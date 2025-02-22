@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Partner Calculation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin: 15px 0;
+        }
+        label {
+            font-size: 16px;
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+        input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 15px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result {
+            background-color: #e8f5e9;
+            border: 1px solid #81c784;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            text-align: left;
+            font-size: 16px;
+            color: #388e3c;
+        }
+        .result p {
+            margin: 5px 0;
+        }
+        .result h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .negative {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+        .positive {
+            color: #388e3c;
+            font-weight: bold;
+        }
+        .total-spend {
+            font-size: 18px;
+            margin-top: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Business Partner Calculation</h1>
+
+    <div class="input-group">
+        <label for="totalSale">Total Sale Amount:</label>
+        <input type="number" id="totalSale" placeholder="Enter total sale">
+    </div>
+
+    <div class="input-group">
+        <label for="bk">BK's Contribution:</label>
+        <input type="number" id="bk" placeholder="Enter BK's contribution">
+    </div>
+
+    <div class="input-group">
+        <label for="rachit">Rachit's Contribution:</label>
+        <input type="number" id="rachit" placeholder="Enter Rachit's contribution">
+    </div>
+
+    <div class="input-group">
+        <label for="vikas">Vikas's Contribution:</label>
+        <input type="number" id="vikas" placeholder="Enter Vikas's contribution">
+    </div>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <div class="result" id="result"></div>
+    <div class="total-spend" id="totalSpend"></div>
+</div>
+
+<script>
+    function calculate() {
+        // Get the values from the inputs
+        var bk = parseFloat(document.getElementById('bk').value) || 0;
+        var rachit = parseFloat(document.getElementById('rachit').value) || 0;
+        var vikas = parseFloat(document.getElementById('vikas').value) || 0;
+        var totalSale = parseFloat(document.getElementById('totalSale').value) || 0;
+
+        // Calculate the total contribution
+        var totalContribution = bk + rachit + vikas;
+
+        // Calculate each partner's share of the total sale
+        var bkShare = (bk / totalContribution) * totalSale;
+        var rachitShare = (rachit / totalContribution) * totalSale;
+        var vikasShare = (vikas / totalContribution) * totalSale;
+
+        // Determine how much each partner owes or should receive
+        var bkToReceive = bkShare - bk;
+        var rachitToReceive = rachitShare - rachit;
+        var vikasToReceive = vikasShare - vikas;
+
+        // Total spend of all partners
+        var totalSpend = bk + rachit + vikas;
+
+        // Display the result
+        var resultText = `
+            <h3>Results:</h3>
+            <p>BK should <span class="${bkToReceive >= 0 ? 'positive' : 'negative'}">${bkToReceive >= 0 ? 'receive' : 'pay'}: <strong>Rs ${Math.abs(bkToReceive).toFixed(2)}</strong></span></p>
+            <p>Rachit should <span class="${rachitToReceive >= 0 ? 'positive' : 'negative'}">${rachitToReceive >= 0 ? 'receive' : 'pay'}: <strong>Rs ${Math.abs(rachitToReceive).toFixed(2)}</strong></span></p>
+            <p>Vikas should <span class="${vikasToReceive >= 0 ? 'positive' : 'negative'}">${vikasToReceive >= 0 ? 'receive' : 'pay'}: <strong>Rs ${Math.abs(vikasToReceive).toFixed(2)}</strong></span></p>
+        `;
+
+        // Display the total spend
+        var totalSpendText = `
+            <h3>Total Spend:</h3>
+            <p><strong>Rs ${totalSpend.toFixed(2)}</strong></p>
+        `;
+
+        document.getElementById('result').innerHTML = resultText;
+        document.getElementById('totalSpend').innerHTML = totalSpendText;
+    }
+</script>
+
+</body>
+</html>
