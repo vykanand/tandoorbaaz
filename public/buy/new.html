@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tandoorbaaz Menu</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: sans-serif;
+            text-align: center; /* Center the content */
+        }
+
+        h1 {
+            font-size: 3em;
+            color: #f00; 
+            margin-bottom: 10px;
+        }
+
+        .menu-section {
+            margin-bottom: 20px;
+        }
+
+        .menu-section-title{
+            font-size: 1.5em;
+            color: #FFA500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .menu-section-title::before {
+            content: "";
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            background-color: #FFA500;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .menu-item {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           padding: 5px 0; /* Adjust padding as needed */
+
+        }
+
+        .prices {
+            display: flex;
+            gap: 10px; /* Add spacing between prices */
+        }
+
+        .address {
+            font-size: 0.8em;
+            margin-top: 20px;
+
+        }
+
+        .contact {
+            margin-bottom: 20px; /* Add margin */
+
+        }
+
+
+        .contact p {
+            margin: 5px 0; /* Reduce margin between phone numbers */
+
+        }
+
+    </style>
+</head>
+<body>
+    <div class="contact">
+    <p style="color: #FFA500;">PHONE- 7065589204</p>
+    <p style="color: #FFA500;">7669077099</p>
+    </div>
+    <h1>TANDOORBAAZ MENU</h1>
+
+    <div class="menu-section">
+        <div class="menu-section-title">KEBAB &amp; TIKKA</div>
+        <div class="menu-item">CHICKEN SEEKH KEBAB <div class="prices">QTR(1PC) 59 HALF(2PC) 109 FULL(4PC) 209</div></div>
+        <div class="menu-item">CHICKEN TIKKA <div class="prices">QTR(4PC) 79 HALF(8PC) 149 FULL(16PC) 289</div></div>
+    </div>
+
+    <div class="menu-section">
+        <div class="menu-section-title">TANDOORI SPECIAL</div>
+        <div class="menu-item">TANDOORI CHICKEN <div class="prices">QTR(2PC) 89 HALF(4PC) 169 FULL(8PC) 329</div></div>
+        <div class="menu-item">AFGHANI CHICKEN <div class="prices">109 209 409</div></div>
+        <div class="menu-item">CHICKEN WINGS <div class="prices">69 129 249</div></div>
+        <div class="menu-item">CHICKEN TANGDI <div class="prices">99 189 369</div></div>
+        <div class="menu-item">AFGHANI TANGDI <div class="prices">119 229 449</div></div>
+        <div class="menu-item">FISH TIKKA <div class="prices">119 (6PC) 229 (12PC)</div></div>
+    </div>
+
+    <div class="menu-section">
+        <div class="menu-section-title">VEG SPECIAL</div>
+        <div class="menu-item">MASALA CHAAP <div class="prices">HALF(3PC) 69 FULL(6PC) 129</div></div>
+        <div class="menu-item">MALAI CHAAP <div class="prices">79 149</div></div>
+        <div class="menu-item">AFGHANI CHAAP <div class="prices">79 149</div></div>
+        <div class="menu-item">PANEER TIKKA <div class="prices">79 (4PC) 149 (8PC)</div></div>
+        <div class="menu-item">RUMALI ROTI <div class="prices">10</div></div>
+    </div>
+
+    <p style="font-size: 1.2em; color: #f00;">WATER &amp; COLD DRINKS ALSO AVAILABLE!</p>
+
+    <p class="address" style="color: #FFA500;">ADDRESS- EROS SAMPOORNAM SERVICE LANE NEAR GALAXY VEGA GOL CHAKKAR, SEC -2 GREATER NOIDA WEST</p>
+
+</body>
+</html>
