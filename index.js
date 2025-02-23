@@ -32,57 +32,108 @@ app.get("/api/orders/stream", (req, res) => {
 });
 
 
-app.get("/api/orderlist", (req, res) => {
-  const ordersFile = path.join(__dirname, "orders.json");
-  try {
-    if (fs.existsSync(ordersFile)) {
-      const orders = JSON.parse(fs.readFileSync(ordersFile, "utf8"));
-      res.json(orders);
-    } else {
-      res.json([]);
+// Get all orders
+app.get('/api/orders', (req, res) => {
+    const ordersFile = path.join(__dirname, "orders.json");
+    try {
+        if (fs.existsSync(ordersFile)) {
+            const orders = JSON.parse(fs.readFileSync(ordersFile, 'utf8'));
+            res.json(orders);
+        } else {
+            res.json([]);
+        }
+    } catch (error) {
+        console.log('Error reading orders:', error);
+        res.json([]);
     }
-  } catch (error) {
-    console.log("Error reading orders:", error);
-    res.json([]);
-  }
 });
 
-app.post("/api/orders", async (req, res, next) => {
-  const ordersFile = path.join(__dirname, "./orders.json");
-  const order = {
-    id: Date.now(),
-    ...req.body,
-    createdAt: new Date().toISOString(),
-  };
-
-  try {
-    // Read existing orders
-    let orders = [];
-    if (await fs.existsSync(ordersFile)) {
-      const fileContent = fs.readFileSync(ordersFile, "utf8");
-      orders = fileContent ? JSON.parse(fileContent) : [];
-      console.log(orders);
+// Get single order
+app.get('/api/orders/:id', (req, res) => {
+    const ordersFile = path.join(__dirname, "orders.json");
+    const orderId = req.params.id;
+    
+    try {
+        const orders = JSON.parse(fs.readFileSync(ordersFile, 'utf8'));
+        const order = orders.find(o => o.id == orderId);
+        if (order) {
+            res.json(order);
+        } else {
+            res.status(404).json({ message: 'Order not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-
-    // Append new order
-    orders.push(order);
-
-    // Write to file
-    fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
-
-    res.status(200).json({
-      success: true,
-      orderId: order.id,
-      message: "Order saved successfully",
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to save order",
-      error: error.message,
-    });
-  }
 });
+
+// Create order
+app.post('/api/orders', async (req, res) => {
+    const ordersFile = path.join(__dirname, "orders.json");
+    const order = {
+        id: Date.now(),
+        ...req.body,
+        createdAt: new Date().toISOString(),
+        status: 'pending'
+    };
+
+    try {
+        let orders = [];
+        if (fs.existsSync(ordersFile)) {
+            const fileContent = fs.readFileSync(ordersFile, 'utf8');
+            orders = fileContent ? JSON.parse(fileContent) : [];
+        }
+        orders.push(order);
+        fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
+        res.status(200).json({
+            success: true,
+            orderId: order.id,
+            message: "Order saved successfully"
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to save order",
+            error: error.message
+        });
+    }
+});
+
+// Update order
+app.put('/api/orders/:id', (req, res) => {
+    const ordersFile = path.join(__dirname, "orders.json");
+    const orderId = req.params.id;
+    
+    try {
+        let orders = JSON.parse(fs.readFileSync(ordersFile, 'utf8'));
+        const orderIndex = orders.findIndex(o => o.id == orderId);
+        
+        if (orderIndex !== -1) {
+            orders[orderIndex] = { ...orders[orderIndex], ...req.body };
+            fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
+            res.json({ success: true, order: orders[orderIndex] });
+        } else {
+            res.status(404).json({ success: false, message: 'Order not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+// Delete order
+app.delete('/api/orders/:id', (req, res) => {
+    const ordersFile = path.join(__dirname, "orders.json");
+    const orderId = req.params.id;
+    
+    try {
+        let orders = JSON.parse(fs.readFileSync(ordersFile, 'utf8'));
+        orders = orders.filter(o => o.id != orderId);
+        fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
+        res.json({ success: true, message: 'Order deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 
 app.get("/", async (req, res, next) => {
   res.sendFile(path.join(__dirname, "./public/buy/index.html"));

@@ -277,13 +277,28 @@
     "createdAt": "2025-02-22T23:55:49.914Z"
   },
   {
-    "id": 1740290799362,
-    "items": "xyz",
-    "createdAt": "2025-02-23T06:06:39.362Z"
-  },
-  {
-    "id": 1740290811079,
-    "items": "xyz",
-    "createdAt": "2025-02-23T06:06:51.079Z"
+    "id": 1740317422252,
+    "items": [
+      {
+        "id": 1,
+        "name": "CHICKEN SEEKH KEBAB - QTR(1PC)",
+        "price": 59,
+        "quantity": 1
+      },
+      {
+        "id": 5,
+        "name": "CHICKEN TIKKA - HALF(8PC)",
+        "price": 149,
+        "quantity": 1
+      }
+    ],
+    "total": 202,
+    "timestamp": "2025-02-23T13:30:22.212Z",
+    "customerDetails": {
+      "phone": "2132142142",
+      "orderTime": "23/02/2025, 19:00:22"
+    },
+    "createdAt": "2025-02-23T13:30:22.252Z",
+    "status": "preparing"
   }
 ]
