@@ -252,6 +252,31 @@
 #scratchModal .modal-body {
     padding: 2rem;
 }
+
+.cart-sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    height: 100vh;
+    width: 300px;
+    background: #fff;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .cart-sidebar {
+        transform: translateX(100%);
+        width: 100%;
+        max-width: 350px;
+    }
+    .cart-sidebar.show {
+        transform: translateX(0);
+    }
+}
 </style>
 
 
@@ -572,6 +597,20 @@ function updateQuantity(itemId, newQuantity) {
     updateCart();
 }
 
+function toggleCart() {
+    const cartSidebar = document.getElementById('cartSidebar');
+    console.log('toggleCart');
+    if (window.innerWidth <= 768) {
+        console.log('Mobile behavior - slide in/out');
+        // Mobile behavior - slide in/out
+        cartSidebar.classList.toggle('show');
+    } else {
+        // Desktop behavior - show/hide
+        console.log('Desktop behavior - show/hide');
+        cartSidebar.style.display = cartSidebar.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
 
    function updateCart() {
     const cartItems = document.getElementById('cartItems');
@@ -611,11 +650,6 @@ function updateQuantity(itemId, newQuantity) {
         placeOrderBtn.style.display = 'none';
     }
 }
-
-        function toggleCart() {
-            const cartSidebar = document.getElementById('cartSidebar');
-            cartSidebar.style.display = cartSidebar.style.display === 'none' ? 'block' : 'none';
-        }
 
        function placeOrder() {
     phoneModal.show();}
