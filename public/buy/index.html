@@ -2,111 +2,175 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TandoorBaaz - Authentic Indian Tandoor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Arial', sans-serif;
+        :root {
+            --primary-color: #d32f2f;
+            --secondary-color: #f8f9fa;
         }
+
+        body {
+            background-color: var(--secondary-color);
+            font-family: 'Poppins', sans-serif;
+        }
+
         .container {
-    max-width: 800px;
-    margin: 20px auto;
-    margin-right: 320px; /* Add this to prevent content from going under cart */
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+            max-width: 100%;
+            margin: 10px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+        }
 
         .menu-section {
+            margin-bottom: 25px;
+        }
+
+        .menu-section h2 {
+            color: var(--primary-color);
+            font-weight: 600;
+            padding: 10px 15px;
+            background: linear-gradient(to right, rgba(211, 47, 47, 0.1), transparent);
+            border-radius: 8px;
             margin-bottom: 20px;
         }
-        .menu-section h2 {
-            color: #d32f2f;
-            border-bottom: 2px solid #d32f2f;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-        }
-        .menu-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .menu-item:last-child {
-            border-bottom: none;
-        }
-        .menu-item-name {
-            flex-grow: 1;
-        }
-        .menu-item-prices {
-            display: flex;
-            gap: 20px;
-        }
-        .cart-sidebar {
-    position: fixed;
-    right: 0;
-    top: 0;
-    height: 100vh;
-    width: 300px;
-    background: #fff;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-    padding: 20px;
-    overflow-y: auto;
-    display: block; /* Changed from 'none' to 'block' */
-    z-index: 1000;
-}
 
-        .cart-item {
+        .menu-item {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .menu-item-name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .menu-item-prices {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .price-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+
+        .price-item span {
+            font-weight: 500;
+        }
+
+        .btn-add {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .btn-add:hover {
+            background-color: #b71c1c;
+            transform: scale(1.05);
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+            width: 100%;
+            max-width: 350px;
+            background: #fff;
+            box-shadow: -2px 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .cart-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 10px;
         }
-        .cart-item-details {
-            flex-grow: 1;
-        }
+
         .cart-item-controls {
             display: flex;
             align-items: center;
+            gap: 10px;
         }
-        .cart-item-controls button {
-            padding: 5px 10px;
-            margin: 0 5px;
-        }
+
         .footer {
             text-align: center;
-            margin-top: 20px;
-            color: #666;
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            margin-top: 30px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
         }
-        .footer p {
-            margin: 5px 0;
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: calc(100% - 380px);
+                margin: 20px auto 20px 20px;
+                padding: 25px;
+            }
+
+            .menu-item-prices {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
+
+        @media (max-width: 767px) {
+            .cart-sidebar {
+                transform: translateX(100%);
+            }
+
+            .cart-sidebar.show {
+                transform: translateX(0);
+            }
+
+            .cart-toggle {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 1001;
+            }
+        }
+
         .cart-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #d32f2f;
+            background: var(--primary-color);
             color: white;
-            padding: 10px 15px;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .cart-toggle i {
-            margin-right: 5px;
+            padding: 12px 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
         }
     </style>
 </head>
 <body>
 
-    <script>
-function getRandomDiscount() {
+<script>
+    function getRandomDiscount() {
     const lastUsed = localStorage.getItem('lastDiscountDate');
     const today = new Date().toDateString();
     
@@ -123,18 +187,18 @@ function getRandomDiscount() {
     
     alert(`Great! ₹${discount} discount applied to your order`);
     updateCart();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const cartSidebar = document.querySelector('.cart-sidebar');
-    if (cartSidebar) {
-        cartSidebar.insertAdjacentHTML('beforeend', `
-            <button class="btn btn-warning w-100 mb-3" id="todaydiscount" onclick="getRandomDiscount()">
-                <i class="bi bi-gift"></i> Get Today's Discount!
-            </button>
-        `);
     }
-});
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const cartSidebar = document.querySelector('.cart-sidebar');
+        if (cartSidebar) {
+            cartSidebar.insertAdjacentHTML('beforeend', `
+                <button class="btn btn-warning w-100 mb-3" id="todaydiscount" onclick="getRandomDiscount()">
+                    <i class="bi bi-gift"></i> Get Today's Discount!
+                </button>
+            `);
+        }
+    });
 
 </script>
 

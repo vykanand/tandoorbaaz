@@ -20,10 +20,7 @@ fs.readdirSync(publicDir).forEach((dir) => {
   }
 });
 
-// Catch-all route for undefined paths
-app.get("*", (req, res) => {
-  res.status(404).send("Website not found!");
-});
+
 
 app.get("/api/orders/stream", (req, res) => {
   res.setHeader("Content-Type", "text/event-stream");
@@ -86,6 +83,10 @@ app.post("/api/orders", async (req, res, next) => {
     });
   }
 });
+
+app.get("/", async (req, res, next) => {
+  res.sendFile(path.join(__dirname, "./public/buy/index.html"));
+})
 
 app.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
