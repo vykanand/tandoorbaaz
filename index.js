@@ -20,16 +20,22 @@ fs.readdirSync(publicDir).forEach((dir) => {
   const dirPath = path.join(publicDir, dir);
 
   if (fs.statSync(dirPath).isDirectory()) {
-    const route = `/${dir}/*`; // Wildcard route to catch all paths under directory
-    console.log(`Serving ${dir} with query params support at ${route}`);
+    const route = `/${dir}/:page`; // Dynamic route to catch specific pages
+    console.log(`Serving ${dir} at ${route}`);
 
     app.get(route, (req, res) => {
-      // Query params are automatically available in req.query
-      const filePath = path.join(dirPath, "index.html");
-      res.sendFile(filePath);
+      const page = req.params.page;
+      const filePath = path.join(dirPath, page);
+
+      // Check if file exists before sending
+      if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+      } else {
+        res.status(404).send("Page not found");
+      }
     });
 
-    // Serve static assets from the directory
+    // Keep static assets serving
     app.use(`/${dir}`, express.static(dirPath));
   }
 });
@@ -144,8 +150,8 @@ app.delete("/api/orders/:id", (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
+
 app.get("/", (req, res) => {
-  // Query params accessible via req.query
   res.sendFile(path.join(__dirname, "./public/buy/index.html"));
 });
 
