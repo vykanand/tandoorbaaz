@@ -221,7 +221,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function loadOrders() {
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     db.collection('bot_orders')
+         .where('createdAt', '>=', today.toISOString())
+        .where('createdAt', '<', tomorrow.toISOString())
         .orderBy('createdAt', 'desc')
         .onSnapshot((snapshot) => {
             currentOrders = snapshot.docs.map(doc => ({
