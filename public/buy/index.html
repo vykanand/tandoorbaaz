@@ -48,9 +48,24 @@
     }
 
     .qr-code {
-        cursor: pointer;
-        transition: transform 0.3s ease;
-    }
+    width: 200px;
+    height: 200px;
+    margin: 1rem auto;
+    animation: float 6s ease-in-out infinite;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.qr-wrapper {
+    background: white;
+    padding: 2rem;
+    border-radius: 25px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    margin: 2rem auto;
+    max-width: 400px;
+}
 
     .qr-code:hover {
         transform: scale(1.05);
