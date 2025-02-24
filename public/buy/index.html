@@ -2,722 +2,122 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TandoorBaaz - Authentic Indian Tandoor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TandoorBaaz QR Ordering</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
-
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
-        :root {
-            --primary-color: #d32f2f;
-            --secondary-color: #f8f9fa;
-        }
-
         body {
-            background-color: var(--secondary-color);
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-family: 'Poppins', sans-serif;
         }
 
         .container {
-            max-width: 100%;
-            margin: 10px;
-            padding: 15px;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
-        }
-
-        .menu-section {
-            margin-bottom: 25px;
-        }
-
-        .menu-section h2 {
-            color: var(--primary-color);
-            font-weight: 600;
-            padding: 10px 15px;
-            background: linear-gradient(to right, rgba(211, 47, 47, 0.1), transparent);
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .menu-item {
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s;
-        }
-
-        .menu-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .menu-item-name {
-            font-weight: 500;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .menu-item-prices {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-        }
-
-        .price-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 6px;
-        }
-
-        .price-item span {
-            font-weight: 500;
-        }
-
-        .btn-add {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 5px 15px;
-            border-radius: 5px;
-            transition: all 0.3s;
-        }
-
-        .btn-add:hover {
-            background-color: #b71c1c;
-            transform: scale(1.05);
-        }
-
-        .cart-sidebar {
-            position: fixed;
-            right: 0;
-            top: 0;
-            height: 100vh;
-            width: 100%;
-            max-width: 350px;
-            background: #fff;
-            box-shadow: -2px 0 15px rgba(0,0,0,0.1);
-            padding: 20px;
-            overflow-y: auto;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-
-        .cart-item {
-            background: #f8f9fa;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .cart-item-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .footer {
             text-align: center;
-            padding: 20px;
-            background: #fff;
-            border-radius: 12px;
-            margin-top: 30px;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
         }
 
-        @media (min-width: 768px) {
-            .container {
-                max-width: calc(100% - 380px);
-                margin: 20px auto 20px 20px;
-                padding: 25px;
-            }
-
-            .menu-item-prices {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        .welcome-text {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
-        @media (max-width: 767px) {
-            .cart-sidebar {
-                transform: translateX(100%);
-            }
-
-            .cart-sidebar.show {
-                transform: translateX(0);
-            }
-
-            .cart-toggle {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                z-index: 1001;
-            }
+        .qr-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 2rem auto;
+            max-width: 400px;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
         }
 
-        .cart-toggle {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 25px;
-            box-shadow: 0 4px 12px rgba(211, 47, 47, 0.2);
+        .qr-container:hover {
+            transform: translateY(-10px) rotateY(10deg);
+        }
+
+        .qr-code {
+            width: 250px;
+            height: 250px;
+            margin: 1rem auto;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .emoji {
+            font-size: 2rem;
+            margin: 0 0.5rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .scan-text {
+            font-size: 1.5rem;
+            color: #666;
+            margin-top: 2rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .footer-text {
+            margin-top: 2rem;
+            color: #666;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
-
-<script>
-    function getRandomDiscount() {
-    const lastUsed = localStorage.getItem('lastDiscountDate');
-    const today = new Date().toDateString();
-    
-    if (lastUsed === today) {
-        alert('You have already claimed your discount for today!');
-        // Show place order button since discount was already used today
-        document.querySelector('.btn-success').style.display = 'block';
-        return;
-    }
-
-    const discount = Math.floor(Math.random() * (12 - 3 + 1)) + 3;
-    appliedDiscount = discount;
-    localStorage.setItem('lastDiscountDate', today);
-    
-    alert(`Great! ₹${discount} discount applied to your order`);
-    updateCart();
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        const cartSidebar = document.querySelector('.cart-sidebar');
-        if (cartSidebar) {
-            cartSidebar.insertAdjacentHTML('beforeend', `
-                <button class="btn btn-warning w-100 mb-3" id="todaydiscount" onclick="getRandomDiscount()">
-                    <i class="bi bi-gift"></i> Get Today's Discount!
-                </button>
-            `);
-        }
-    });
-
-</script>
-
-<style>
-.scratch-container {
-    position: relative;
-    width: 300px;
-    height: 150px;
-    margin: 0 auto;
-    background: linear-gradient(135deg, #ff6b6b, #feca57);
-    border-radius: 12px;
-    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    overflow: hidden;
-}
-
-#scratchCanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    cursor: pointer;
-    border-radius: 12px;
-}
-
-#rewardAmount {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.5s ease;
-}
-
-.reward-text {
-    font-size: 32px;
-    font-weight: bold;
-    color: #fff;
-    text-align: center;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    line-height: 1.2;
-}
-
-#scratchModal .modal-content {
-    background: #f8f9fa;
-    border: none;
-    border-radius: 15px;
-}
-
-#scratchModal .modal-body {
-    padding: 2rem;
-}
-
-.cart-sidebar {
-    position: fixed;
-    right: 0;
-    top: 0;
-    height: 100vh;
-    width: 300px;
-    background: #fff;
-    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-    padding: 20px;
-    overflow-y: auto;
-    z-index: 1000;
-    transition: transform 0.3s ease;
-}
-
-@media (max-width: 768px) {
-    .cart-sidebar {
-        transform: translateX(100%);
-        width: 100%;
-        max-width: 350px;
-    }
-    .cart-sidebar.show {
-        transform: translateX(0);
-    }
-}
-</style>
-
-
-
-    <button class="cart-toggle" onclick="toggleCart()">
-        <i class="bi bi-cart3"></i> Cart (<span id="cartCount">0</span>)
-    </button>
-
-    <div class="container">
-    <div class="menu-section">
-        <h2>KEBAB & TIKKA</h2>
-        <div class="menu-item">
-            <span class="menu-item-name">CHICKEN SEEKH KEBAB</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>QTR(1PC) ₹59</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(1, 'CHICKEN SEEKH KEBAB - QTR(1PC)', 59)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>HALF(2PC) ₹109</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(2, 'CHICKEN SEEKH KEBAB - HALF(2PC)', 109)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(4PC) ₹209</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(3, 'CHICKEN SEEKH KEBAB - FULL(4PC)', 209)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">CHICKEN TIKKA</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>QTR(4PC) ₹79</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(4, 'CHICKEN TIKKA - QTR(4PC)', 79)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>HALF(8PC) ₹149</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(5, 'CHICKEN TIKKA - HALF(8PC)', 149)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(16PC) ₹289</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(6, 'CHICKEN TIKKA - FULL(16PC)', 289)">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="menu-section">
-        <h2>TANDOORI SPECIAL</h2>
-        <div class="menu-item">
-            <span class="menu-item-name">TANDOORI CHICKEN</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>QTR(2PC) ₹89</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(7, 'TANDOORI CHICKEN - QTR(2PC)', 89)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>HALF(4PC) ₹169</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(8, 'TANDOORI CHICKEN - HALF(4PC)', 169)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(8PC) ₹329</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(9, 'TANDOORI CHICKEN - FULL(8PC)', 329)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">AFGHANI CHICKEN</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>QTR(2PC) ₹109</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(10, 'AFGHANI CHICKEN - QTR(2PC)', 109)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>HALF(4PC) ₹209</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(11, 'AFGHANI CHICKEN - HALF(4PC)', 209)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(8PC) ₹409</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(12, 'AFGHANI CHICKEN - FULL(8PC)', 409)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">CHICKEN WINGS</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>QTR(2PC) ₹69</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(13, 'CHICKEN WINGS - QTR(2PC)', 69)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>HALF(4PC) ₹129</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(14, 'CHICKEN WINGS - HALF(4PC)', 129)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(8PC) ₹249</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(15, 'CHICKEN WINGS - FULL(8PC)', 249)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">CHICKEN TANGDI</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>QTR(2PC) ₹99</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(17, 'CHICKEN TANGDI - QTR(2PC)', 99)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>HALF(4PC) ₹189</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(18, 'CHICKEN TANGDI - HALF(4PC)', 189)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(8PC) ₹369</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(19, 'CHICKEN TANGDI - FULL(8PC)', 369)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">AFGHANI TANGDI</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>QTR(2PC) ₹119</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(20, 'AFGHANI TANGDI - QTR(2PC)', 119)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>HALF(4PC) ₹229</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(21, 'AFGHANI TANGDI - HALF(4PC)', 229)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(8PC) ₹449</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(22, 'AFGHANI TANGDI - FULL(8PC)', 449)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">FISH TIKKA</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>6PC ₹119</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(23, 'FISH TIKKA - 6PC', 119)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>12PC ₹229</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(24, 'FISH TIKKA - 12PC', 229)">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="menu-section">
-        <h2>VEG SPECIAL</h2>
-        <div class="menu-item">
-            <span class="menu-item-name">MASALA CHAAP</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>HALF(3PC) ₹69</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(25, 'MASALA CHAAP - HALF(3PC)', 69)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(6PC) ₹129</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(26, 'MASALA CHAAP - FULL(6PC)', 129)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">MALAI CHAAP</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>HALF(3PC) ₹79</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(27, 'MALAI CHAAP - HALF(3PC)', 79)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(6PC) ₹149</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(28, 'MALAI CHAAP - FULL(6PC)', 149)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">AFGHANI CHAAP</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>HALF(3PC) ₹79</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(29, 'AFGHANI CHAAP - HALF(3PC)', 79)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>FULL(6PC) ₹149</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(30, 'AFGHANI CHAAP - FULL(6PC)', 149)">Add</button>
-                </div>
-            </div>
-        </div>
-        <div class="menu-item">
-            <span class="menu-item-name">PANEER TIKKA</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>4PC ₹79</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(31, 'PANEER TIKKA - 4PC', 79)">Add</button>
-                </div>
-                <div class="price-item">
-                    <span>8PC ₹149</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(32, 'PANEER TIKKA - 8PC', 149)">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="menu-section">
-        <h2>RUMALI ROTI</h2>
-        <div class="menu-item">
-            <span class="menu-item-name">RUMALI ROTI</span>
-            <div class="menu-item-prices">
-                <div class="price-item">
-                    <span>₹10</span>
-                    <button class="btn btn-sm btn-danger" onclick="addToCart(33, 'RUMALI ROTI', 10)">Add</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-    .menu-item-prices {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-    .price-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-    .btn-sm {
-        padding: 2px 8px;
-    }
-</style>
-
-        <!-- Other menu sections remain unchanged -->
-
-        <div class="footer">
-            <p>PHONE- 7065589204</p>
-            <p>7669077099</p>
-            <p>WATER & COLD DRINKS ALSO AVAILABLE!</p>
-            <p>ADDRESS- EROS SAMPOORNAM SERVICE LANE NEAR GALAXY VEGA GOL CHAKKAR SEC -2 GREATER NOIDA WEST</p>
-        </div>
-    </div>
-
-    <div class="cart-sidebar" id="cartSidebar">
-        <h2>Your Cart</h2>
-        <div id="cartItems"></div>
-        <hr>
-        <div class="d-flex justify-content-between">
-    <h6>Subtotal:</h6>
-    <span id="subtotal">₹0</span>
-</div>
-<div class="d-flex justify-content-between" id="discountRow" style="display: none !important;">
-    <h6>Discount:</h6>
-    <span id="discountAmount" class="text-success">-₹0</span>
-</div>
-<div class="d-flex justify-content-between">
-    <h6>Total:</h6>
-    <span id="total">₹0</span>
-</div>
-
-
-        <button class="btn btn-success w-100 mt-3" id="placeOrderBtn" onclick="placeOrder()">Place Order</button>
-    </div>
-
-
-    <!-- Phone Number Modal -->
-<div class="modal fade" id="phoneModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Enter Your Phone Number</h5>
-            </div>
-            <div class="modal-body">
-                <input type="tel" id="phoneNumber" class="form-control" pattern="[0-9]{10}" maxlength="10" placeholder="10 digit mobile number" required>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="confirmOrder()">Confirm Order</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-    <script>
-
-        let phoneModal;
-
-document.addEventListener('DOMContentLoaded', () => {
-    phoneModal = new bootstrap.Modal(document.getElementById('phoneModal'), {
-        backdrop: true,
-        keyboard: true
-    });
-});
-
-
-        let cart = [];
-let appliedDiscount = 0;
-
-function addToCart(id, name, price) {
-    const existingItem = cart.find(item => item.id === id);
-    if (existingItem) {
-        existingItem.quantity++;
-    } else {
-        cart.push({ id, name, price, quantity: 1 });
-    }
-    updateCart();
-}
-
-function updateQuantity(itemId, newQuantity) {
-    if (newQuantity <= 0) {
-        cart = cart.filter(item => item.id !== itemId);
-    } else {
-        const item = cart.find(item => item.id === itemId);
-        item.quantity = newQuantity;
-    }
-    updateCart();
-}
-
-function toggleCart() {
-    const cartSidebar = document.getElementById('cartSidebar');
-    console.log('toggleCart');
-    if (window.innerWidth <= 768) {
-        console.log('Mobile behavior - slide in/out');
-        // Mobile behavior - slide in/out
-        cartSidebar.classList.toggle('show');
-    } else {
-        // Desktop behavior - show/hide
-        console.log('Desktop behavior - show/hide');
-        cartSidebar.style.display = cartSidebar.style.display === 'none' ? 'block' : 'none';
-    }
-}
-
-
-   function updateCart() {
-    const cartItems = document.getElementById('cartItems');
-    cartItems.innerHTML = '';
-    let subtotal = 0;
-
-    cart.forEach(item => {
-        subtotal += item.price * item.quantity;
-        cartItems.innerHTML += `
-            <div class="cart-item">
-                <div class="cart-item-details">
-                    <h6>${item.name}</h6>
-                    <small>₹${item.price} x ${item.quantity}</small>
-                </div>
-                <div class="cart-item-controls">
-                    <button class="btn btn-sm btn-outline-danger" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
-                    <span>${item.quantity}</span>
-                    <button class="btn btn-sm btn-outline-danger" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
-                </div>
-            </div>
-        `;
-    });
-
-    const total = Math.max(0, subtotal - appliedDiscount);
-    
-    document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
-    document.getElementById('total').textContent = `₹${total.toFixed(2)}`;
-    document.getElementById('cartCount').textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
-
-    // Show discount and enable place order button if discount applied
-    const placeOrderBtn = document.querySelector('.btn-success');
-    if (appliedDiscount > 0) {
-        document.getElementById('discountRow').style.display = 'flex';
-        document.getElementById('discountAmount').textContent = `-₹${appliedDiscount.toFixed(2)}`;
-        placeOrderBtn.style.display = 'block';
-    } else {
-        placeOrderBtn.style.display = 'none';
-    }
-}
-
-       function placeOrder() {
-    phoneModal.show();}
-
-async function confirmOrder() {
-    const phoneNumber = document.getElementById('phoneNumber').value;
-    
-    if (!phoneNumber || phoneNumber.length !== 10) {
-        alert('Please enter a valid 10-digit phone number');
-        return;
-    }
-
-    const order = {
-        id: Date.now(),
-        items: cart,
-        total: parseFloat(document.getElementById('total').textContent.replace('₹', '')),
-        timestamp: new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        status: 'pending',
-        customerDetails: {
-            phone: phoneNumber,
-            orderTime: new Date().toLocaleString()
-        }
-    };
-
-    try {
-        // Add to Firebase instead of using fetch
-        await db.collection('bot_orders').add(order);
+    <div class="container animate__animated animate__fadeIn">
+        <h1 class="welcome-text animate__animated animate__bounceIn">
+            Welcome to TandoorBaaz 
+            <span class="emoji">🔥</span>
+            <span class="emoji">🍖</span>
+            <span class="emoji">👨‍🍳</span>
+        </h1>
         
-        phoneModal.hide();
-        alert('Order placed successfully!');
-        
-        // Reset cart and discount
-        cart = [];
-        appliedDiscount = 0;
-        updateCart();
-    } catch (error) {
-        console.error('Error placing order:', error);
-        alert('Failed to place order. Please try again.');
-    }
-}
+        <div class="qr-container animate__animated animate__zoomIn">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://tandoorbaaz.com/buy" 
+                 alt="Order QR Code" 
+                 class="qr-code">
+            <p class="scan-text">Scan to Order Delicious Food! 📱</p>
+        </div>
 
-// Add Firebase initialization at the top of your script section:
-const firebaseConfig = {
-    apiKey: "AIzaSyAEKHWdRyzI8WyBeGeesjDrM-nEzOXCuNk",
-    authDomain: "billion1-a9324.firebaseapp.com",
-    projectId: "billion1-a9324",
-    storageBucket: "billion1-a9324.firebasestorage.app",
-    messagingSenderId: "443716692865",
-    appId: "1:443716692865:web:96813fe32a44f8342cd680",
-    measurementId: "G-FE7NFHY5PG"
-};
+        <p class="footer-text animate__animated animate__fadeIn animate__delay-1s">
+            Experience the authentic taste of tandoor
+            <br>
+            Fast • Fresh • Flavorful 🌟
+        </p>
+    </div>
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-
-        // Initialize the page
-        updateCart();
-    </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const emojis = document.querySelectorAll('.emoji');
+            emojis.forEach((emoji, index) => {
+                emoji.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
+    </script>
 </body>
 </html>
