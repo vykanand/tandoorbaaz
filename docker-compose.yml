@@ -1,0 +1,19 @@
+version: '3'
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    command: node index.js
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  whatsapp-bot:
+    build: .
+    ports:
+      - "3010:3010"
+    command: node whatsapp-bot.js
+    volumes:
+      - .:/app
+      - /app/node_modules

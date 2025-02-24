@@ -153,6 +153,80 @@ Reply with a number to continue`;
 });
 
 
+
+
+
+sock.ev.on("messages.upsert", async ({ messages }) => {
+  const message = messages[0];
+  const userNumber = message.key.remoteJid.split("@")[0];
+  const userResponse = message.message.conversation.toLowerCase();
+
+  if (userResponse === "hello") {
+    const welcomeMessage = `Welcome to Tandoorbaaz! 🔥
+Our Menu:
+1. CHICKEN SEEKH KEBAB - QTR(1PC) - ₹59
+2. TANDOORI CHICKEN - QTR(2PC) - ₹89
+3. CHICKEN TIKKA - HALF(8PC) - ₹149
+
+Reply with item number and quantity (e.g. "1 2" for 2 CHICKEN SEEKH KEBAB)`;
+
+    await sock.sendMessage(message.key.remoteJid, { text: welcomeMessage });
+  }
+
+  const menuItems = {
+    1: { name: "CHICKEN SEEKH KEBAB - QTR(1PC)", price: 59 },
+    2: { name: "TANDOORI CHICKEN - QTR(2PC)", price: 89 },
+    3: { name: "CHICKEN TIKKA - HALF(8PC)", price: 149 },
+  };
+
+  const orderMatch = userResponse.match(/^([1-3])\s+(\d+)$/);
+  if (orderMatch) {
+    const [_, itemNum, quantity] = orderMatch;
+    const item = menuItems[itemNum];
+    const total = item.price * parseInt(quantity);
+
+    const order = {
+      id: Date.now(),
+      items: [
+        {
+          id: parseInt(itemNum),
+          name: item.name,
+          price: item.price,
+          quantity: parseInt(quantity),
+        },
+      ],
+      total: total,
+      timestamp: new Date().toISOString(),
+      customerDetails: {
+        phone: userNumber,
+        orderTime: new Date().toLocaleString("en-IN"),
+      },
+      createdAt: new Date().toISOString(),
+      status: "pending",
+    };
+
+    console.log("New order received:", {
+      orderId: order.id,
+      customerPhone: userNumber,
+      total: total,
+    });
+
+    // Save order to orders.json
+    const ordersFile = path.join(__dirname, "orders.json");
+    let orders = [];
+    if (fs.existsSync(ordersFile)) {
+      orders = JSON.parse(fs.readFileSync(ordersFile, "utf8"));
+    }
+    orders.push(order);
+    fs.writeFileSync(ordersFile, JSON.stringify(orders, null, 2));
+
+    await sock.sendMessage(message.key.remoteJid, {
+      text: `Order Confirmed! ✅\nOrder ID: ${order.id}\nTotal: ₹${total}\nThank you for ordering with Tandoorbaaz! 🙏`,
+    });
+  }
+});
+
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

@@ -1,12 +1,18 @@
 import express from "express";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 
 const app = express();
 const port = 3000;
 
+// Define __dirname equivalent for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Define the base public directory
 const publicDir = path.join(__dirname, "public");
+
 app.use(express.json());
 
 // Read all directories under /public and serve them
