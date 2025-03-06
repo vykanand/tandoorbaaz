@@ -46,41 +46,48 @@ const closingHistoryRef = collection(db, "accounting/history/closing");
 
 // Core Functions
 async function fetchData() {
-    try {
-        showLoader();
-        const [partnersDoc, balancesDoc, dailyDoc] = await Promise.all([
-            getDoc(doc(accountingRef, "partners")),
-            getDoc(doc(accountingRef, "balances")),
-            getDoc(doc(accountingRef, "daily"))
-        ]);
+  try {
+    showLoader();
+    const [partnersDoc, balancesDoc, dailyDoc] = await Promise.all([
+      getDoc(doc(accountingRef, "partners")),
+      getDoc(doc(accountingRef, "balances")),
+      getDoc(doc(accountingRef, "daily")),
+    ]);
 
-        // Load partners
-        partners = partnersDoc.exists() ? partnersDoc.data().partners : [];
+    // Load partners
+    partners = partnersDoc.exists() ? partnersDoc.data().partners : [];
 
-        if (balancesDoc.exists()) {
-            openingBalance = balancesDoc.data().openingBalance;
-            closingBalance = balancesDoc.data().closingBalance;
-        }
-
-        if (dailyDoc.exists()) {
-            dailyTransactions.debit = dailyDoc.data().totalDebit;
-            dailyTransactions.credit = dailyDoc.data().totalCredit;
-        }
-
-        await Promise.all([
-            updateUI(),
-            updateTransactionHistory(),
-            updateDailyTotals(),
-            updateClosingHistory(),
-            updatePartnerBalances() // Add this line
-        ]);
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    } finally {
-        hideLoader();
+    if (balancesDoc.exists()) {
+      openingBalance = balancesDoc.data().openingBalance || 0;
+      closingBalance = balancesDoc.data().closingBalance || 0;
+    } else {
+      // Initialize with zero if document doesn't exist
+      openingBalance = 0;
+      closingBalance = 0;
     }
-}
 
+    if (dailyDoc.exists()) {
+      dailyTransactions.debit = dailyDoc.data().totalDebit || 0;
+      dailyTransactions.credit = dailyDoc.data().totalCredit || 0;
+    } else {
+      // Initialize with zero if document doesn't exist
+      dailyTransactions.debit = 0;
+      dailyTransactions.credit = 0;
+    }
+
+    await Promise.all([
+      updateUI(),
+      updateTransactionHistory(),
+      updateDailyTotals(),
+      updateClosingHistory(),
+      updatePartnerBalances(),
+    ]);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  } finally {
+    hideLoader();
+  }
+}
 
 async function recordTransaction() {
   showLoader();
@@ -125,23 +132,33 @@ async function updateBalances(amount, type) {
 
   if (type === "debit") {
     dailyTransactions.debit += Number(amount);
-    closingBalance = openingBalance - Number(amount);
   } else {
     dailyTransactions.credit += Number(amount);
-    closingBalance = openingBalance + Number(amount);
   }
 
+  // Calculate closing balance based on opening balance and net transaction amount
+  closingBalance =
+    openingBalance + (dailyTransactions.credit - dailyTransactions.debit);
+
   try {
-    await setDoc(doc(accountingRef, "balances"), {
-      openingBalance,
-      closingBalance,
-      lastUpdated: serverTimestamp(),
-    });
+    await Promise.all([
+      setDoc(doc(accountingRef, "balances"), {
+        openingBalance,
+        closingBalance,
+        lastUpdated: serverTimestamp(),
+      }),
+      setDoc(doc(accountingRef, "daily"), {
+        totalDebit: dailyTransactions.debit,
+        totalCredit: dailyTransactions.credit,
+        lastUpdated: serverTimestamp(),
+      }),
+    ]);
     updateUI();
   } catch (error) {
     console.error("Error updating balances:", error);
   }
 }
+
 
 async function updateDailyTotals() {
   const today = new Date();
@@ -170,6 +187,9 @@ async function updateDailyTotals() {
   dailyTransactions.debit = dailyDebit;
   dailyTransactions.credit = dailyCredit;
 
+  // Set totalSales to the running P&L
+  totalSales = runningPnL;
+
   // Update UI elements
   const elements = {
     debit: document.getElementById("totalDebit"),
@@ -186,7 +206,6 @@ async function updateDailyTotals() {
     }`;
   }
 }
-
 
 
 async function updatePartnerBalances() {
