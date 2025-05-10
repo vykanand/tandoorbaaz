@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TandoorBaaz Orders Management</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -57,6 +58,15 @@
             animation: pulse 1s infinite;
         }
     </style>
+    <style>
+        @media (max-width: 767.98px) {
+            .sticky-top {
+                position: static !important;
+                top: auto !important;
+                margin-top: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -90,7 +100,7 @@
 
     <!-- Modals -->
     <div class="modal fade" id="addOrderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content">
                 <form id="addOrderForm">
                     <div class="modal-header">
@@ -124,7 +134,7 @@
     </div>
 
     <div class="modal fade" id="editOrderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
             <div class="modal-content">
                 <form id="editOrderForm">
                     <div class="modal-header">
@@ -158,7 +168,7 @@
     </div>
 
     <div class="modal fade" id="vehicleModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Vehicle Number</h5>
@@ -176,7 +186,7 @@
     </div>
 
     <div class="modal fade" id="delayAlertModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">Delay Alert</h5>
@@ -192,7 +202,6 @@
             </div>
         </div>
     </div>
-
     <script>
         // Firebase Configuration and Initialization
         const firebaseConfig = {
@@ -383,9 +392,15 @@
         }
 
         function renderOrders() {
-            const ordersHTML = state.currentOrders.map(order => `
+            const ordersHTML = state.currentOrders.map(order => {
+                // Add a thicker border for severely delayed orders
+                const borderStyle = order.delayLevel >= 3 
+                    ? `border-left: 8px solid ${getDelayColor(order)}` 
+                    : `border-left: 5px solid ${getDelayColor(order)}`;
+            
+                return `
         <div class="col-md-6 col-lg-4">
-            <div class="card order-card" style="border-left: 5px solid ${getDelayColor(order)}">
+            <div class="card order-card" style="${borderStyle}">
                 <div class="card-body">
                     <span class="badge ${getStatusClass(order.status)} status-badge">${order.status}</span>
                     ${order.delayLevel > 0 ? `<span class="badge bg-danger delay-badge">Delayed ${order.delayLevel}x</span>` : ''}
@@ -427,7 +442,8 @@
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
             document.getElementById('ordersList').innerHTML = ordersHTML;
         }
@@ -536,8 +552,25 @@
         }
 
         function getDelayColor(order) {
-            const hue = 120 - (order.delayLevel * 20);
-            return `hsl(${hue}, 80%, 50%)`;
+            // If there's no delay, return a green color
+            if (!order.delayLevel || order.delayLevel <= 0) {
+                return 'hsl(120, 80%, 40%)'; // Green for on-time orders
+            }
+            
+            // Calculate a color from green (hue 120) to red (hue 0)
+            // The higher the delay level, the closer to red
+            // Cap at delay level 5 (which will be dark red)
+            const maxDelayLevel = 5;
+            const delayLevel = Math.min(order.delayLevel, maxDelayLevel);
+            
+            // Calculate hue: 120 (green) to 0 (red)
+            const hue = Math.max(120 - (delayLevel * 24), 0);
+            
+            // Reduce saturation and lightness for higher delay levels to make colors more intense
+            const saturation = 80 - (delayLevel * 5);
+            const lightness = 40 - (delayLevel * 3);
+            
+            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
         }
 
         function formatTime(date) {
