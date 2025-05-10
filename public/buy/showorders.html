@@ -410,12 +410,12 @@
                     <p class="mb-1"><i class="bi bi-clock"></i> ${formatTime(order.createdAt)}</p>
                     ${order.vehicleNumber ? `<p class="mb-1"><i class="bi bi-truck"></i> ${order.vehicleNumber}</p>` : ''}
                     <hr>
-                    ${order.items.map(item => `
-                        <div class="d-flex justify-content-between mb-2">
-                            <div>${item.name} ×${item.quantity}</div>
-                            <div>₹${item.price * item.quantity}</div>
-                        </div>
-                    `).join('')}
+${order.items.map(item => `
+    <div class="d-flex justify-content-between mb-2">
+        <div>${item.name} (${item.portion.toUpperCase()}) ×${item.quantity}</div>
+        <div>₹${item.price * item.quantity}</div>
+    </div>
+`).join('')}
                     <hr>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <strong>Total:</strong>
