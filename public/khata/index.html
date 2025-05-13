@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker - BK, Rachit, Vikas, Surya, Salil</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #2c3e50;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .form-section,
+        .summary-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        button.secondary {
+            background-color: #3498db;
+        }
+
+        button.secondary:hover {
+            background-color: #2980b9;
+        }
+
+        button.danger {
+            background-color: #e74c3c;
+        }
+
+        button.danger:hover {
+            background-color: #c0392b;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .checkbox-item input {
+            margin-right: 5px;
+        }
+
+        .positive {
+            color: green;
+        }
+
+        .negative {
+            color: red;
+        }
+
+        .status-message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            display: none;
+        }
+
+        .status-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-spinner {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .people-manager {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .people-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .person-tag {
+            background-color: #e1f5fe;
+            border: 1px solid #81d4fa;
+            border-radius: 20px;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .person-tag button {
+            background: none;
+            border: none;
+            color: #e74c3c;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 0 5px;
+            margin: 0 0 0 5px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }
+
+        .tab.active {
+            background-color: #f9f9f9;
+            border-color: #ddd;
+            border-bottom: 1px solid #f9f9f9;
+            margin-bottom: -1px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .settlement-card {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .settlement-amount {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+        
+        /* Pagination styles */
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            gap: 10px;
+        }
+        
+        #pageInfo {
+            margin: 0 10px;
+        }
+        
+        /* Transaction filters */
+        .transaction-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .transaction-filters .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        /* Settlement options */
+        .settlement-options {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        /* Quick summary */
+        #quickSummary {
+            padding: 10px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .summary-item {
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .summary-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        /* Completed settlements */
+        .settlement-completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        /* Settlement sections */
+        .settlement-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .settlement-section h4 {
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            color: #2c3e50;
+        }
+        
+        .settlement-section h5 {
+            margin: 15px 0 10px;
+            color: #3498db;
+            font-size: 1em;
+        }
+        
+        /* Settlement toggle */
+        .settlement-toggle {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e1f5fe;
+            border: 1px solid #81d4fa;
+            border-radius: 4px;
+        }
+        
+        .settlement-toggle label {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .settlement-toggle input {
+            margin-right: 8px;
+        }
+        
+        /* Balance total */
+        .balance-total {
+            margin-top: 15px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Tandoorbaaz personal Expense Tracker</h1>
+    <div id="statusMessage" class="status-message"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="transactions">Transactions</div>
+        <div class="tab" data-tab="settlements">Settlements</div>
+        <!-- <div class="tab" data-tab="people">Manage People</div> -->
+        <!-- <div class="tab" data-tab="settings">Settings</div> -->
+    </div>
+
+    <div id="transactionsTab" class="tab-content active">
+        <div class="container">
+            <div class="form-section">
+                <h2>Add New Expense</h2>
+                <div class="form-group">
+                    <label for="payer">Paid by:</label>
+                    <select id="payer"></select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount (₹):</label>
+                    <input type="number" id="amount" min="0" step="0.01" placeholder="Enter amount">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <input type="text" id="description" placeholder="What was this expense for?">
+                </div>
+                <div class="form-group">
+                    <label>Split Between:</label>
+                    <div id="splitBetweenCheckboxes" class="checkbox-group"></div>
+                </div>
+                <button onclick="addExpense()">Add Expense</button>
+                <button class="secondary" onclick="refreshTransactions()">Refresh Data</button>
+            </div>
+
+            <div class="summary-section">
+                <h2>Quick Summary</h2>
+                <div id="quickSummary"></div>
+            </div>
+        </div>
+
+        <h2>Transactions</h2>
+        <div class="transaction-filters">
+            <div class="form-group">
+                <label for="transactionSearch">Search:</label>
+                <input type="text" id="transactionSearch" placeholder="Search by description or person">
+            </div>
+            <div class="form-group">
+                <label for="transactionDateFilter">Date Range:</label>
+                <select id="transactionDateFilter">
+                    <option value="all">All Time</option>
+                    <option value="today">Today</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="custom">Custom Range</option>
+                </select>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Paid By</th>
+                    <th>Amount</th>
+                    <th>Description</th>
+                    <th>Split Between</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="transactionsList"></tbody>
+        </table>
+        
+        <div class="pagination-controls">
+            <button id="prevPage" class="secondary" onclick="changePage(-1)">Previous</button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button id="nextPage" class="secondary" onclick="changePage(1)">Next</button>
+            <select id="pageSize" onchange="changePageSize()">
+                <option value="10">10 per page</option>
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+            </select>
+        </div>
+
+        <button class="danger" onclick="clearAllTransactions()">Clear All Transactions</button>
+    </div>
+    
+    <div id="settlementsTab" class="tab-content">
+        <h2>Settlements</h2>
+        <p>View who owes whom and settle up expenses.</p>
+        
+        <div class="container">
+            <div class="form-section">
+                <h3>Individual Balances</h3>
+                <div id="balances"></div>
+            </div>
+            
+            <div class="summary-section">
+                <h3>Suggested Settlements</h3>
+                <div id="settlements"></div>
+            </div>
+        </div>
+        
+
+    </div>
+
+    <div id="peopleTab" class="tab-content">
+        <h2>Manage People</h2>
+        <p>Add or remove people from the expense tracker. <strong>Note:</strong> Removing a person will not remove their
+            transactions.</p>
+
+        <div class="form-group">
+            <label for="newPersonName">Add New Person:</label>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="newPersonName" placeholder="Enter name">
+                <button onclick="addPerson()">Add Person</button>
+            </div>
+        </div>
+
+        <h3>Current People</h3>
+        <div class="people-list" id="peopleList"></div>
+    </div>
+
+    <div id="settingsTab" class="tab-content">
+        <h2>Settings</h2>
+
+        <div class="form-group">
+            <label for="jsonBinKey">JSON Bin Master Key:</label>
+            <input type="text" id="jsonBinKey" value="$2a$10$Fc5T8KVSWawgZnQ6dclo7O8RXtsBEt.k2v57q0eNdYeqIskqdFDt2"
+                placeholder="Enter your JSON Bin Master Key">
+        </div>
+
+        <div class="form-group">
+            <label for="jsonBinId">JSON Bin ID:</label>
+            <input type="text" id="jsonBinId" value="681e6acb8a456b79669a999c" placeholder="Enter your JSON Bin ID">
+        </div>
+
+        <button onclick="saveSettings()">Save Settings</button>
+        <button class="secondary" onclick="testConnection()">Test Connection</button>
+    </div>
+
+    <script>
+        // Global variables
+        let people = ['BK', 'Rachit', 'Vikas', 'Surya', 'Salil'];
+        let transactions = [];
+        let usingLocalStorage = false;
+        
+        // Pagination state
+        let currentPage = 1;
+        let pageSize = 10;
+        let filteredTransactions = [];
+        
+        // Settlements tracking
+        let completedSettlements = [];
+
+        // JSONBin.io configuration
+        const JSON_BIN_URL = 'https://api.jsonbin.io/v3/b';
+        let binId = '681e6acb8a456b79669a999c';
+        let masterKey = '$2a$10$Fc5T8KVSWawgZnQ6dclo7O8RXtsBEt.k2v57q0eNdYeqIskqdFDt2';
+
+        // Initialize app on page load
+        window.onload = function () {
+            // Load settings from localStorage if available
+            loadSettings();
+
+            // Initialize tabs
+            initTabs();
+            
+            // Initialize event listeners for search and filters
+            initSearchAndFilters();
+            
+            // Set default page size
+            document.getElementById('pageSize').value = pageSize;
+
+            // Initialize the app
+            initializeApp();
+        };
+        
+        // Initialize search and filter event listeners
+        function initSearchAndFilters() {
+            // Search functionality
+            document.getElementById('transactionSearch').addEventListener('input', function() {
+                currentPage = 1;
+                filterAndDisplayTransactions();
+            });
+            
+            // Date filter
+            document.getElementById('transactionDateFilter').addEventListener('change', function() {
+                currentPage = 1;
+                filterAndDisplayTransactions();
+            });
+        }
+
+        // Initialize tabs
+        function initTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const tabName = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabName}Tab`).classList.add('active');
+                    
+                    // Special handling for settlements tab
+                    if (tabName === 'settlements') {
+                        // Calculate balances
+                        const balances = calculateBalances();
+                        
+                        // Display individual balances
+                        displayBalances(balances);
+                        
+                        // Clear the settlements div
+                        const settlementsDiv = document.getElementById('settlements');
+                        settlementsDiv.innerHTML = '';
+                        
+                        // Create the toggle control
+                        const toggleDiv = document.createElement('div');
+                        toggleDiv.id = 'settlementToggle';
+                        toggleDiv.className = 'settlement-toggle';
+                        toggleDiv.innerHTML = `
+                            <label>
+                                <input type="checkbox" id="showAllSettlements" checked 
+                                    onchange="optimizeSettlements()">
+                                Show all settlements between members
+                            </label>
+                        `;
+                        
+                        // Add the toggle to the settlements div
+                        settlementsDiv.appendChild(toggleDiv);
+                        
+                        // Calculate and display all settlements
+                        const settlements = calculateSettlements(balances);
+                        displaySettlements(settlements);
+                    }
+                });
+            });
+        }
+
+        // Load settings from localStorage
+        function loadSettings() {
+            const savedMasterKey = localStorage.getItem('jsonBinMasterKey');
+            const savedBinId = localStorage.getItem('jsonBinId');
+            const savedPeople = localStorage.getItem('khataTrackerPeople');
+            const savedCompletedSettlements = localStorage.getItem('completedSettlements');
+
+            if (savedMasterKey) {
+                masterKey = savedMasterKey;
+                document.getElementById('jsonBinKey').value = masterKey;
+            }
+
+            if (savedBinId) {
+                binId = savedBinId;
+                document.getElementById('jsonBinId').value = binId;
+            }
+
+            if (savedPeople) {
+                people = JSON.parse(savedPeople);
+            }
+            
+            if (savedCompletedSettlements) {
+                try {
+                    completedSettlements = JSON.parse(savedCompletedSettlements);
+                } catch (e) {
+                    console.error('Error parsing completed settlements:', e);
+                    completedSettlements = [];
+                }
+            }
+        }
+
+        // Save settings
+        function saveSettings() {
+            const newMasterKey = document.getElementById('jsonBinKey').value.trim();
+            const newBinId = document.getElementById('jsonBinId').value.trim();
+
+            if (newMasterKey && newBinId) {
+                masterKey = newMasterKey;
+                binId = newBinId;
+
+                localStorage.setItem('jsonBinMasterKey', masterKey);
+                localStorage.setItem('jsonBinId', binId);
+
+                showStatusMessage('Settings saved successfully', 'success');
+
+                // Reinitialize the app with new settings
+                initializeApp();
+            } else {
+                showStatusMessage('Please fill in all fields', 'error');
+            }
+        }
+
+        // Test connection to JSONBin
+        async function testConnection() {
+            showLoading(true);
+
+            try {
+                const headers = getHeaders();
+
+                const response = await fetch(`${JSON_BIN_URL}/${binId}/latest`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                await response.json();
+                showStatusMessage('Connection successful! Your settings are working correctly.', 'success');
+            } catch (error) {
+                console.error('Connection test error:', error);
+                showStatusMessage('Connection failed: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Show/hide loading overlay
+        function showLoading(show) {
+            document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none';
+        }
+
+        // Initialize the application
+        async function initializeApp() {
+            showLoading(true);
+
+            try {
+                // Update UI with current people
+                updatePeopleUI();
+
+                // Try to fetch existing data
+                const response = await fetch(`${JSON_BIN_URL}/${binId}/latest`, {
+                    method: 'GET',
+                    headers: getHeaders()
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch data: ${response.status}`);
+                }
+
+                                const data = await response.json();
+
+                                            // Check if data has the expected structure
+                                            if (data && data.record) {
+                                                // Extract transactions and people from the response
+                                                if (Array.isArray(data.record.transactions)) {
+                                                    transactions = data.record.transactions;
+                                                } else {
+                                                    transactions = [];
+                                                }
+
+                                                if (Array.isArray(data.record.people)) {
+                                                    people = data.record.people;
+                                                    // Save people to localStorage as backup
+                                                    localStorage.setItem('khataTrackerPeople', JSON.stringify(people));
+                                                    // Update UI with current people
+                                                    updatePeopleUI();
+                                                }
+                                                
+                                                // Load completed settlements if available
+                                                if (Array.isArray(data.record.completedSettlements)) {
+                                                    completedSettlements = data.record.completedSettlements;
+                                                    // Save to localStorage as backup
+                                                    localStorage.setItem('completedSettlements', JSON.stringify(completedSettlements));
+                                                }
+
+                                                // Update UI
+                                                updateExpenseUI();
+                                                showStatusMessage('Data loaded successfully', 'success');
+                                            } else {
+                                                // Initialize with empty data
+                                                await initializeData();
+                                            }
+                                        } catch (error) {
+                                            console.error('Error initializing app:', error);
+                                            showStatusMessage('Error loading data. Using local storage.', 'error');
+
+                                            // Try to load from localStorage as fallback
+                                            loadFromLocalStorage();
+
+                                            // Mark that we're using localStorage
+                                            usingLocalStorage = true;
+                                        } finally {
+                                            showLoading(false);
+                                        }
+                                    }
+
+                                    // Initialize data structure in JSONBin
+                                    async function initializeData() {
+                                        const initialData = {
+                                            people: people,
+                                            transactions: [],
+                                            completedSettlements: []
+                                        };
+
+                                        try {
+                                            const response = await fetch(`${JSON_BIN_URL}/${binId}`, {
+                                                method: 'PUT',
+                                                headers: getHeaders(),
+                                                body: JSON.stringify(initialData)
+                                            });
+
+                                            if (!response.ok) {
+                                                throw new Error(`Failed to initialize data: ${response.status}`);
+                                            }
+
+                                            transactions = [];
+                                            updateExpenseUI();
+                                            showStatusMessage('Data initialized successfully', 'success');
+                                        } catch (error) {
+                                            console.error('Error initializing data:', error);
+                                            showStatusMessage('Error initializing data. Using local storage.', 'error');
+
+                                            // Mark that we're using localStorage
+                                            usingLocalStorage = true;
+                                        }
+                                    }
+
+                                    // Load data from localStorage
+                                    function loadFromLocalStorage() {
+                                        const savedTransactions = localStorage.getItem('khataTrackerTransactions');
+                                        const savedPeople = localStorage.getItem('khataTrackerPeople');
+                                        const savedCompletedSettlements = localStorage.getItem('completedSettlements');
+
+                                        if (savedTransactions) {
+                                            transactions = JSON.parse(savedTransactions);
+                                        } else {
+                                            transactions = [];
+                                        }
+
+                                        if (savedPeople) {
+                                            people = JSON.parse(savedPeople);
+                                        }
+                                        
+                                        if (savedCompletedSettlements) {
+                                            try {
+                                                completedSettlements = JSON.parse(savedCompletedSettlements);
+                                            } catch (e) {
+                                                console.error('Error parsing completed settlements:', e);
+                                                completedSettlements = [];
+                                            }
+                                        }
+
+                                        updateExpenseUI();
+                                        updatePeopleUI();
+                                    }
+
+                                    // Save data to JSONBin
+                                    async function saveData() {
+                                        // First save to localStorage as backup
+                                        saveToLocalStorage();
+
+                                        // If we're in localStorage mode, don't try to save to JSONBin
+                                        if (usingLocalStorage) {
+                                            return;
+                                        }
+
+                                        showLoading(true);
+
+                                        try {
+                                            const dataToSave = {
+                                                people: people,
+                                                transactions: transactions,
+                                                completedSettlements: completedSettlements
+                                            };
+
+                                            const response = await fetch(`${JSON_BIN_URL}/${binId}`, {
+                                                method: 'PUT',
+                                                headers: getHeaders(),
+                                                body: JSON.stringify(dataToSave)
+                                            });
+
+                                            if (!response.ok) {
+                                                throw new Error(`Failed to save data: ${response.status}`);
+                                            }
+
+                                            showStatusMessage('Data saved successfully', 'success');
+                                        } catch (error) {
+                                            console.error('Error saving data:', error);
+                                            showStatusMessage('Error saving data. Using local storage.', 'error');
+
+                                            // Mark that we're using localStorage
+                                            usingLocalStorage = true;
+                                        } finally {
+                                            showLoading(false);
+                                        }
+                                    }
+
+                                    // Save to localStorage as backup
+                                    function saveToLocalStorage() {
+                                        localStorage.setItem('khataTrackerTransactions', JSON.stringify(transactions));
+                                        localStorage.setItem('khataTrackerPeople', JSON.stringify(people));
+                                        localStorage.setItem('completedSettlements', JSON.stringify(completedSettlements));
+                                    }
+
+                                    // Get headers for JSONBin requests
+                                    function getHeaders() {
+                                        return {
+                                            'Content-Type': 'application/json',
+                                            'X-Master-Key': masterKey
+                                        };
+                                    }
+
+                                    // Show status message
+                                    function showStatusMessage(message, type) {
+                                        const statusMessage = document.getElementById('statusMessage');
+                                        statusMessage.textContent = message;
+                                        statusMessage.className = `status-message ${type}`;
+                                        statusMessage.style.display = 'block';
+
+                                        // Hide message after 3 seconds
+                                        setTimeout(() => {
+                                            statusMessage.style.display = 'none';
+                                        }, 3000);
+                                    }
+
+                                    // Update expense UI (payer dropdown, split checkboxes, transactions table, balances)
+                                    function updateExpenseUI() {
+                                        // Update payer dropdown
+                                        const payerSelect = document.getElementById('payer');
+                                        payerSelect.innerHTML = '';
+
+                                        people.forEach(person => {
+                                            const option = document.createElement('option');
+                                            option.value = person;
+                                            option.textContent = person;
+                                            payerSelect.appendChild(option);
+                                        });
+
+                                        // Update split between checkboxes
+                                        updateSplitBetweenCheckboxes();
+
+                                        // Reset filters
+                                        document.getElementById('transactionSearch').value = '';
+                                        document.getElementById('transactionDateFilter').value = 'all';
+                                        
+                                        // Reset pagination
+                                        currentPage = 1;
+                                        
+                                        // Update filtered transactions and display
+                                        filterAndDisplayTransactions();
+
+                                        // Update balances and settlements
+                                        updateBalancesAndSettlements();
+                                    }
+
+                                    // Update split between checkboxes
+                                    function updateSplitBetweenCheckboxes() {
+                                        const splitBetweenDiv = document.getElementById('splitBetweenCheckboxes');
+                                        splitBetweenDiv.innerHTML = '';
+
+                                        people.forEach(person => {
+                                            const checkboxItem = document.createElement('div');
+                                            checkboxItem.className = 'checkbox-item';
+
+                                            const checkbox = document.createElement('input');
+                                            checkbox.type = 'checkbox';
+                                            checkbox.id = `split${person}`;
+                                            checkbox.value = person;
+                                            checkbox.checked = true;
+
+                                            const label = document.createElement('label');
+                                            label.htmlFor = `split${person}`;
+                                            label.textContent = person;
+
+                                            checkboxItem.appendChild(checkbox);
+                                            checkboxItem.appendChild(label);
+                                            splitBetweenDiv.appendChild(checkboxItem);
+                                        });
+                                    }
+
+                                    // Update people UI
+                                    function updatePeopleUI() {
+                                        const peopleList = document.getElementById('peopleList');
+                                        peopleList.innerHTML = '';
+
+                                        people.forEach(person => {
+                                            const personTag = document.createElement('div');
+                                            personTag.className = 'person-tag';
+
+                                            personTag.innerHTML = `
+                    ${person}
+                    <button onclick="removePerson('${person}')">&times;</button>
+                `;
+
+                                            peopleList.appendChild(personTag);
+                                        });
+                                    }
+
+                                    // Add a new person
+                                    function addPerson() {
+                                        const newPersonInput = document.getElementById('newPersonName');
+                                        const newPersonName = newPersonInput.value.trim();
+
+                                        if (!newPersonName) {
+                                            showStatusMessage('Please enter a name', 'error');
+                                            return;
+                                        }
+
+                                        if (people.includes(newPersonName)) {
+                                            showStatusMessage('This person already exists', 'error');
+                                            return;
+                                        }
+
+                                        people.push(newPersonName);
+
+                                        // Update UI
+                                        updatePeopleUI();
+                                        updateExpenseUI();
+
+                                        // Save data
+                                        saveData();
+
+                                        // Clear input
+                                        newPersonInput.value = '';
+
+                                        showStatusMessage(`${newPersonName} added successfully`, 'success');
+                                    }
+
+                                    // Remove a person
+                                    function removePerson(personName) {
+                                        // Check if person has transactions
+                                        const hasTransactions = transactions.some(t =>
+                                            t.payer === personName || t.splitBetween.includes(personName)
+                                        );
+
+                                        let confirmMessage = `Are you sure you want to remove ${personName}?`;
+
+                                        if (hasTransactions) {
+                                            confirmMessage += ` This person has transactions. Removing them will affect balance calculations.`;
+                                        }
+
+                                        if (confirm(confirmMessage)) {
+                                            people = people.filter(p => p !== personName);
+
+                                            // Update UI
+                                            updatePeopleUI();
+                                            updateExpenseUI();
+
+                                            // Save data
+                                            saveData();
+
+                                            showStatusMessage(`${personName} removed successfully`, 'success');
+                                        }
+                                    }
+
+                                    // Add a new expense
+                                    function addExpense() {
+                                        const payer = document.getElementById('payer').value;
+                                        const amount = parseFloat(document.getElementById('amount').value);
+                                        const description = document.getElementById('description').value;
+
+                                        // Get selected people for splitting
+                                        const splitBetween = [];
+                                        people.forEach(person => {
+                                            const checkbox = document.getElementById(`split${person}`);
+                                            if (checkbox && checkbox.checked) {
+                                                splitBetween.push(person);
+                                            }
+                                        });
+
+                                        // Validation
+                                        if (!payer) {
+                                            showStatusMessage('Please select who paid', 'error');
+                                            return;
+                                        }
+
+                                        if (isNaN(amount) || amount <= 0) {
+                                            showStatusMessage('Please enter a valid amount', 'error');
+                                            return;
+                                        }
+
+                                        if (!description) {
+                                            showStatusMessage('Please enter a description', 'error');
+                                            return;
+                                        }
+
+                                        if (splitBetween.length === 0) {
+                                            showStatusMessage('Please select at least one person to split with', 'error');
+                                            return;
+                                        }
+
+                                        // Format date as dd/mm/yyyy
+                                        const today = new Date();
+                                        const day = String(today.getDate()).padStart(2, '0');
+                                        const month = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+                                        const year = today.getFullYear();
+                                        const formattedDate = `${day}/${month}/${year}`;
+
+                                        // Create new transaction
+                                        const newTransaction = {
+                                            id: Date.now(),
+                                            date: formattedDate,
+                                            payer: payer,
+                                            amount: amount,
+                                            description: description,
+                                            splitBetween: splitBetween
+                                        };
+
+                                        // Add to transactions array
+                                        transactions.push(newTransaction);
+
+                                        // Save data
+                                        saveData();
+
+                                        // Update UI
+                                        filterAndDisplayTransactions();
+                                        updateBalancesAndSettlements();
+
+                                        // Reset form
+                                        document.getElementById('amount').value = '';
+                                        document.getElementById('description').value = '';
+
+                                        showStatusMessage('Expense added successfully', 'success');
+                                    }
+
+                                    // Filter and display transactions
+                                    function filterAndDisplayTransactions() {
+                                        // Get filter values
+                                        const searchTerm = document.getElementById('transactionSearch').value.toLowerCase();
+                                        const dateFilter = document.getElementById('transactionDateFilter').value;
+                                        
+                                        // Apply filters
+                                        filteredTransactions = [...transactions];
+                                        
+                                        // Apply search filter
+                                        if (searchTerm) {
+                                            filteredTransactions = filteredTransactions.filter(transaction => {
+                                                return transaction.description.toLowerCase().includes(searchTerm) ||
+                                                       transaction.payer.toLowerCase().includes(searchTerm) ||
+                                                       transaction.splitBetween.some(person => person.toLowerCase().includes(searchTerm));
+                                            });
+                                        }
+                                        
+                                        // Apply date filter
+                                        if (dateFilter !== 'all') {
+                                            const today = new Date();
+                                            today.setHours(0, 0, 0, 0);
+                                            
+                                            filteredTransactions = filteredTransactions.filter(transaction => {
+                                                // Parse dd/mm/yyyy format to Date object
+                                                const [day, month, year] = transaction.date.split('/').map(Number);
+                                                const transactionDate = new Date(year, month - 1, day);
+                                                
+                                                if (dateFilter === 'today') {
+                                                    return transactionDate.getTime() === today.getTime();
+                                                } else if (dateFilter === 'week') {
+                                                    const weekAgo = new Date(today);
+                                                    weekAgo.setDate(today.getDate() - 7);
+                                                    return transactionDate >= weekAgo;
+                                                } else if (dateFilter === 'month') {
+                                                    const monthAgo = new Date(today);
+                                                    monthAgo.setMonth(today.getMonth() - 1);
+                                                    return transactionDate >= monthAgo;
+                                                }
+                                                return true;
+                                            });
+                                        }
+                                        
+                                        // Sort by date (newest first)
+                                        filteredTransactions.sort((a, b) => {
+                                            // Parse dd/mm/yyyy format to Date objects for comparison
+                                            const [aDay, aMonth, aYear] = a.date.split('/').map(Number);
+                                            const [bDay, bMonth, bYear] = b.date.split('/').map(Number);
+                                            
+                                            const dateA = new Date(aYear, aMonth - 1, aDay);
+                                            const dateB = new Date(bYear, bMonth - 1, bDay);
+                                            
+                                            return dateB - dateA;
+                                        });
+                                        
+                                        // Display transactions with pagination
+                                        displayTransactions();
+                                    }
+                                    
+                                    // Display transactions in the table with pagination
+                                    function displayTransactions() {
+                                        const transactionsList = document.getElementById('transactionsList');
+                                        transactionsList.innerHTML = '';
+                                        
+                                        // Calculate pagination
+                                        const totalPages = Math.ceil(filteredTransactions.length / pageSize);
+                                        if (currentPage > totalPages && totalPages > 0) {
+                                            currentPage = totalPages;
+                                        }
+                                        
+                                        // Update page info
+                                        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${totalPages || 1}`;
+                                        
+                                        // Enable/disable pagination buttons
+                                        document.getElementById('prevPage').disabled = currentPage <= 1;
+                                        document.getElementById('nextPage').disabled = currentPage >= totalPages;
+                                        
+                                        // Get current page transactions
+                                        const startIndex = (currentPage - 1) * pageSize;
+                                        const endIndex = startIndex + pageSize;
+                                        const currentPageTransactions = filteredTransactions.slice(startIndex, endIndex);
+
+                                        // Display transactions
+                                        currentPageTransactions.forEach(transaction => {
+                                            const row = document.createElement('tr');
+
+                                            row.innerHTML = `
+                    <td>${transaction.date}</td>
+                    <td>${transaction.payer}</td>
+                    <td>₹${transaction.amount.toFixed(2)}</td>
+                    <td>${transaction.description}</td>
+                    <td>${transaction.splitBetween.join(', ')}</td>
+                    <td>
+                        <button class="danger" onclick="deleteTransaction(${transaction.id})">Delete</button>
+                    </td>
+                `;
+
+                                            transactionsList.appendChild(row);
+                                        });
+                                        
+                                        // Update quick summary
+                                        updateQuickSummary();
+                                    }
+                                    
+                                    // Change page
+                                    function changePage(direction) {
+                                        currentPage += direction;
+                                        displayTransactions();
+                                    }
+                                    
+                                    // Change page size
+                                    function changePageSize() {
+                                        pageSize = parseInt(document.getElementById('pageSize').value);
+                                        currentPage = 1;
+                                        displayTransactions();
+                                    }
+                                    
+                                    // Update quick summary
+                                    function updateQuickSummary() {
+                                        const summaryDiv = document.getElementById('quickSummary');
+                                        summaryDiv.innerHTML = '';
+                                        
+                                        // Total transactions
+                                        const totalAmount = transactions.reduce((sum, t) => sum + t.amount, 0);
+                                        
+                                        // Create summary elements
+                                        const totalTransactionsEl = document.createElement('div');
+                                        totalTransactionsEl.className = 'summary-item';
+                                        totalTransactionsEl.innerHTML = `<strong>Total Transactions:</strong> ${transactions.length}`;
+                                        
+                                        const totalAmountEl = document.createElement('div');
+                                        totalAmountEl.className = 'summary-item';
+                                        totalAmountEl.innerHTML = `<strong>Total Amount:</strong> ₹${totalAmount.toFixed(2)}`;
+                                        
+                                        // Add to summary
+                                        summaryDiv.appendChild(totalTransactionsEl);
+                                        summaryDiv.appendChild(totalAmountEl);
+                                        
+                                        // Add top spender if we have transactions
+                                        if (transactions.length > 0) {
+                                            // Calculate spending by person
+                                            const spendingByPerson = {};
+                                            people.forEach(person => spendingByPerson[person] = 0);
+                                            
+                                            transactions.forEach(t => {
+                                                spendingByPerson[t.payer] = (spendingByPerson[t.payer] || 0) + t.amount;
+                                            });
+                                            
+                                            // Find top spender
+                                            let topSpender = people[0];
+                                            people.forEach(person => {
+                                                if (spendingByPerson[person] > spendingByPerson[topSpender]) {
+                                                    topSpender = person;
+                                                }
+                                            });
+                                            
+                                            const topSpenderEl = document.createElement('div');
+                                            topSpenderEl.className = 'summary-item';
+                                            topSpenderEl.innerHTML = `<strong>Top Spender:</strong> ${topSpender} (₹${spendingByPerson[topSpender].toFixed(2)})`;
+                                            
+                                            summaryDiv.appendChild(topSpenderEl);
+                                        }
+                                    }
+
+                                    // Delete a transaction
+                                    function deleteTransaction(id) {
+                                        if (confirm('Are you sure you want to delete this transaction?')) {
+                                            transactions = transactions.filter(t => t.id !== id);
+
+                                            // Save data
+                                            saveData();
+
+                                            // Update UI
+                                            filterAndDisplayTransactions();
+                                            updateBalancesAndSettlements();
+
+                                            showStatusMessage('Transaction deleted successfully', 'success');
+                                        }
+                                    }
+
+                                    // Clear all transactions
+                                    function clearAllTransactions() {
+                                        if (confirm('Are you sure you want to clear ALL transactions? This cannot be undone!')) {
+                                            transactions = [];
+
+                                            // Save data
+                                            saveData();
+
+                                            // Update UI
+                                            filterAndDisplayTransactions();
+                                            updateBalancesAndSettlements();
+
+                                            showStatusMessage('All transactions cleared successfully', 'success');
+                                        }
+                                    }
+
+                                    // Refresh transactions from server
+                                    async function refreshTransactions() {
+                                        showLoading(true);
+
+                                        try {
+                                            const response = await fetch(`${JSON_BIN_URL}/${binId}/latest`, {
+                                                method: 'GET',
+                                                headers: getHeaders()
+                                            });
+
+                                            if (!response.ok) {
+                                                throw new Error(`Failed to fetch data: ${response.status}`);
+                                            }
+
+                                            const data = await response.json();
+
+                                            // Check if data has the expected structure
+                                            if (data && data.record) {
+                                                // Extract transactions and people from the response
+                                                if (Array.isArray(data.record.transactions)) {
+                                                    transactions = data.record.transactions;
+                                                }
+
+                                                if (Array.isArray(data.record.people)) {
+                                                    people = data.record.people;
+                                                    // Save people to localStorage as backup
+                                                    localStorage.setItem('khataTrackerPeople', JSON.stringify(people));
+                                                    // Update UI with current people
+                                                    updatePeopleUI();
+                                                }
+
+                                                // Update UI
+                                                updateExpenseUI();
+                                                showStatusMessage('Data refreshed successfully', 'success');
+
+                                                // Reset localStorage flag
+                                                usingLocalStorage = false;
+                                            } else {
+                                                throw new Error('Invalid data structure');
+                                            }
+                                        } catch (error) {
+                                            console.error('Error refreshing data:', error);
+                                            showStatusMessage('Error refreshing data: ' + error.message, 'error');
+                                        } finally {
+                                            showLoading(false);
+                                        }
+                                    }
+
+                                    // Calculate and update balances and settlements
+                                    function updateBalancesAndSettlements() {
+                                        // Calculate balances
+                                        const balances = calculateBalances();
+                                        
+                                        // Display individual balances
+                                        displayBalances(balances);
+                                        
+                                        // Calculate and display settlements
+                                        const settlements = calculateSettlements(balances);
+                                        displaySettlements(settlements);
+                                    }
+                                    
+                                    // Calculate balances for all people
+                                    function calculateBalances() {
+                                        // Initialize balances for all people
+                                        const balances = {};
+                                        people.forEach(person => {
+                                            balances[person] = 0;
+                                        });
+
+                                        // Calculate each person's contribution and share
+                                        transactions.forEach(transaction => {
+                                            const payer = transaction.payer;
+                                            const amount = transaction.amount;
+                                            const splitBetween = transaction.splitBetween;
+                                            
+                                            // Skip if no one to split with
+                                            if (splitBetween.length === 0) return;
+                                            
+                                            const sharePerPerson = amount / splitBetween.length;
+
+                                            // Add the full amount to the payer
+                                            if (balances[payer] !== undefined) {
+                                                balances[payer] += amount;
+                                            }
+
+                                            // Subtract each person's share
+                                            splitBetween.forEach(person => {
+                                                if (balances[person] !== undefined) {
+                                                    balances[person] -= sharePerPerson;
+                                                }
+                                            });
+                                        });
+                                        
+                                        // Round balances to 2 decimal places to avoid floating point issues
+                                        for (const person in balances) {
+                                            balances[person] = parseFloat(balances[person].toFixed(2));
+                                        }
+
+                                        return balances;
+                                    }
+                                    
+                                    // Display individual balances
+                                    function displayBalances(balances) {
+                                        const balancesDiv = document.getElementById('balances');
+                                        balancesDiv.innerHTML = '';
+
+                                        // Sort people by balance (highest to lowest)
+                                        const sortedPeople = [...people].sort((a, b) => {
+                                            return (balances[b] || 0) - (balances[a] || 0);
+                                        });
+
+                                        sortedPeople.forEach(person => {
+                                            if (balances[person] !== undefined) {
+                                                const balance = balances[person];
+                                                const balanceClass = balance >= 0 ? 'positive' : 'negative';
+
+                                                const balanceElement = document.createElement('p');
+                                                balanceElement.innerHTML = `${person}: <span class="${balanceClass}">₹${balance.toFixed(2)}</span>`;
+                                                balancesDiv.appendChild(balanceElement);
+                                            }
+                                        });
+                                        
+                                        // Add a total row
+                                        const totalPositive = Object.values(balances)
+                                            .filter(b => b > 0)
+                                            .reduce((sum, b) => sum + b, 0);
+                                            
+                                        const totalElement = document.createElement('p');
+                                        totalElement.className = 'balance-total';
+                                        totalElement.innerHTML = `<strong>Total Money Owed: <span class="positive">₹${totalPositive.toFixed(2)}</span></strong>`;
+                                        balancesDiv.appendChild(totalElement);
+                                    }
+                                    
+                                    // For backward compatibility
+                                    function updateBalances() {
+                                        updateBalancesAndSettlements();
+                                    }
+
+                                    // Calculate all possible settlements between members
+                                    function calculateSettlements(balances) {
+                                        const settlements = [];
+                                        
+                                        // Create a matrix of all possible settlements between members
+                                        for (let i = 0; i < people.length; i++) {
+                                            for (let j = 0; j < people.length; j++) {
+                                                // Skip self-settlements
+                                                if (i === j) continue;
+                                                
+                                                const person1 = people[i];
+                                                const person2 = people[j];
+                                                
+                                                // Calculate net amount between these two people
+                                                let netAmount = 0;
+                                                
+                                                // Go through all transactions involving these two people
+                                                transactions.forEach(transaction => {
+                                                    // If person1 paid and person2 is in the split
+                                                    if (transaction.payer === person1 && transaction.splitBetween.includes(person2)) {
+                                                        const sharePerPerson = transaction.amount / transaction.splitBetween.length;
+                                                        netAmount += sharePerPerson;
+                                                    }
+                                                    
+                                                    // If person2 paid and person1 is in the split
+                                                    if (transaction.payer === person2 && transaction.splitBetween.includes(person1)) {
+                                                        const sharePerPerson = transaction.amount / transaction.splitBetween.length;
+                                                        netAmount -= sharePerPerson;
+                                                    }
+                                                });
+                                                
+                                                // Round to 2 decimal places
+                                                netAmount = parseFloat(netAmount.toFixed(2));
+                                                
+                                                // Only add if there's a non-trivial amount
+                                                if (Math.abs(netAmount) > 0.01) {
+                                                    if (netAmount > 0) {
+                                                        // person2 owes person1
+                                                        settlements.push({
+                                                            from: person2,
+                                                            to: person1,
+                                                            amount: netAmount,
+                                                            completed: false
+                                                        });
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        // Sort settlements by amount (highest first)
+                                        settlements.sort((a, b) => b.amount - a.amount);
+                                        
+                                        return settlements;
+                                    }
+                                    
+                                    // Display settlements
+                                    function displaySettlements(settlements) {
+                                        const settlementsDiv = document.getElementById('settlements');
+                                        settlementsDiv.innerHTML = '';
+                                        
+                                        if (settlements.length === 0) {
+                                            settlementsDiv.innerHTML = '<p>No settlements needed. Everyone is square!</p>';
+                                            return;
+                                        }
+
+                                        // Mark settlements as completed if they're in the completedSettlements array
+                                        settlements.forEach(settlement => {
+                                            const isCompleted = completedSettlements.some(
+                                                cs => cs.from === settlement.from && 
+                                                      cs.to === settlement.to && 
+                                                      Math.abs(cs.amount - settlement.amount) < 0.01
+                                            );
+                                            
+                                            settlement.completed = isCompleted;
+                                        });
+                                        
+                                        // Group settlements by person
+                                        const settlementsByPerson = {};
+                                        
+                                        people.forEach(person => {
+                                            settlementsByPerson[person] = {
+                                                owes: [],    // What this person owes to others
+                                                owed: []     // What others owe to this person
+                                            };
+                                        });
+                                        
+                                        // Populate the grouped settlements
+                                        settlements.forEach((settlement, index) => {
+                                            // Add to what the person owes
+                                            if (settlementsByPerson[settlement.from]) {
+                                                settlementsByPerson[settlement.from].owes.push({
+                                                    ...settlement,
+                                                    index
+                                                });
+                                            }
+                                            
+                                            // Add to what the person is owed
+                                            if (settlementsByPerson[settlement.to]) {
+                                                settlementsByPerson[settlement.to].owed.push({
+                                                    ...settlement,
+                                                    index
+                                                });
+                                            }
+                                        });
+                                        
+                                        // Create a section for each person
+                                        people.forEach(person => {
+                                            const personSettlements = settlementsByPerson[person];
+                                            
+                                            // Skip if no settlements for this person
+                                            if (personSettlements.owes.length === 0 && personSettlements.owed.length === 0) {
+                                                return;
+                                            }
+                                            
+                                            // Create person section
+                                            const personSection = document.createElement('div');
+                                            personSection.className = 'settlement-section';
+                                            
+                                            // Add person header
+                                            const personHeader = document.createElement('h4');
+                                            personHeader.textContent = person;
+                                            personSection.appendChild(personHeader);
+                                            
+                                            // Add what this person owes
+                                            if (personSettlements.owes.length > 0) {
+                                                const owesHeader = document.createElement('h5');
+                                                owesHeader.textContent = `${person} owes:`;
+                                                personSection.appendChild(owesHeader);
+                                                
+                                                personSettlements.owes.forEach(settlement => {
+                                                    const settlementCard = createSettlementCard(settlement, settlement.index);
+                                                    personSection.appendChild(settlementCard);
+                                                });
+                                            }
+                                            
+                                            // Add what this person is owed
+                                            if (personSettlements.owed.length > 0) {
+                                                const owedHeader = document.createElement('h5');
+                                                owedHeader.textContent = `Owed to ${person}:`;
+                                                personSection.appendChild(owedHeader);
+                                                
+                                                personSettlements.owed.forEach(settlement => {
+                                                    const settlementCard = createSettlementCard(settlement, settlement.index);
+                                                    personSection.appendChild(settlementCard);
+                                                });
+                                            }
+                                            
+                                            // Add to main settlements div
+                                            settlementsDiv.appendChild(personSection);
+                                        });
+                                    }
+                                    
+                                    // Create a settlement card element
+                                    function createSettlementCard(settlement, index) {
+                                        const settlementCard = document.createElement('div');
+                                        settlementCard.className = `settlement-card ${settlement.completed ? 'settlement-completed' : ''}`;
+                                        
+                                        const checkboxId = `settlement-${index}`;
+
+                                        settlementCard.innerHTML = `
+                                            <div>
+                                                <input type="checkbox" id="${checkboxId}" 
+                                                    ${settlement.completed ? 'checked' : ''} 
+                                                    onchange="toggleSettlementStatus(${index})">
+                                                <label for="${checkboxId}">
+                                                    ${settlement.from} should pay ${settlement.to}
+                                                </label>
+                                            </div>
+                                            <div class="settlement-amount negative">₹${settlement.amount.toFixed(2)}</div>
+                                        `;
+
+                                        return settlementCard;
+                                    }
+                                    
+                                    // Toggle settlement completion status
+                                    function toggleSettlementStatus(index) {
+                                        // Get current balances
+                                        const balances = calculateBalances();
+                                        
+                                        // Calculate settlements
+                                        const settlements = calculateSettlements(balances);
+                                        
+                                        if (index >= 0 && index < settlements.length) {
+                                            const settlement = settlements[index];
+                                            
+                                            // Check if this settlement is already in completedSettlements
+                                            const existingIndex = completedSettlements.findIndex(
+                                                cs => cs.from === settlement.from && 
+                                                      cs.to === settlement.to && 
+                                                      Math.abs(cs.amount - settlement.amount) < 0.01
+                                            );
+                                            
+                                            if (existingIndex >= 0) {
+                                                // Remove from completed settlements
+                                                completedSettlements.splice(existingIndex, 1);
+                                            } else {
+                                                // Add to completed settlements
+                                                completedSettlements.push({
+                                                    from: settlement.from,
+                                                    to: settlement.to,
+                                                    amount: settlement.amount,
+                                                    date: new Date().toLocaleDateString('en-GB')
+                                                });
+                                            }
+                                            
+                                            // Save completed settlements to backend
+                                            saveData();
+                                            
+                                            // Update display
+                                            displaySettlements(settlements);
+                                        }
+                                    }
+                                    
+                                    // Toggle between showing all settlements and optimized settlements
+                                    function optimizeSettlements() {
+                                        // Calculate current balances
+                                        const balances = calculateBalances();
+                                        
+                                        // Get the toggle checkbox
+                                        const toggleCheckbox = document.getElementById('showAllSettlements');
+                                        
+                                        // If the toggle doesn't exist yet, create it
+                                        if (!toggleCheckbox) {
+                                            // Create the toggle first
+                                            const settlementsDiv = document.getElementById('settlements');
+                                            const toggleDiv = document.createElement('div');
+                                            toggleDiv.id = 'settlementToggle';
+                                            toggleDiv.className = 'settlement-toggle';
+                                            toggleDiv.innerHTML = `
+                                                <label>
+                                                    <input type="checkbox" id="showAllSettlements" checked 
+                                                        onchange="optimizeSettlements()">
+                                                    Show all settlements between members
+                                                </label>
+                                            `;
+                                            
+                                            // Insert at the top of settlements div
+                                            settlementsDiv.insertBefore(toggleDiv, settlementsDiv.firstChild);
+                                            
+                                            // Show all settlements by default
+                                            const settlements = calculateSettlements(balances);
+                                            displaySettlements(settlements);
+                                            return;
+                                        }
+                                        
+                                        // Get the current state
+                                        const showingAll = toggleCheckbox.checked;
+                                        
+                                        // Display the appropriate settlements
+                                        if (showingAll) {
+                                            // Show all settlements
+                                            const settlements = calculateSettlements(balances);
+                                            displaySettlements(settlements);
+                                            showStatusMessage('Showing all settlements between members', 'success');
+                                        } else {
+                                            // Show optimized settlements
+                                            const settlements = calculateOptimizedSettlements(balances);
+                                            displaySettlements(settlements);
+                                            showStatusMessage('Showing optimized settlements (fewer transactions)', 'success');
+                                        }
+                                    }
+                                    
+                                    // Calculate optimized settlements (minimum number of transactions)
+                                    function calculateOptimizedSettlements(balances) {
+                                        // Create arrays of creditors and debtors
+                                        const creditors = [];
+                                        const debtors = [];
+                                        
+                                        for (const person in balances) {
+                                            const balance = balances[person];
+                                            if (balance > 0.01) {
+                                                creditors.push({ name: person, amount: balance });
+                                            } else if (balance < -0.01) {
+                                                debtors.push({ name: person, amount: balance });
+                                            }
+                                        }
+                                        
+                                        // Sort by amount (largest first)
+                                        creditors.sort((a, b) => b.amount - a.amount);
+                                        debtors.sort((a, b) => a.amount - b.amount); // Most negative first
+                                        
+                                        const settlements = [];
+                                        
+                                        // Try to match largest debtor with largest creditor first
+                                        while (debtors.length > 0 && creditors.length > 0) {
+                                            const debtor = debtors[0];
+                                            const creditor = creditors[0];
+                                            
+                                            // Calculate settlement amount
+                                            const amount = Math.min(Math.abs(debtor.amount), creditor.amount);
+                                            const roundedAmount = parseFloat(amount.toFixed(2));
+                                            
+                                            if (roundedAmount > 0.01) {
+                                                // Add settlement
+                                                settlements.push({
+                                                    from: debtor.name,
+                                                    to: creditor.name,
+                                                    amount: roundedAmount,
+                                                    completed: false
+                                                });
+                                            }
+                                            
+                                            // Update balances
+                                            debtor.amount += roundedAmount;
+                                            creditor.amount -= roundedAmount;
+                                            
+                                            // Remove people with zero balance
+                                            if (Math.abs(debtor.amount) < 0.01) {
+                                                debtors.shift();
+                                            }
+                                            
+                                            if (Math.abs(creditor.amount) < 0.01) {
+                                                creditors.shift();
+                                            }
+                                        }
+                                        
+                                        return settlements;
+                                    }
+                                    
+                                    // Record a settlement manually
+                                    function recordSettlement() {
+                                        // Implementation for recording a manual settlement
+                                        // This could be expanded with a modal dialog
+                                        alert('This feature will be implemented in a future update.');
+                                    }
+                                            </script>
+    </body>
+    
+    </html>

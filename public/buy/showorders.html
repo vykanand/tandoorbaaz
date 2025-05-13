@@ -2,7 +2,6 @@
 <html>
 
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TandoorBaaz Orders Management</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -40,6 +39,32 @@
             transition: all 0.3s;
         }
 
+        /* Delay level badge colors for pending status */
+        .delay-level-0 {
+            background-color: hsl(120, 80%, 50%);
+            color: white;
+        }
+        .delay-level-1 {
+            background-color: hsl(96, 80%, 50%);
+            color: white;
+        }
+        .delay-level-2 {
+            background-color: hsl(72, 80%, 50%);
+            color: white;
+        }
+        .delay-level-3 {
+            background-color: hsl(48, 80%, 50%);
+            color: white;
+        }
+        .delay-level-4 {
+            background-color: hsl(24, 80%, 50%);
+            color: white;
+        }
+        .delay-level-5 {
+            background-color: hsl(0, 80%, 50%);
+            color: white;
+        }
+
         @keyframes pulse {
             0% {
                 opacity: 1;
@@ -56,15 +81,6 @@
 
         .alert-pulse {
             animation: pulse 1s infinite;
-        }
-    </style>
-    <style>
-        @media (max-width: 767.98px) {
-            .sticky-top {
-                position: static !important;
-                top: auto !important;
-                margin-top: 20px;
-            }
         }
     </style>
 </head>
@@ -100,7 +116,7 @@
 
     <!-- Modals -->
     <div class="modal fade" id="addOrderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <form id="addOrderForm">
                     <div class="modal-header">
@@ -134,7 +150,7 @@
     </div>
 
     <div class="modal fade" id="editOrderModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <form id="editOrderForm">
                     <div class="modal-header">
@@ -168,7 +184,7 @@
     </div>
 
     <div class="modal fade" id="vehicleModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Vehicle Number</h5>
@@ -186,7 +202,7 @@
     </div>
 
     <div class="modal fade" id="delayAlertModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">Delay Alert</h5>
@@ -202,6 +218,7 @@
             </div>
         </div>
     </div>
+
     <script>
         // Firebase Configuration and Initialization
         const firebaseConfig = {
@@ -322,42 +339,28 @@
         document.addEventListener('DOMContentLoaded', () => {
             initModals();
             initEventListeners();
-            initOrderForms();
             loadOrders();
             setInterval(checkDelayedOrders, 300000); // 5 minute checks
         });
 
-        function initModals() {
-            state.modals = {
-                edit: new bootstrap.Modal('#editOrderModal'),
-                vehicle: new bootstrap.Modal('#vehicleModal'),
-                delay: new bootstrap.Modal('#delayAlertModal'),
-                addOrder: new bootstrap.Modal('#addOrderModal'),
-                editOrder: new bootstrap.Modal('#editOrderModal')
-            };
-        }
+function initModals() {
+    state.modals = {
+        edit: new bootstrap.Modal('#editOrderModal'),
+        vehicle: new bootstrap.Modal('#vehicleModal'),
+        delay: new bootstrap.Modal('#delayAlertModal'),
+        addOrder: new bootstrap.Modal('#addOrderModal'),
+        editOrder: new bootstrap.Modal('#editOrderModal')
+    };
+}
 
         function initEventListeners() {
             document.getElementById('saveVehicleNumberBtn').addEventListener('click', saveVehicleNumber);
             document.getElementById('addOrderForm').addEventListener('submit', handleNewOrder);
             document.getElementById('editOrderForm').addEventListener('submit', handleOrderEdit);
-            document.getElementById('addOrderItemBtn').addEventListener('click', () => {
-                const row = createOrderItemRow();
-                document.getElementById('orderItemsContainer').appendChild(row);
-            });
             document.getElementById('editAddOrderItemBtn').addEventListener('click', () => {
                 const row = createEditOrderItemRow();
                 document.getElementById('editOrderItemsContainer').appendChild(row);
             });
-        }
-
-        function initOrderForms() {
-            // Initialize the add order form with one item row
-            const orderItemsContainer = document.getElementById('orderItemsContainer');
-            if (orderItemsContainer.children.length === 0) {
-                const row = createOrderItemRow();
-                orderItemsContainer.appendChild(row);
-            }
         }
 
         async function loadOrders() {
@@ -374,11 +377,23 @@
             state.currentOrders = snapshot.docs.map(doc => {
                 const data = doc.data();
                 console.log(`Order ${doc.id} updatedAt raw:`, data.updatedAt);
+                // Ensure updatedAt is a Date object
+                let updatedAtDate = null;
+                if (data.updatedAt) {
+                    if (typeof data.updatedAt.toDate === 'function') {
+                        updatedAtDate = data.updatedAt.toDate();
+                    } else if (data.updatedAt instanceof Date) {
+                        updatedAtDate = data.updatedAt;
+                    } else {
+                        console.warn(`Order ${doc.id} has updatedAt in unexpected format:`, data.updatedAt);
+                        updatedAtDate = null;
+                    }
+                }
                 return {
                     docId: doc.id,
                     ...data,
-                    createdAt: data.createdAt ? data.createdAt.toDate() : null,
-                    updatedAt: data.updatedAt ? data.updatedAt.toDate() : null
+                    createdAt: data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : data.createdAt) : null,
+                    updatedAt: updatedAtDate
                 };
             });
 
@@ -392,15 +407,9 @@
         }
 
         function renderOrders() {
-            const ordersHTML = state.currentOrders.map(order => {
-                // Add a thicker border for severely delayed orders
-                const borderStyle = order.delayLevel >= 3 
-                    ? `border-left: 8px solid ${getDelayColor(order)}` 
-                    : `border-left: 5px solid ${getDelayColor(order)}`;
-            
-                return `
+            const ordersHTML = state.currentOrders.map(order => `
         <div class="col-md-6 col-lg-4">
-            <div class="card order-card" style="${borderStyle}">
+            <div class="card order-card" style="border-left: 5px solid ${getDelayColor(order)}">
                 <div class="card-body">
                     <span class="badge ${getStatusClass(order.status)} status-badge">${order.status}</span>
                     ${order.delayLevel > 0 ? `<span class="badge bg-danger delay-badge">Delayed ${order.delayLevel}x</span>` : ''}
@@ -411,11 +420,11 @@
                     ${order.vehicleNumber ? `<p class="mb-1"><i class="bi bi-truck"></i> ${order.vehicleNumber}</p>` : ''}
                     <hr>
 ${order.items.map(item => `
-    <div class="d-flex justify-content-between mb-2">
-        <div>${item.name} (${item.portion.toUpperCase()}) ×${item.quantity}</div>
-        <div>₹${item.price * item.quantity}</div>
-    </div>
-`).join('')}
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>${item.name} (${item.portion}) ×${item.quantity}</div>
+                            <div>₹${item.price * item.quantity}</div>
+                        </div>
+                    `).join('')}
                     <hr>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <strong>Total:</strong>
@@ -442,48 +451,60 @@ ${order.items.map(item => `
                 </div>
             </div>
         </div>
-    `;
-    }).join('');
+    `).join('');
 
             document.getElementById('ordersList').innerHTML = ordersHTML;
         }
 
-        function renderKitchenList() {
-            // First, let's log the items to see what we're working with
-            console.log("Items for kitchen list:", state.currentOrders
-                .filter(o => ['pending', 'preparing'].includes(o.status))
-                .flatMap(o => o.items));
-            
+function renderKitchenList() {
+            // Aggregate quantities by dish name and portion
             const kitchenItems = state.currentOrders
                 .filter(o => ['pending', 'preparing'].includes(o.status))
                 .flatMap(o => o.items)
                 .reduce((acc, item) => {
-                    // Make sure we're using the complete name property
-                    // Log each item to verify what we're working with
-                    console.log("Processing kitchen item:", item);
-                    
-                    // Use the complete name as the key
-                    const key = item.name;
-                    
-                    if (!acc[key]) {
-                        acc[key] = 0;
+                    if (!acc[item.name]) {
+                        acc[item.name] = { half: 0, full: 0, delayLevels: [] };
                     }
-                    acc[key] += item.quantity;
+                    const portionKey = item.portion.toLowerCase();
+                    if (portionKey === 'half' || portionKey === 'full') {
+                        acc[item.name][portionKey] += item.quantity;
+                    } else {
+                        // For other portions, accumulate under 'full' as default
+                        acc[item.name].full += item.quantity;
+                    }
+                    // Find the order containing this item to get delayLevel
+                    const order = state.currentOrders.find(o => o.items.includes(item));
+                    if (order && typeof order.delayLevel === 'number') {
+                        acc[item.name].delayLevels.push(order.delayLevel);
+                    }
                     return acc;
                 }, {});
 
-            console.log("Aggregated kitchen items:", kitchenItems);
-
+            // Generate HTML grouped by dish with half and full quantities and delay color
             const kitchenHTML = Object.entries(kitchenItems)
-                .sort((a, b) => b[1] - a[1])
-                .map(([name, qty]) => `
-            <div class="kitchen-item mb-2 p-2 bg-light rounded">
-                <div class="d-flex justify-content-between">
-                    <strong>${name}</strong>
-                    <span class="badge bg-primary">${qty} Qty</span>
-                </div>
-            </div>
-        `).join('');
+                .sort((a, b) => {
+                    const totalA = a[1].half + a[1].full;
+                    const totalB = b[1].half + b[1].full;
+                    return totalB - totalA;
+                })
+                .map(([name, portions]) => {
+                    const halfQty = portions.half;
+                    const fullQty = portions.full;
+                    // Calculate max delay level for the dish
+                    const maxDelay = portions.delayLevels.length > 0 ? Math.max(...portions.delayLevels) : 0;
+                    // Map delay level to color from green (0) to dark red (5+)
+                    const hue = Math.max(0, 120 - maxDelay * 20);
+                    const bgColor = `hsl(${hue}, 80%, 80%)`;
+                    return `
+                    <div class="kitchen-item mb-2 p-2 rounded" style="background-color: ${bgColor};">
+                        <strong>${name}</strong>
+                        <div class="d-flex justify-content-between mt-1">
+                            <div>Half: ${halfQty}</div>
+                            <div>Full: ${fullQty}</div>
+                        </div>
+                    </div>
+                    `;
+                }).join('');
 
             document.getElementById('kitchenList').innerHTML = kitchenHTML;
         }
@@ -506,11 +527,11 @@ ${order.items.map(item => `
             const statusDurations = {
                 pending: 15, preparing: 25, ready: 45
             };
-            if (!order.updatedAt) {
-                console.log(`Order ${order.docId} has no updatedAt timestamp.`);
+            if (!order.updatedAt || !(order.updatedAt instanceof Date)) {
+                console.log(`Order ${order.docId} has no valid updatedAt timestamp.`);
                 return 0;
             }
-            let elapsed = (Date.now() - order.updatedAt) / 60000;
+            let elapsed = (Date.now() - order.updatedAt.getTime()) / 60000;
             if (elapsed < 0) {
                 console.warn(`Order ${order.docId} has future updatedAt timestamp. Clamping elapsed time to 0.`);
                 elapsed = 0;
@@ -525,7 +546,7 @@ ${order.items.map(item => `
             showDelayAlert(order);
         }
 
-        function showDelayAlert(order) {
+function showDelayAlert(order) {
             console.log(`Showing delay alert for order ${order.docId}`);
             state.currentDelayOrder = order;
             let delayMinutes = 0;
@@ -540,9 +561,13 @@ ${order.items.map(item => `
         }
 
         // Utility Functions
-        function getStatusClass(status) {
+function getStatusClass(status, delayLevel = 0) {
+            if (status === 'pending') {
+                // Clamp delayLevel between 0 and 5
+                const level = Math.min(Math.max(delayLevel, 0), 5);
+                return `delay-level-${level}`;
+            }
             const classes = {
-                pending: 'bg-warning',
                 preparing: 'bg-info',
                 ready: 'bg-success',
                 delivered: 'bg-primary',
@@ -551,147 +576,19 @@ ${order.items.map(item => `
             return classes[status] || 'bg-secondary';
         }
 
-        function getDelayColor(order) {
-            // If there's no delay, return a green color
-            if (!order.delayLevel || order.delayLevel <= 0) {
-                return 'hsl(120, 80%, 40%)'; // Green for on-time orders
-            }
-            
-            // Calculate a color from green (hue 120) to red (hue 0)
-            // The higher the delay level, the closer to red
-            // Cap at delay level 5 (which will be dark red)
-            const maxDelayLevel = 5;
-            const delayLevel = Math.min(order.delayLevel, maxDelayLevel);
-            
-            // Calculate hue: 120 (green) to 0 (red)
-            const hue = Math.max(120 - (delayLevel * 24), 0);
-            
-            // Reduce saturation and lightness for higher delay levels to make colors more intense
-            const saturation = 80 - (delayLevel * 5);
-            const lightness = 40 - (delayLevel * 3);
-            
-            return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+function getDelayColor(order) {
+            // Clamp delayLevel between 0 and 5 for color mapping
+            const delayLevel = Math.min(Math.max(order.delayLevel || 0, 0), 5);
+            // Map delayLevel 0 (green) to 5 (dark red)
+            const hue = 120 - (delayLevel * 24); // 120 to 0 hue range
+            return `hsl(${hue}, 80%, 50%)`;
         }
 
         function formatTime(date) {
             return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
         }
 
-        // Order Item Row Creation Functions
-        function createOrderItemRow() {
-            const orderItemsContainer = document.getElementById('orderItemsContainer');
-            const orderTotalElem = document.getElementById('orderTotal');
-            
-            const row = document.createElement('div');
-            row.className = 'd-flex gap-2 mb-2 align-items-center';
-
-            const itemSelect = document.createElement('select');
-            itemSelect.className = 'form-select flex-grow-1';
-            itemSelect.required = true;
-
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select Item';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            itemSelect.appendChild(defaultOption);
-
-            for (const [id, menuItem] of Object.entries(state.menuItems)) {
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = menuItem.name;
-                itemSelect.appendChild(option);
-            }
-
-            const portionSelect = document.createElement('select');
-            portionSelect.className = 'form-select';
-            portionSelect.required = true;
-            portionSelect.style.width = '120px';
-
-            const quantityInput = document.createElement('input');
-            quantityInput.type = 'number';
-            quantityInput.min = '1';
-            quantityInput.value = '1';
-            quantityInput.className = 'form-control';
-            quantityInput.style.width = '80px';
-            quantityInput.required = true;
-
-            const priceDisplay = document.createElement('div');
-            priceDisplay.style.minWidth = '80px';
-            priceDisplay.textContent = '₹0';
-
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn btn-danger btn-sm';
-            removeBtn.textContent = 'Remove';
-
-            row.appendChild(itemSelect);
-            row.appendChild(portionSelect);
-            row.appendChild(quantityInput);
-            row.appendChild(priceDisplay);
-            row.appendChild(removeBtn);
-
-            function updatePortions() {
-                const itemId = itemSelect.value;
-                portionSelect.innerHTML = '';
-                if (itemId && state.menuItems[itemId]) {
-                    const portions = state.menuItems[itemId].portions;
-                    for (const [key, portion] of Object.entries(portions)) {
-                        const option = document.createElement('option');
-                        option.value = key;
-                        option.textContent = `${portion.name} - ₹${portion.price}`;
-                        portionSelect.appendChild(option);
-                    }
-                }
-                updatePrice();
-            }
-
-            function updatePrice() {
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value) || 0;
-                if (itemId && portionKey && state.menuItems[itemId]) {
-                    const price = state.menuItems[itemId].portions[portionKey].price * quantity;
-                    priceDisplay.textContent = `₹${price}`;
-                } else {
-                    priceDisplay.textContent = '₹0';
-                }
-                updateTotal();
-            }
-
-            function updateTotal() {
-                let total = 0;
-                const rows = orderItemsContainer.querySelectorAll('div.d-flex');
-                rows.forEach(r => {
-                    const priceText = r.querySelector('div').textContent;
-                    const price = parseInt(priceText.replace('₹', '')) || 0;
-                    total += price;
-                });
-                orderTotalElem.textContent = total;
-            }
-
-            itemSelect.addEventListener('change', () => {
-                updatePortions();
-            });
-
-            portionSelect.addEventListener('change', () => {
-                updatePrice();
-            });
-
-            quantityInput.addEventListener('input', () => {
-                updatePrice();
-            });
-
-            removeBtn.addEventListener('click', () => {
-                row.remove();
-                updateTotal();
-            });
-
-            updatePortions();
-
-            return row;
-        }
-
+        // Order Modification Functions
         function createEditOrderItemRow(item) {
             const editOrderItemsContainer = document.getElementById('editOrderItemsContainer');
             const row = document.createElement('div');
@@ -836,102 +733,26 @@ ${order.items.map(item => `
             state.modals.editOrder.show();
         }
 
-        // Consolidated handleNewOrder function - merged with the inline async function
-        async function handleNewOrder(e) {
-            e.preventDefault();
-            
-            const phone = document.getElementById('customerPhone').value.trim();
-            const comments = document.getElementById('customerComments').value.trim();
-            
-            if (!phone) {
-                alert('Please enter customer phone number.');
-                return;
-            }
-            
-            const items = [];
-            const orderItemsContainer = document.getElementById('orderItemsContainer');
-            const rows = orderItemsContainer.querySelectorAll('div.d-flex');
-            
-            if (rows.length === 0) {
-                alert('Please add at least one order item.');
-                return;
-            }
-            
-            for (const row of rows) {
-                const itemSelect = row.querySelector('select.form-select');
-                const portionSelect = row.querySelectorAll('select.form-select')[1];
-                const quantityInput = row.querySelector('input[type="number"]');
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value);
-                
-                if (!itemId || !portionKey || !quantity || quantity <= 0) {
-                    alert('Please fill all item details correctly.');
-                    return;
-                }
-                
-                const itemData = state.menuItems[itemId];
-                const portionData = itemData.portions[portionKey];
-                
-                items.push({
-                    id: itemId,
-                    name: itemData.name,
-                    portion: portionData.name,
-                    quantity,
-                    price: portionData.price
-                });
-            }
-            
-            const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-            
-            try {
-                await db.collection('bot_orders').add({
-                    customerDetails: { phone, comments },
-                    items,
-                    total,
-                    status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                alert('Order added successfully.');
-                
-                // Reset form
-                document.getElementById('addOrderForm').reset();
-                orderItemsContainer.innerHTML = '';
-                document.getElementById('orderTotal').textContent = '0';
-                
-                // Add initial row
-                const row = createOrderItemRow();
-                orderItemsContainer.appendChild(row);
-                
-                state.modals.addOrder.hide();
-            } catch (error) {
-                alert('Error adding order: ' + error.message);
-            }
-        }
-
-        // Consolidated handleOrderEdit function
         async function handleOrderEdit(e) {
             e.preventDefault();
 
             const phone = document.getElementById('editCustomerPhone').value.trim();
             const comments = document.getElementById('editCustomerComments').value.trim();
-            
+
             if (!phone) {
                 alert('Please enter customer phone number.');
                 return;
             }
-            
+
             const items = [];
             const editOrderItemsContainer = document.getElementById('editOrderItemsContainer');
             const rows = editOrderItemsContainer.querySelectorAll('div.d-flex');
-            
+
             if (rows.length === 0) {
                 alert('Please add at least one order item.');
                 return;
             }
-            
+
             for (const row of rows) {
                 const itemSelect = row.querySelector('select.form-select');
                 const portionSelect = row.querySelectorAll('select.form-select')[1];
@@ -939,15 +760,15 @@ ${order.items.map(item => `
                 const itemId = itemSelect.value;
                 const portionKey = portionSelect.value;
                 const quantity = parseInt(quantityInput.value);
-                
+
                 if (!itemId || !portionKey || !quantity || quantity <= 0) {
                     alert('Please fill all item details correctly.');
                     return;
                 }
-                
+
                 const itemData = state.menuItems[itemId];
                 const portionData = itemData.portions[portionKey];
-                
+
                 items.push({
                     id: itemId,
                     name: itemData.name,
@@ -956,9 +777,9 @@ ${order.items.map(item => `
                     price: portionData.price
                 });
             }
-            
+
             const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-            
+
             try {
                 await db.collection('bot_orders').doc(state.editingOrderId).update({
                     customerDetails: { phone, comments },
@@ -966,7 +787,6 @@ ${order.items.map(item => `
                     total,
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
                 alert('Order updated successfully.');
                 state.modals.editOrder.hide();
             } catch (error) {
@@ -974,11 +794,9 @@ ${order.items.map(item => `
             }
         }
 
-        // Other functions
+        // Existing Functions with Optimizations
         async function deleteOrder(docId) {
-            if (confirm('Confirm deletion?')) {
-                await db.collection('bot_orders').doc(docId).delete();
-            }
+            if (confirm('Confirm deletion?')) await db.collection('bot_orders').doc(docId).delete();
         }
 
         async function updateOrderStatus(docId, newStatus) {
@@ -1009,20 +827,248 @@ ${order.items.map(item => `
             return new Date(Date.now() + buffer * 60000).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
         }
 
+        // Add remaining functions from previous versions with similar optimizations
+
         function saveVehicleNumber() {
-            const vehicleNumber = document.getElementById('vehicleNumberInput').value.trim();
-            if (vehicleNumber && state.vehicleOrderId) {
-                db.collection('bot_orders').doc(state.vehicleOrderId).update({
-                    vehicleNumber: vehicleNumber,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                }).then(() => {
-                    alert('Vehicle number saved successfully.');
-                    state.modals.vehicle.hide();
-                }).catch(error => {
-                    alert('Error saving vehicle number: ' + error.message);
+            // TODO: Implement save vehicle number logic
+            console.log('saveVehicleNumber called');
+        }
+
+            async function handleNewOrder(e) {
+                e.preventDefault();
+                const phone = document.getElementById('customerPhone').value.trim();
+                const comments = document.getElementById('customerComments').value.trim();
+                if (!phone) {
+                    alert('Please enter customer phone number.');
+                    return;
+                }
+                const items = [];
+                const orderItemsContainer = document.getElementById('orderItemsContainer');
+                const orderTotalElem = document.getElementById('orderTotal');
+                const rows = orderItemsContainer.querySelectorAll('div.d-flex');
+                if (rows.length === 0) {
+                    alert('Please add at least one order item.');
+                    return;
+                }
+                for (const row of rows) {
+                    const itemSelect = row.querySelector('select.form-select');
+                    const portionSelect = row.querySelectorAll('select.form-select')[1];
+                    const quantityInput = row.querySelector('input[type="number"]');
+                    const itemId = itemSelect.value;
+                    const portionKey = portionSelect.value;
+                    const quantity = parseInt(quantityInput.value);
+                    if (!itemId || !portionKey || !quantity || quantity <= 0) {
+                        alert('Please fill all item details correctly.');
+                        return;
+                    }
+                    const itemData = state.menuItems[itemId];
+                    const portionData = itemData.portions[portionKey];
+                    items.push({
+                        id: itemId,
+                        name: itemData.name,
+                        portion: portionData.name,
+                        quantity,
+                        price: portionData.price
+                    });
+                }
+                const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+                try {
+                    await db.collection('bot_orders').add({
+                        customerDetails: { phone, comments },
+                        items,
+                        total,
+                        status: 'pending',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    alert('Order added successfully.');
+                    e.target.reset();
+                    orderItemsContainer.innerHTML = '';
+                    orderTotalElem.textContent = '0';
+                    state.modals.addOrder.hide();
+                } catch (error) {
+                    alert('Error adding order: ' + error.message);
+                }
+            }
+
+        async function handleOrderEdit(e) {
+            e.preventDefault();
+
+            const phone = document.getElementById('editCustomerPhone').value.trim();
+            const comments = document.getElementById('editCustomerComments').value.trim();
+            if (!phone) {
+                alert('Please enter customer phone number.');
+                return;
+            }
+            const items = [];
+            const orderItemsContainer = document.getElementById('editOrderItemsContainer');
+            const orderTotalElem = document.getElementById('editOrderTotal');
+            const rows = orderItemsContainer.querySelectorAll('div.d-flex');
+            if (rows.length === 0) {
+                alert('Please add at least one order item.');
+                return;
+            }
+            for (const row of rows) {
+                const itemSelect = row.querySelector('select.form-select');
+                const portionSelect = row.querySelectorAll('select.form-select')[1];
+                const quantityInput = row.querySelector('input[type="number"]');
+                const itemId = itemSelect.value;
+                const portionKey = portionSelect.value;
+                const quantity = parseInt(quantityInput.value);
+                if (!itemId || !portionKey || !quantity || quantity <= 0) {
+                    alert('Please fill all item details correctly.');
+                    return;
+                }
+                const itemData = state.menuItems[itemId];
+                const portionData = itemData.portions[portionKey];
+                items.push({
+                    id: itemId,
+                    name: itemData.name,
+                    portion: portionData.name,
+                    quantity,
+                    price: portionData.price
                 });
             }
+            const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+            try {
+                await db.collection('bot_orders').doc(state.editingOrderId).update({
+                    customerDetails: { phone, comments },
+                    items,
+                    total,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                alert('Order updated successfully.');
+                e.target.reset();
+                orderItemsContainer.innerHTML = '';
+                orderTotalElem.textContent = '0';
+                state.modals.editOrder.hide();
+            } catch (error) {
+                alert('Error updating order: ' + error.message);
+            }
         }
+
+        // Add order form handling
+        document.addEventListener('DOMContentLoaded', () => {
+            const addOrderItemBtn = document.getElementById('addOrderItemBtn');
+            const orderItemsContainer = document.getElementById('orderItemsContainer');
+            const orderTotalElem = document.getElementById('orderTotal');
+            const addOrderForm = document.getElementById('addOrderForm');
+
+            function createOrderItemRow() {
+                const row = document.createElement('div');
+                row.className = 'd-flex gap-2 mb-2 align-items-center';
+
+                const itemSelect = document.createElement('select');
+                itemSelect.className = 'form-select flex-grow-1';
+                itemSelect.required = true;
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select Item';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                itemSelect.appendChild(defaultOption);
+
+                for (const [id, item] of Object.entries(state.menuItems)) {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = item.name;
+                    itemSelect.appendChild(option);
+                }
+
+                const portionSelect = document.createElement('select');
+                portionSelect.className = 'form-select';
+                portionSelect.required = true;
+                portionSelect.style.width = '120px';
+
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.min = '1';
+                quantityInput.value = '1';
+                quantityInput.className = 'form-control';
+                quantityInput.style.width = '80px';
+                quantityInput.required = true;
+
+                const priceDisplay = document.createElement('div');
+                priceDisplay.style.minWidth = '80px';
+                priceDisplay.textContent = '₹0';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.textContent = 'Remove';
+
+                row.appendChild(itemSelect);
+                row.appendChild(portionSelect);
+                row.appendChild(quantityInput);
+                row.appendChild(priceDisplay);
+                row.appendChild(removeBtn);
+
+                function updatePortions() {
+                    const itemId = itemSelect.value;
+                    portionSelect.innerHTML = '';
+                    if (itemId && state.menuItems[itemId]) {
+                        const portions = state.menuItems[itemId].portions;
+                        for (const [key, portion] of Object.entries(portions)) {
+                            const option = document.createElement('option');
+                            option.value = key;
+                            option.textContent = `${portion.name} - ₹${portion.price}`;
+                            portionSelect.appendChild(option);
+                        }
+                    }
+                    updatePrice();
+                }
+
+                function updatePrice() {
+                    const itemId = itemSelect.value;
+                    const portionKey = portionSelect.value;
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    if (itemId && portionKey && state.menuItems[itemId]) {
+                        const price = state.menuItems[itemId].portions[portionKey].price * quantity;
+                        priceDisplay.textContent = `₹${price}`;
+                    } else {
+                        priceDisplay.textContent = '₹0';
+                    }
+                    updateTotal();
+                }
+
+                function updateTotal() {
+                    let total = 0;
+                    const rows = orderItemsContainer.querySelectorAll('div.d-flex');
+                    rows.forEach(r => {
+                        const priceText = r.querySelector('div').textContent;
+                        const price = parseInt(priceText.replace('₹', '')) || 0;
+                        total += price;
+                    });
+                    orderTotalElem.textContent = total;
+                }
+
+                itemSelect.addEventListener('change', () => {
+                    updatePortions();
+                });
+
+                portionSelect.addEventListener('change', () => {
+                    updatePrice();
+                });
+
+                quantityInput.addEventListener('input', () => {
+                    updatePrice();
+                });
+
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    updateTotal();
+                });
+
+                return row;
+            }
+
+            addOrderItemBtn.addEventListener('click', () => {
+                const row = createOrderItemRow();
+                orderItemsContainer.appendChild(row);
+            });
+
+        });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
