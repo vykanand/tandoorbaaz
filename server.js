@@ -8,22 +8,22 @@ const startServices = async () => {
   });
 
   // Start WhatsApp bot with proper Node.js flags
-  const whatsappBot = fork("whatsapp-bot.js", [], {
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      NODE_NO_WARNINGS: "1",
-    },
-  });
+  // const whatsappBot = fork("whatsapp-bot.js", [], {
+  //   stdio: "inherit",
+  //   env: {
+  //     ...process.env,
+  //     NODE_NO_WARNINGS: "1",
+  //   },
+  // });
 
   // Handle process exits
   webServer.on("exit", (code) => {
     console.log(`🚪 Web server exited with code ${code}`);
   });
 
-  whatsappBot.on("exit", (code) => {
-    console.log(`🤖 WhatsApp bot exited with code ${code}`);
-  });
+  // whatsappBot.on("exit", (code) => {
+  //   console.log(`🤖 WhatsApp bot exited with code ${code}`);
+  // });
 };
 
 startServices();
