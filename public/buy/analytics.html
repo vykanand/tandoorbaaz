@@ -120,6 +120,66 @@
             </div>
         </div>
 
+        <!-- Real-time Sales Statistics Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-dark text-white">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Real-time Sales Statistics</h5>
+                        <div>
+                            <select id="salesPeriodSelect" class="form-select form-select-sm d-inline-block me-2" style="width: auto;" onchange="changeSalesPeriod(this.value)">
+                                <option value="today">Today</option>
+                                <option value="yesterday">Yesterday</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="custom">Custom Date Range</option>
+                            </select>
+                            <div id="salesCustomDateRange" class="d-none d-inline-block me-2">
+                                <input type="date" id="salesStartDate" class="form-control form-control-sm d-inline-block" style="width: auto;">
+                                <input type="date" id="salesEndDate" class="form-control form-control-sm d-inline-block" style="width: auto;">
+                                <button class="btn btn-sm btn-light" onclick="applySalesDateRange()">Apply</button>
+                            </div>
+                            <button class="btn btn-sm btn-outline-light" onclick="updateSalesStats()">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="p-3 bg-success bg-opacity-25 rounded">
+                                    <h6 class="text-white">Delivered Sales</h6>
+                                    <h3 class="mb-0" id="completedSales">₹0</h3>
+                                    <small class="text-white-50" id="completedOrdersCount">0 orders</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-warning bg-opacity-25 rounded">
+                                    <h6 class="text-white">Pending Sales</h6>
+                                    <h3 class="mb-0" id="pendingSales">₹0</h3>
+                                    <small class="text-white-50" id="pendingOrdersCount">0 orders</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-danger bg-opacity-25 rounded">
+                                    <h6 class="text-white">Cancelled Sales</h6>
+                                    <h3 class="mb-0" id="cancelledSales">₹0</h3>
+                                    <small class="text-white-50" id="cancelledOrdersCount">0 orders</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 bg-primary bg-opacity-25 rounded">
+                                    <h6 class="text-white">Total Sales</h6>
+                                    <h3 class="mb-0" id="totalSales">₹0</h3>
+                                    <small class="text-white-50" id="totalOrdersCount">0 orders</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Key Metrics -->
         <div class="row mb-4">
             <div class="col-md-3">
@@ -315,6 +375,285 @@
         };
 
         const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Global variable to store Firebase server date
+        let FIREBASE_SERVER_DATE = new Date().toISOString();
+        
+        // Fetch server time from Firebase
+        async function fetchServerTime() {
+            try {
+                const timeDoc = await db.collection('utility').doc('serverTime').get();
+                if (timeDoc.exists && timeDoc.data().timestamp) {
+                    const timestamp = timeDoc.data().timestamp;
+                    if (typeof timestamp.toDate === 'function') {
+                        FIREBASE_SERVER_DATE = timestamp.toDate().toISOString();
+                    } else {
+                        FIREBASE_SERVER_DATE = new Date().toISOString();
+                    }
+                } else {
+                    console.log('No server time document found, using local time');
+                    FIREBASE_SERVER_DATE = new Date().toISOString();
+                }
+                console.log('Firebase server date:', FIREBASE_SERVER_DATE);
+            } catch (error) {
+                console.error('Error fetching server time:', error);
+                FIREBASE_SERVER_DATE = new Date().toISOString();
+            }
+        }
+        
+        // Sales period state
+        let salesPeriod = {
+            type: 'today',
+            startDate: null,
+            endDate: null,
+            orders: []
+        };
+        
+        // Helper function to format date for input fields
+        function formatDateForInput(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        // Function to handle sales period change
+        window.changeSalesPeriod = function(periodType) {
+            console.log('Changing sales period to:', periodType);
+            salesPeriod.type = periodType;
+            
+            // Show/hide custom date range inputs
+            if (periodType === 'custom') {
+                document.getElementById('salesCustomDateRange').classList.remove('d-none');
+                document.getElementById('salesCustomDateRange').classList.add('d-inline-block');
+                
+                // Set default dates if not already set
+                if (!document.getElementById('salesStartDate').value) {
+                    // Use Firebase server date as reference
+                    const firebaseDate = new Date(FIREBASE_SERVER_DATE);
+                    const lastWeek = new Date(firebaseDate);
+                    lastWeek.setDate(firebaseDate.getDate() - 7);
+                    
+                    document.getElementById('salesStartDate').value = formatDateForInput(lastWeek);
+                    document.getElementById('salesEndDate').value = formatDateForInput(firebaseDate);
+                }
+            } else {
+                document.getElementById('salesCustomDateRange').classList.add('d-none');
+                document.getElementById('salesCustomDateRange').classList.remove('d-inline-block');
+                
+                // Update sales stats for the selected period
+                updateSalesStats();
+            }
+        }
+        
+        // Function to apply custom date range for sales statistics
+        window.applySalesDateRange = function() {
+            const startDateStr = document.getElementById('salesStartDate').value;
+            const endDateStr = document.getElementById('salesEndDate').value;
+            
+            if (!startDateStr || !endDateStr) {
+                alert('Please select both start and end dates');
+                return;
+            }
+            
+            // Update sales stats with the custom date range
+            updateSalesStats();
+        }
+        
+        // Function to update sales statistics
+        window.updateSalesStats = async function() {
+            // Show loading indicator
+            document.getElementById('completedSales').textContent = 'Loading...';
+            document.getElementById('pendingSales').textContent = 'Loading...';
+            document.getElementById('cancelledSales').textContent = 'Loading...';
+            document.getElementById('totalSales').textContent = 'Loading...';
+            
+            try {
+                // Determine date range based on selected period
+                let startDate, endDate;
+                
+                // Use the global Firebase server date
+                const firebaseServerDate = new Date(FIREBASE_SERVER_DATE);
+                console.log('Sales stats: Firebase server date:', firebaseServerDate.toISOString());
+                
+                switch (salesPeriod.type) {
+                    case 'today':
+                        startDate = new Date(firebaseServerDate);
+                        startDate.setHours(0, 0, 0, 0);
+                        
+                        endDate = new Date(firebaseServerDate);
+                        endDate.setHours(23, 59, 59, 999);
+                        break;
+                        
+                    case 'yesterday':
+                        startDate = new Date(firebaseServerDate);
+                        startDate.setDate(startDate.getDate() - 1);
+                        startDate.setHours(0, 0, 0, 0);
+                        
+                        endDate = new Date(firebaseServerDate);
+                        endDate.setDate(endDate.getDate() - 1);
+                        endDate.setHours(23, 59, 59, 999);
+                        break;
+                        
+                    case 'week':
+                        startDate = new Date(firebaseServerDate);
+                        startDate.setDate(startDate.getDate() - startDate.getDay());
+                        startDate.setHours(0, 0, 0, 0);
+                        
+                        endDate = new Date(firebaseServerDate);
+                        endDate.setHours(23, 59, 59, 999);
+                        break;
+                        
+                    case 'month':
+                        startDate = new Date(firebaseServerDate.getFullYear(), firebaseServerDate.getMonth(), 1);
+                        startDate.setHours(0, 0, 0, 0);
+                        
+                        endDate = new Date(firebaseServerDate);
+                        endDate.setHours(23, 59, 59, 999);
+                        break;
+                        
+                    case 'custom':
+                        const startDateStr = document.getElementById('salesStartDate').value;
+                        const endDateStr = document.getElementById('salesEndDate').value;
+                        
+                        if (!startDateStr || !endDateStr) {
+                            alert('Please select both start and end dates');
+                            return;
+                        }
+                        
+                        startDate = new Date(startDateStr);
+                        startDate.setHours(0, 0, 0, 0);
+                        
+                        endDate = new Date(endDateStr);
+                        endDate.setHours(23, 59, 59, 999);
+                        break;
+                        
+                    default:
+                        startDate = new Date(firebaseServerDate);
+                        startDate.setHours(0, 0, 0, 0);
+                        
+                        endDate = new Date(firebaseServerDate);
+                        endDate.setHours(23, 59, 59, 999);
+                }
+                
+                // Fetch orders from Firestore for the selected date range
+                const ordersToProcess = await loadOrdersForDateRange(startDate, endDate);
+                
+                // Initialize counters
+                let completedSales = 0;
+                let completedCount = 0;
+                let pendingSales = 0;
+                let pendingCount = 0;
+                let cancelledSales = 0;
+                let cancelledCount = 0;
+                let totalSales = 0;
+                let totalCount = 0;
+                
+                // Process all orders
+                ordersToProcess.forEach(order => {
+                    const orderTotal = parseFloat(order.total) || 0;
+                    totalCount++;
+                    
+                    // Categorize by status (simplified to only 3 statuses)
+                    if (order.status === 'delivered') {
+                        completedSales += orderTotal;
+                        completedCount++;
+                        totalSales += orderTotal; // Add to total sales
+                    } else if (order.status === 'cancelled') {
+                        cancelledSales += orderTotal;
+                        cancelledCount++;
+                        // Cancelled orders are not added to total sales
+                    } else {
+                        // Only pending status remains
+                        pendingSales += orderTotal;
+                        pendingCount++;
+                        // Pending orders are part of potential sales but not confirmed
+                    }
+                });
+                
+                // Update the UI
+                document.getElementById('completedSales').textContent = `₹${completedSales.toFixed(2)}`;
+                document.getElementById('completedOrdersCount').textContent = `${completedCount} order${completedCount !== 1 ? 's' : ''}`;
+                
+                document.getElementById('pendingSales').textContent = `₹${pendingSales.toFixed(2)}`;
+                document.getElementById('pendingOrdersCount').textContent = `${pendingCount} order${pendingCount !== 1 ? 's' : ''}`;
+                
+                document.getElementById('cancelledSales').textContent = `₹${cancelledSales.toFixed(2)}`;
+                document.getElementById('cancelledOrdersCount').textContent = `${cancelledCount} order${cancelledCount !== 1 ? 's' : ''}`;
+                
+                document.getElementById('totalSales').textContent = `₹${totalSales.toFixed(2)}`;
+                document.getElementById('totalOrdersCount').textContent = `${totalCount} order${totalCount !== 1 ? 's' : ''}`;
+            } catch (error) {
+                console.error('Error updating sales stats:', error);
+                alert('Error loading sales statistics: ' + error.message);
+                
+                // Reset UI
+                document.getElementById('completedSales').textContent = '₹0';
+                document.getElementById('pendingSales').textContent = '₹0';
+                document.getElementById('cancelledSales').textContent = '₹0';
+                document.getElementById('totalSales').textContent = '₹0';
+            }
+        }
+        
+        // Function to load orders for a specific date range (for sales statistics)
+        async function loadOrdersForDateRange(startDate, endDate) {
+            console.log(`Loading orders for date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
+            try {
+                const snapshot = await db.collection('bot_orders')
+                    .where('createdAt', '>=', startDate)
+                    .where('createdAt', '<=', endDate)
+                    .get();
+                
+                console.log(`Found ${snapshot.docs.length} orders in date range`);
+                
+                return snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    
+                    // Convert Firestore timestamps to JavaScript Date objects
+                    let createdAtDate = null;
+                    if (data.createdAt) {
+                        if (typeof data.createdAt.toDate === 'function') {
+                            createdAtDate = data.createdAt.toDate();
+                        } else if (data.createdAt instanceof Date) {
+                            createdAtDate = data.createdAt;
+                        } else {
+                            createdAtDate = new Date(FIREBASE_SERVER_DATE);
+                        }
+                    } else {
+                        createdAtDate = new Date(FIREBASE_SERVER_DATE);
+                    }
+                    
+                    // Convert updatedAt timestamp
+                    let updatedAtDate = null;
+                    if (data.updatedAt) {
+                        if (typeof data.updatedAt.toDate === 'function') {
+                            updatedAtDate = data.updatedAt.toDate();
+                        } else if (data.updatedAt instanceof Date) {
+                            updatedAtDate = data.updatedAt;
+                        } else {
+                            updatedAtDate = new Date(FIREBASE_SERVER_DATE);
+                        }
+                    } else {
+                        updatedAtDate = new Date(FIREBASE_SERVER_DATE);
+                    }
+                    
+                    return {
+                        docId: doc.id,
+                        ...data,
+                        createdAt: createdAtDate,
+                        updatedAt: updatedAtDate,
+                        // Ensure these fields exist with defaults if missing
+                        status: data.status || 'pending',
+                        customerDetails: data.customerDetails || { 
+                            name: 'Unknown',
+                            phone: 'Unknown'
+                        },
+                        total: data.total || '0'
+                    };
+                });
+            } catch (error) {
+                console.error('Error loading orders for date range:', error);
+                return [];
+            }
+        }
         const db = firebase.firestore();
 
         // Application State
@@ -541,6 +880,7 @@
 
         function refreshData() {
             loadAnalyticsData();
+            updateSalesStats(); // Also refresh the real-time sales statistics
         }
 
         // UI Update Functions
