@@ -242,11 +242,87 @@
             padding: 0 2px;
             border-radius: 2px;
         }
+        
+        /* Summary section styles */
+        .summary-card {
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .summary-card h3 {
+            font-size: 2rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 
 <body>
     <div class="container-fluid mt-4">
+        <!-- Order Summary Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Orders Summary</h5>
+                        <button class="btn btn-sm btn-outline-light" onclick="loadOrders()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3 mb-md-0">
+                                <div class="card summary-card bg-light h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title"><i class="bi bi-calendar-check"></i> Total Orders</h6>
+                                        <h3 id="totalOrdersCount" class="mb-0">0</h3>
+                                        <div class="d-flex justify-content-center align-items-center mt-2">
+                                            <span class="badge bg-primary px-2 py-1">Total Sale: ₹<span id="totalSalesAmount">0</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3 mb-md-0">
+                                <div class="card summary-card bg-warning h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title"><i class="bi bi-hourglass-split"></i> Pending Orders</h6>
+                                        <h3 id="pendingOrdersCount" class="mb-0">0</h3>
+                                        <p class="text-muted mb-0">Value: ₹<span id="pendingOrdersTotal">0</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3 mb-md-0">
+                                <div class="card summary-card bg-success text-white h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title"><i class="bi bi-cash-coin"></i> Paid Orders</h6>
+                                        <h3 id="paidOrdersCount" class="mb-0">0</h3>
+                                        <div class="d-flex justify-content-between mt-2">
+                                            <small><i class="bi bi-cash"></i> Cash: ₹<span id="cashPaymentsTotal">0</span></small>
+                                            <small><i class="bi bi-credit-card"></i> Online: ₹<span id="onlinePaymentsTotal">0</span></small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card summary-card bg-info text-white h-100">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title"><i class="bi bi-truck"></i> Delivered (Unpaid)</h6>
+                                        <h3 id="deliveredUnpaidCount" class="mb-0">0</h3>
+                                        <p class="text-white mb-0">Value: ₹<span id="deliveredUnpaidTotal">0</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <div class="row">
             <div class="col-md-8">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -937,6 +1013,51 @@
             if (deliveredHeader) {
                 deliveredHeader.innerHTML = `<i class="bi bi-truck"></i> Delivered Orders <span class="badge bg-light text-dark ms-2">${deliveredCount}</span>`;
             }
+            
+            // Update summary section
+            updateOrdersSummary(pendingCount, paidCount, deliveredCount);
+        }
+        
+        function updateOrdersSummary(pendingCount, paidCount, deliveredCount) {
+            // Get all orders
+            const ordersToRender = state.searchQuery ? state.filteredOrders : state.currentOrders;
+            const totalCount = pendingCount + paidCount + deliveredCount;
+            
+            // Calculate totals
+            let pendingTotal = 0;
+            let cashPaymentsTotal = 0;
+            let onlinePaymentsTotal = 0;
+            let deliveredUnpaidTotal = 0;
+            let totalSales = 0;
+            
+            // Process each order
+            ordersToRender.forEach(order => {
+                const orderTotal = parseFloat(order.total) || 0;
+                
+                // Add to total sales regardless of status
+                totalSales += orderTotal;
+                
+                if (order.status === 'preparing' || order.status === 'pending') {
+                    pendingTotal += orderTotal;
+                } else if (order.status === 'paid (cash)') {
+                    cashPaymentsTotal += orderTotal;
+                } else if (order.status === 'paid(online)') {
+                    onlinePaymentsTotal += orderTotal;
+                } else if (order.status === 'delivered') {
+                    deliveredUnpaidTotal += orderTotal;
+                }
+            });
+            
+            // Update the summary section
+            document.getElementById('totalOrdersCount').textContent = totalCount;
+            document.getElementById('totalSalesAmount').textContent = totalSales.toFixed(2);
+            document.getElementById('pendingOrdersCount').textContent = pendingCount;
+            document.getElementById('pendingOrdersTotal').textContent = pendingTotal.toFixed(2);
+            document.getElementById('paidOrdersCount').textContent = paidCount;
+            document.getElementById('cashPaymentsTotal').textContent = cashPaymentsTotal.toFixed(2);
+            document.getElementById('onlinePaymentsTotal').textContent = onlinePaymentsTotal.toFixed(2);
+            document.getElementById('deliveredUnpaidCount').textContent = deliveredCount;
+            document.getElementById('deliveredUnpaidTotal').textContent = deliveredUnpaidTotal.toFixed(2);
         }
 
         function toggleSection(sectionId) {
