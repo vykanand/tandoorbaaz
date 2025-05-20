@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firestore Database Explorer</title>
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- JSON Formatter -->
+    <script src="https://cdn.jsdelivr.net/npm/json-formatter-js@2.3.4/dist/json-formatter.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+        }
+        #jsonOutput {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            overflow: auto;
+            max-height: 70vh;
+        }
+        
+        /* Enhanced JSON styling */
+        .json-formatter-row {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            position: relative;
+        }
+        
+        /* Improved hierarchy visualization with indentation guides */
+        .json-formatter-row .json-formatter-children {
+            margin-left: 12px !important;
+            border-left: 1px dashed #ccc;
+            padding-left: 12px;
+        }
+        
+        /* Enhanced arrow indicators */
+        .json-formatter-row .json-formatter-toggler {
+            font-size: 16px;
+            cursor: pointer;
+            margin-right: 4px;
+            transition: transform 0.2s ease;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            text-align: center;
+            line-height: 16px;
+            color: #0d6efd;
+        }
+        
+        .json-formatter-row .json-formatter-toggler:hover {
+            color: #0a58ca;
+            transform: scale(1.2);
+        }
+        
+        .json-formatter-row.json-formatter-open > .json-formatter-toggler {
+            transform: rotate(90deg);
+        }
+        
+        .json-formatter-row .json-formatter-key {
+            color: #0d6efd;
+            font-weight: 600;
+        }
+        
+        .json-formatter-row .json-formatter-string {
+            color: #28a745;
+        }
+        
+        .json-formatter-row .json-formatter-number {
+            color: #fd7e14;
+        }
+        
+        .json-formatter-row .json-formatter-boolean {
+            color: #dc3545;
+        }
+        
+        .json-formatter-row .json-formatter-null {
+            color: #6c757d;
+        }
+        
+        .json-formatter-row .json-formatter-bracket {
+            color: #495057;
+            font-weight: bold;
+        }
+        
+        .json-formatter-row .json-formatter-comma {
+            color: #495057;
+        }
+        
+        /* Hover effect for better readability */
+        .json-formatter-row:hover > .json-formatter-key,
+        .json-formatter-row:hover > .json-formatter-string,
+        .json-formatter-row:hover > .json-formatter-number,
+        .json-formatter-row:hover > .json-formatter-boolean,
+        .json-formatter-row:hover > .json-formatter-null {
+            background-color: rgba(13, 110, 253, 0.1);
+            border-radius: 3px;
+        }
+        
+        /* Custom JSON display for fallback */
+        .json-raw-display {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            background-color: #212529;
+            color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #0d6efd;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .btn-export {
+            margin-top: 10px;
+        }
+        .stats {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .collection-dropdown {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="bi bi-database"></i> Firestore Database Explorer</h4>
+                        <button id="refreshBtn" class="btn btn-sm btn-outline-light">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> This tool allows you to explore your Firestore database structure and export collection data as JSON.
+                        </div>
+                        
+                        <div class="row align-items-center mb-4">
+                            <div class="col-md-3">
+                                <label for="collectionDropdown" class="form-label fw-bold">Select Collection:</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group">
+                                    <select id="collectionDropdown" class="form-select collection-dropdown">
+                                        <option value="">-- Select a collection --</option>
+                                    </select>
+                                    <button id="loadCollectionBtn" class="btn btn-primary">
+                                        <i class="bi bi-cloud-download"></i> Load Data
+                                    </button>
+                                </div>
+                                <div id="collectionsLoader" class="loader d-none mt-2"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <input type="text" id="manualCollection" class="form-control" placeholder="Or enter collection name">
+                                    <button id="loadManualCollection" class="btn btn-outline-primary">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- JSON Output -->
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-braces"></i> Collection Data</h5>
+                        <div>
+                            <button id="expandAllBtn" class="btn btn-sm btn-outline-light me-2">
+                                <i class="bi bi-arrows-angle-expand"></i> Expand All
+                            </button>
+                            <button id="collapseAllBtn" class="btn btn-sm btn-outline-light">
+                                <i class="bi bi-arrows-angle-contract"></i> Collapse All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="dataLoader" class="loader d-none"></div>
+                        <div id="collectionStats" class="stats mb-2"></div>
+                        <div id="jsonOutput">
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-arrow-up-circle fs-3"></i>
+                                <p>Select a collection from the dropdown to view its data</p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="input-group" style="max-width: 400px;">
+                                <input type="text" id="jsonSearchInput" class="form-control" placeholder="Search in JSON data...">
+                                <button id="searchJsonBtn" class="btn btn-outline-secondary">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                <button id="clearSearchBtn" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <button id="copyJsonBtn" class="btn btn-outline-primary btn-export me-2 d-none">
+                                    <i class="bi bi-clipboard"></i> Copy JSON
+                                </button>
+                                <button id="viewRawJsonBtn" class="btn btn-outline-secondary btn-export me-2 d-none">
+                                    <i class="bi bi-code"></i> View Raw JSON
+                                </button>
+                                <button id="exportJsonBtn" class="btn btn-primary btn-export d-none">
+                                    <i class="bi bi-download"></i> Export as JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration and Initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEKHWdRyzI8WyBeGeesjDrM-nEzOXCuNk",
+            authDomain: "billion1-a9324.firebaseapp.com",
+            projectId: "billion1-a9324",
+            storageBucket: "billion1-a9324.appspot.com",
+            messagingSenderId: "1031058131707",
+            appId: "1:1031058131707:web:0e9c3c4d3e8b6c0a7d0d2c"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Global variables
+        let currentFormatter = null;
+        let currentCollectionData = null;
+
+        // DOM Elements
+        const collectionDropdown = document.getElementById('collectionDropdown');
+        const loadCollectionBtn = document.getElementById('loadCollectionBtn');
+        const manualCollection = document.getElementById('manualCollection');
+        const loadManualCollection = document.getElementById('loadManualCollection');
+        const jsonOutput = document.getElementById('jsonOutput');
+        const collectionsLoader = document.getElementById('collectionsLoader');
+        const dataLoader = document.getElementById('dataLoader');
+        const exportJsonBtn = document.getElementById('exportJsonBtn');
+        const copyJsonBtn = document.getElementById('copyJsonBtn');
+        const viewRawJsonBtn = document.getElementById('viewRawJsonBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const expandAllBtn = document.getElementById('expandAllBtn');
+        const collapseAllBtn = document.getElementById('collapseAllBtn');
+        const collectionStats = document.getElementById('collectionStats');
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCollections();
+            
+            // Event listeners
+            refreshBtn.addEventListener('click', fetchCollections);
+            loadCollectionBtn.addEventListener('click', () => {
+                const selectedCollection = collectionDropdown.value;
+                if (selectedCollection) {
+                    fetchCollectionData(selectedCollection);
+                }
+            });
+            loadManualCollection.addEventListener('click', () => {
+                const collName = manualCollection.value.trim();
+                if (collName) {
+                    fetchCollectionData(collName);
+                    addCollectionToDropdown(collName);
+                    collectionDropdown.value = collName;
+                }
+            });
+            exportJsonBtn.addEventListener('click', exportJson);
+            copyJsonBtn.addEventListener('click', copyJsonToClipboard);
+            viewRawJsonBtn.addEventListener('click', viewRawJson);
+            expandAllBtn.addEventListener('click', () => {
+                if (currentFormatter) currentFormatter.openAtDepth(Infinity);
+            });
+            collapseAllBtn.addEventListener('click', () => {
+                if (currentFormatter) currentFormatter.openAtDepth(1);
+            });
+            
+            // Search functionality
+            const jsonSearchInput = document.getElementById('jsonSearchInput');
+            const searchJsonBtn = document.getElementById('searchJsonBtn');
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            
+            searchJsonBtn.addEventListener('click', () => {
+                searchInJson(jsonSearchInput.value.trim());
+            });
+            
+            clearSearchBtn.addEventListener('click', () => {
+                jsonSearchInput.value = '';
+                clearJsonSearch();
+            });
+            
+            jsonSearchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchJsonBtn.click();
+                }
+            });
+            
+            // Allow pressing Enter in manual collection input
+            manualCollection.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    loadManualCollection.click();
+                }
+            });
+        });
+
+        // Fetch all collections from Firestore
+        async function fetchCollections() {
+            try {
+                collectionsLoader.classList.remove('d-none');
+                
+                // Clear dropdown except first option
+                while (collectionDropdown.options.length > 1) {
+                    collectionDropdown.remove(1);
+                }
+                
+                let collectionsFound = false;
+                
+                // Method 1: Use the native Firestore API to list collections if available
+                try {
+                    // For Firestore v9 compatibility mode
+                    if (db.listCollections) {
+                        console.log("Trying listCollections API...");
+                        const collections = await db.listCollections();
+                        if (collections && collections.length > 0) {
+                            collections.forEach(collection => {
+                                addCollectionToDropdown(collection.id);
+                            });
+                            console.log(`Found ${collections.length} collections using listCollections API`);
+                            collectionsFound = true;
+                        }
+                    }
+                } catch (error) {
+                    console.log('Error using listCollections API:', error);
+                }
+                
+                // Method 2: Use a special collection discovery approach
+                // This creates a small query to the database root which can reveal collection names
+                try {
+                    console.log("Trying collection discovery via query...");
+                    // This is a trick to get Firestore to return collection information
+                    // We make a request that will fail but the error might contain collection info
+                    const queryResult = await db.collection('').get()
+                        .catch(error => {
+                            // Parse the error message which might contain collection names
+                            const errorMsg = error.toString();
+                            const collectionMatches = errorMsg.match(/collection ID "([^"]+)"/g);
+                            if (collectionMatches) {
+                                collectionMatches.forEach(match => {
+                                    const collName = match.replace('collection ID "', '').replace('"', '');
+                                    if (collName && collName.trim() !== '') {
+                                        addCollectionToDropdown(collName);
+                                        console.log(`Discovered collection from query: ${collName}`);
+                                        collectionsFound = true;
+                                    }
+                                });
+                            }
+                            return null;
+                        });
+                } catch (error) {
+                    console.log('Error in collection discovery:', error);
+                }
+                
+                // Method 3: Try to get collection information from a metadata document
+                // Some applications store collection metadata in a special document
+                try {
+                    console.log("Checking for collection metadata...");
+                    // Check common metadata locations
+                    const metadataLocations = [
+                        { collection: '_metadata', doc: 'collections' },
+                        { collection: 'metadata', doc: 'schema' },
+                        { collection: 'system', doc: 'collections' },
+                        { collection: 'meta', doc: 'collections' }
+                    ];
+                    
+                    for (const location of metadataLocations) {
+                        try {
+                            const metaDoc = await db.collection(location.collection).doc(location.doc).get();
+                            if (metaDoc.exists && metaDoc.data()) {
+                                const data = metaDoc.data();
+                                // Look for arrays or objects that might contain collection names
+                                Object.keys(data).forEach(key => {
+                                    const value = data[key];
+                                    if (Array.isArray(value)) {
+                                        // If it's an array, check each item
+                                        value.forEach(item => {
+                                            if (typeof item === 'string') {
+                                                addCollectionToDropdown(item);
+                                                console.log(`Found collection from metadata: ${item}`);
+                                                collectionsFound = true;
+                                            } else if (typeof item === 'object' && item !== null && item.name) {
+                                                addCollectionToDropdown(item.name);
+                                                console.log(`Found collection from metadata object: ${item.name}`);
+                                                collectionsFound = true;
+                                            }
+                                        });
+                                    } else if (typeof value === 'object' && value !== null) {
+                                        // If it's an object, check its keys
+                                        Object.keys(value).forEach(collName => {
+                                            addCollectionToDropdown(collName);
+                                            console.log(`Found collection from metadata object: ${collName}`);
+                                            collectionsFound = true;
+                                        });
+                                    }
+                                });
+                            }
+                        } catch (error) {
+                            // Silently ignore errors for metadata that doesn't exist
+                        }
+                    }
+                } catch (error) {
+                    console.log('Error checking metadata:', error);
+                }
+                
+                // Method 4: If no collections found, try a few common ones as a last resort
+                if (!collectionsFound) {
+                    console.log("No collections found, trying common collection names as fallback...");
+                    const commonCollections = [
+                        'users', 'orders', 'products', 'customers', 'settings'
+                    ];
+                    
+                    for (const collName of commonCollections) {
+                        try {
+                            const snapshot = await db.collection(collName).limit(1).get();
+                            if (!snapshot.empty) {
+                                addCollectionToDropdown(collName);
+                                console.log(`Found collection from common names: ${collName}`);
+                                collectionsFound = true;
+                            }
+                        } catch (error) {
+                            // Silently ignore errors for collections that don't exist
+                        }
+                    }
+                }
+                
+                // Method 5: Try to discover collections by examining document references
+                // This works by looking for document references in existing documents
+                try {
+                    if (!collectionsFound) {
+                        console.log("Trying to discover collections from document references...");
+                        // Start with any collection we might have found
+                        const collectionsToCheck = Array.from(
+                            new Set(
+                                Array.from(collectionDropdown.options)
+                                    .map(option => option.value)
+                                    .filter(value => value)
+                            )
+                        );
+                        
+                        if (collectionsToCheck.length === 0) {
+                            // If we have no collections yet, try 'users' as a starting point
+                            collectionsToCheck.push('users');
+                        }
+                        
+                        // Keep track of collections we've already checked to avoid infinite loops
+                        const checkedCollections = new Set();
+                        
+                        // Function to recursively discover collections from document references
+                        async function discoverCollectionsFromRefs(collectionName, depth = 0) {
+                            if (depth > 2 || checkedCollections.has(collectionName)) {
+                                return; // Limit recursion depth and avoid cycles
+                            }
+                            
+                            checkedCollections.add(collectionName);
+                            
+                            try {
+                                const snapshot = await db.collection(collectionName).limit(5).get();
+                                if (!snapshot.empty) {
+                                    // We found documents in this collection
+                                    collectionsFound = true;
+                                    
+                                    // Look through the documents for references to other collections
+                                    snapshot.forEach(doc => {
+                                        const data = doc.data();
+                                        // Look for fields that might be references
+                                        Object.values(data).forEach(value => {
+                                            // Check if it's a document reference
+                                            if (value && typeof value === 'object' && value.path) {
+                                                const pathParts = value.path.split('/');
+                                                // In a path like "collection/docId", the collection name is at index 0
+                                                if (pathParts.length >= 2 && pathParts[0]) {
+                                                    const refCollName = pathParts[0];
+                                                    addCollectionToDropdown(refCollName);
+                                                    console.log(`Found collection from reference: ${refCollName}`);
+                                                    
+                                                    // Recursively check this collection
+                                                    if (!checkedCollections.has(refCollName)) {
+                                                        discoverCollectionsFromRefs(refCollName, depth + 1);
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    });
+                                }
+                            } catch (error) {
+                                // Silently ignore errors for collections that don't exist
+                            }
+                        }
+                        
+                        // Check each collection we know about
+                        for (const collName of collectionsToCheck) {
+                            await discoverCollectionsFromRefs(collName);
+                        }
+                    }
+                } catch (error) {
+                    console.log('Error discovering collections from references:', error);
+                }
+                
+                // If no collections found
+                if (collectionDropdown.options.length <= 1) {
+                    const option = document.createElement('option');
+                    option.text = 'No collections found - enter name manually';
+                    option.disabled = true;
+                    collectionDropdown.add(option);
+                }
+            } catch (error) {
+                console.error("Error fetching collections:", error);
+                const option = document.createElement('option');
+                option.text = `Error: ${error.message}`;
+                option.disabled = true;
+                collectionDropdown.add(option);
+            } finally {
+                collectionsLoader.classList.add('d-none');
+            }
+        }
+
+        // Add a collection to the dropdown
+        function addCollectionToDropdown(collectionId) {
+            // Check if collection already exists in the dropdown
+            for (let i = 0; i < collectionDropdown.options.length; i++) {
+                if (collectionDropdown.options[i].value === collectionId) {
+                    return;
+                }
+            }
+            
+            const option = document.createElement('option');
+            option.value = collectionId;
+            option.text = collectionId;
+            collectionDropdown.add(option);
+        }
+
+        // Fetch data from a specific collection
+        async function fetchCollectionData(collectionId) {
+            try {
+                // Show loader
+                dataLoader.classList.remove('d-none');
+                jsonOutput.innerHTML = '';
+                exportJsonBtn.classList.add('d-none');
+                copyJsonBtn.classList.add('d-none');
+                viewRawJsonBtn.classList.add('d-none');
+                
+                // Fetch all documents from the collection
+                const snapshot = await db.collection(collectionId).get();
+                
+                if (snapshot.empty) {
+                    jsonOutput.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="bi bi-info-circle"></i> Collection "${collectionId}" exists but contains no documents.
+                        </div>
+                    `;
+                    collectionStats.innerHTML = `Collection: <strong>${collectionId}</strong> | Documents: <strong>0</strong>`;
+                    return;
+                }
+                
+                // Convert documents to JSON
+                const data = {};
+                snapshot.forEach(doc => {
+                    data[doc.id] = convertFirestoreData(doc.data());
+                });
+                
+                // Store current collection data
+                currentCollectionData = {
+                    collectionId,
+                    data
+                };
+                
+                // Display JSON
+                displayJson(data);
+                
+                // Generate collection statistics and summary
+                const stats = generateCollectionStats(data);
+                
+                // Update stats display
+                collectionStats.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center flex-wrap">
+                        <div>
+                            <span class="badge bg-primary me-2">Collection: <strong>${collectionId}</strong></span>
+                            <span class="badge bg-success me-2">Documents: <strong>${snapshot.size}</strong></span>
+                            <span class="badge bg-info me-2">Fields: <strong>${stats.uniqueFields}</strong></span>
+                        </div>
+                        <div class="small text-muted">
+                            ${stats.hasTimestamps ? '<span class="badge bg-secondary me-1">Timestamps</span>' : ''}
+                            ${stats.hasGeoPoints ? '<span class="badge bg-secondary me-1">GeoPoints</span>' : ''}
+                            ${stats.hasReferences ? '<span class="badge bg-secondary me-1">References</span>' : ''}
+                            ${stats.hasArrays ? '<span class="badge bg-secondary me-1">Arrays</span>' : ''}
+                            ${stats.hasNestedObjects ? '<span class="badge bg-secondary me-1">Nested Objects</span>' : ''}
+                        </div>
+                    </div>
+                `;
+                
+                // Show action buttons
+                exportJsonBtn.classList.remove('d-none');
+                copyJsonBtn.classList.remove('d-none');
+                viewRawJsonBtn.classList.remove('d-none');
+            } catch (error) {
+                console.error(`Error fetching collection ${collectionId}:`, error);
+                
+                // Create a more detailed error message
+                let errorDetails = error.message;
+                if (error.stack) {
+                    console.log("Error stack:", error.stack);
+                }
+                
+                // Check for common errors
+                if (errorDetails.includes("replace is not a function")) {
+                    errorDetails = "Data format error: The collection contains complex data types that couldn't be processed. This has been fixed, please try again.";
+                }
+                
+                jsonOutput.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle"></i> Error fetching collection "${collectionId}": ${errorDetails}
+                    </div>
+                `;
+                collectionStats.innerHTML = '';
+            } finally {
+                dataLoader.classList.add('d-none');
+            }
+        }
+
+        // Display JSON data with formatter
+        function displayJson(data) {
+            try {
+                // First ensure the data is properly serializable
+                const processedData = JSON.parse(JSON.stringify(data));
+                
+                // Create JSON formatter with improved settings
+                const formatter = new JSONFormatter(processedData, 2, {
+                    hoverPreviewEnabled: true,
+                    hoverPreviewArrayCount: 100,
+                    hoverPreviewFieldCount: 10,
+                    theme: 'dark',
+                    animateOpen: true,
+                    animateClose: true
+                });
+                
+                // Customize the formatter to show better hierarchy
+                formatter.openAtDepth(1);
+                
+                // Store formatter for later use
+                currentFormatter = formatter;
+                
+                // Clear previous content
+                jsonOutput.innerHTML = '';
+                
+                // Add a small tip about expanding/collapsing
+                const infoDiv = document.createElement('div');
+                infoDiv.className = 'alert alert-info mb-3 py-2';
+                infoDiv.innerHTML = `
+                    <small><i class="bi bi-info-circle"></i> Tip: Click on the arrows to expand/collapse objects. Use the buttons above to expand or collapse all.</small>
+                `;
+                jsonOutput.appendChild(infoDiv);
+                
+                // Add a title for the JSON tree view
+                const treeViewTitle = document.createElement('div');
+                treeViewTitle.className = 'mb-3 d-flex align-items-center';
+                treeViewTitle.innerHTML = `
+                    <h6 class="mb-0 me-2"><i class="bi bi-diagram-3"></i> JSON Tree View</h6>
+                    <span class="badge bg-secondary">Interactive</span>
+                `;
+                jsonOutput.appendChild(treeViewTitle);
+                
+                // Get the formatter element
+                const formatterElement = formatter.render();
+                
+                // Add custom styling to improve readability
+                formatterElement.style.fontSize = '14px';
+                formatterElement.style.lineHeight = '1.5';
+                formatterElement.style.fontFamily = 'monospace';
+                
+                // Add a container with border for the formatter
+                const formatterContainer = document.createElement('div');
+                formatterContainer.className = 'p-3 border rounded bg-light';
+                formatterContainer.appendChild(formatterElement);
+                
+                // Append formatter container
+                jsonOutput.appendChild(formatterContainer);
+                
+                // Make JSON keys stand out
+                const keyElements = formatterElement.querySelectorAll('.json-formatter-key');
+                keyElements.forEach(el => {
+                    el.style.color = '#569cd6';
+                    el.style.fontWeight = 'bold';
+                });
+            } catch (error) {
+                console.error("Error displaying JSON:", error);
+                
+                // Fallback to basic JSON display
+                try {
+                    const jsonString = JSON.stringify(data, null, 2);
+                    jsonOutput.innerHTML = `
+                        <div class="alert alert-warning mb-3">
+                            <i class="bi bi-exclamation-triangle"></i> The JSON formatter encountered an error: ${error.message}
+                            <br>Displaying raw JSON instead.
+                        </div>
+                        <pre class="bg-dark text-light p-3 rounded" style="overflow: auto; max-height: 70vh; font-family: monospace;">${jsonString}</pre>
+                    `;
+                } catch (stringifyError) {
+                    jsonOutput.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="bi bi-exclamation-triangle"></i> Error displaying data: ${error.message}
+                            <br>Additionally, could not stringify the data: ${stringifyError.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Convert Firestore data types to serializable objects
+        function convertFirestoreData(data) {
+            if (data === null || data === undefined) return data;
+            
+            // Handle arrays
+            if (Array.isArray(data)) {
+                return data.map(item => convertFirestoreData(item));
+            }
+            
+            // Handle objects
+            if (typeof data === 'object') {
+                // Handle Firestore Timestamp
+                if (data.toDate && typeof data.toDate === 'function') {
+                    try {
+                        const date = data.toDate();
+                        return {
+                            _type: 'timestamp',
+                            value: date.toISOString(),
+                            _display: date.toLocaleString()
+                        };
+                    } catch (e) {
+                        return {
+                            _type: 'timestamp',
+                            _error: 'Invalid timestamp'
+                        };
+                    }
+                }
+                
+                // Handle Firestore GeoPoint
+                if (data.latitude !== undefined && data.longitude !== undefined && typeof data.latitude === 'number') {
+                    return {
+                        _type: 'geopoint',
+                        latitude: data.latitude,
+                        longitude: data.longitude,
+                        _display: `${data.latitude}, ${data.longitude}`
+                    };
+                }
+                
+                // Handle Firestore DocumentReference
+                if (data.path && typeof data.path === 'string') {
+                    let refPath = data.path;
+                    // If it's a firestore reference with id method
+                    if (data.id && typeof data.id === 'string') {
+                        return {
+                            _type: 'reference',
+                            path: refPath,
+                            id: data.id,
+                            _display: `Reference: ${refPath}`
+                        };
+                    }
+                    return {
+                        _type: 'reference',
+                        path: refPath,
+                        _display: `Reference: ${refPath}`
+                    };
+                }
+                
+                // Handle Firestore Binary data (Blob)
+                if (data.toBase64 && typeof data.toBase64 === 'function') {
+                    try {
+                        return {
+                            _type: 'binary',
+                            _display: 'Binary data'
+                        };
+                    } catch (e) {
+                        return {
+                            _type: 'binary',
+                            _error: 'Invalid binary data'
+                        };
+                    }
+                }
+                
+                // Handle regular objects by recursively converting their properties
+                const result = {};
+                for (const key in data) {
+                    if (Object.prototype.hasOwnProperty.call(data, key)) {
+                        result[key] = convertFirestoreData(data[key]);
+                    }
+                }
+                return result;
+            }
+            
+            // Return primitive values as is
+            return data;
+        }
+
+        // Generate statistics about the collection data
+        function generateCollectionStats(data) {
+            const stats = {
+                uniqueFields: 0,
+                hasTimestamps: false,
+                hasGeoPoints: false,
+                hasReferences: false,
+                hasArrays: false,
+                hasNestedObjects: false,
+                fieldTypes: {}
+            };
+            
+            // Set of all unique field names across all documents
+            const allFields = new Set();
+            
+            // Analyze each document
+            Object.keys(data).forEach(docId => {
+                const doc = data[docId];
+                
+                // Function to recursively analyze fields
+                function analyzeFields(obj, prefix = '') {
+                    if (!obj || typeof obj !== 'object') return;
+                    
+                    Object.keys(obj).forEach(key => {
+                        const fieldName = prefix ? `${prefix}.${key}` : key;
+                        const value = obj[key];
+                        
+                        // Add to unique fields set
+                        allFields.add(fieldName);
+                        
+                        // Check value type
+                        if (value === null) {
+                            // Skip null values
+                        } else if (Array.isArray(value)) {
+                            stats.hasArrays = true;
+                            // Check array contents
+                            value.forEach(item => {
+                                if (item && typeof item === 'object' && !Array.isArray(item)) {
+                                    stats.hasNestedObjects = true;
+                                    analyzeFields(item, `${fieldName}[]`);
+                                }
+                            });
+                        } else if (typeof value === 'object') {
+                            // Check for special types
+                            if (value._type === 'timestamp') {
+                                stats.hasTimestamps = true;
+                            } else if (value._type === 'geopoint') {
+                                stats.hasGeoPoints = true;
+                            } else if (value._type === 'reference') {
+                                stats.hasReferences = true;
+                            } else {
+                                // Regular nested object
+                                stats.hasNestedObjects = true;
+                                analyzeFields(value, fieldName);
+                            }
+                        }
+                    });
+                }
+                
+                analyzeFields(doc);
+            });
+            
+            // Set the count of unique fields
+            stats.uniqueFields = allFields.size;
+            
+            return stats;
+        }
+
+        // Search within the JSON data
+        function searchInJson(searchTerm) {
+            if (!searchTerm || !currentCollectionData) return;
+            
+            // Clear previous highlights
+            clearJsonSearch();
+            
+            // Convert search term to lowercase for case-insensitive search
+            const searchTermLower = searchTerm.toLowerCase();
+            
+            // Get all text nodes in the JSON output
+            const jsonContainer = jsonOutput.querySelector('.json-formatter-row');
+            if (!jsonContainer) return;
+            
+            // Find all elements that might contain the search term
+            const allElements = jsonContainer.querySelectorAll('.json-formatter-string, .json-formatter-number, .json-formatter-boolean, .json-formatter-null, .json-formatter-key');
+            
+            let matchCount = 0;
+            
+            // Check each element
+            allElements.forEach(element => {
+                const text = element.textContent;
+                if (text.toLowerCase().includes(searchTermLower)) {
+                    // Highlight the element
+                    element.classList.add('search-highlight');
+                    
+                    // Make sure parent containers are expanded
+                    let parent = element.closest('.json-formatter-row');
+                    while (parent) {
+                        if (parent.classList.contains('json-formatter-closed')) {
+                            // Find and click the toggle button
+                            const toggle = parent.querySelector('.json-formatter-toggler');
+                            if (toggle) toggle.click();
+                        }
+                        parent = parent.parentElement ? parent.parentElement.closest('.json-formatter-row') : null;
+                    }
+                    
+                    matchCount++;
+                }
+            });
+            
+            // Show search results
+            if (matchCount > 0) {
+                // Add a notification about search results
+                const searchNotification = document.createElement('div');
+                searchNotification.id = 'searchNotification';
+                searchNotification.className = 'alert alert-success py-2 mt-2';
+                searchNotification.innerHTML = `<small><i class="bi bi-check-circle"></i> Found ${matchCount} matches for "${searchTerm}"</small>`;
+                
+                // Insert before the JSON output
+                const infoDiv = jsonOutput.querySelector('.alert');
+                if (infoDiv) {
+                    infoDiv.insertAdjacentElement('afterend', searchNotification);
+                } else {
+                    jsonOutput.insertAdjacentElement('afterbegin', searchNotification);
+                }
+                
+                // Add CSS for highlighting
+                const style = document.createElement('style');
+                style.id = 'searchHighlightStyle';
+                style.textContent = `
+                    .search-highlight {
+                        background-color: #ffff00 !important;
+                        color: #000000 !important;
+                        padding: 2px 4px !important;
+                        border-radius: 3px !important;
+                        font-weight: bold !important;
+                        box-shadow: 0 0 3px rgba(0,0,0,0.3) !important;
+                        animation: highlight-pulse 1.5s infinite !important;
+                    }
+                    
+                    @keyframes highlight-pulse {
+                        0% { background-color: #ffff00 !important; }
+                        50% { background-color: #ffa500 !important; }
+                        100% { background-color: #ffff00 !important; }
+                    }
+                `;
+                document.head.appendChild(style);
+            } else {
+                // No matches found
+                const searchNotification = document.createElement('div');
+                searchNotification.id = 'searchNotification';
+                searchNotification.className = 'alert alert-warning py-2 mt-2';
+                searchNotification.innerHTML = `<small><i class="bi bi-exclamation-circle"></i> No matches found for "${searchTerm}"</small>`;
+                
+                // Insert before the JSON output
+                const infoDiv = jsonOutput.querySelector('.alert');
+                if (infoDiv) {
+                    infoDiv.insertAdjacentElement('afterend', searchNotification);
+                } else {
+                    jsonOutput.insertAdjacentElement('afterbegin', searchNotification);
+                }
+            }
+        }
+        
+        // Clear search highlights
+        function clearJsonSearch() {
+            // Remove highlight classes
+            const highlightedElements = document.querySelectorAll('.search-highlight');
+            highlightedElements.forEach(el => el.classList.remove('search-highlight'));
+            
+            // Remove search notification
+            const searchNotification = document.getElementById('searchNotification');
+            if (searchNotification) searchNotification.remove();
+            
+            // Remove highlight style
+            const highlightStyle = document.getElementById('searchHighlightStyle');
+            if (highlightStyle) highlightStyle.remove();
+        }
+
+        // Copy JSON to clipboard
+        function copyJsonToClipboard() {
+            if (!currentCollectionData) return;
+            
+            const { data } = currentCollectionData;
+            
+            try {
+                const jsonString = JSON.stringify(data, null, 2);
+                navigator.clipboard.writeText(jsonString).then(() => {
+                    // Show success message
+                    const notification = document.createElement('div');
+                    notification.className = 'alert alert-success position-fixed bottom-0 end-0 m-3';
+                    notification.style.zIndex = '1050';
+                    notification.innerHTML = '<i class="bi bi-check-circle"></i> JSON copied to clipboard!';
+                    document.body.appendChild(notification);
+                    
+                    // Remove notification after 3 seconds
+                    setTimeout(() => {
+                        notification.remove();
+                    }, 3000);
+                }).catch(err => {
+                    console.error('Failed to copy JSON: ', err);
+                    alert('Failed to copy JSON to clipboard. See console for details.');
+                });
+            } catch (error) {
+                console.error('Error preparing JSON for clipboard: ', error);
+                alert('Error preparing JSON for clipboard. See console for details.');
+            }
+        }
+        
+        // View raw JSON in a modal
+        function viewRawJson() {
+            if (!currentCollectionData) return;
+            
+            const { collectionId, data } = currentCollectionData;
+            
+            try {
+                const jsonString = JSON.stringify(data, null, 2);
+                
+                // Create modal if it doesn't exist
+                let modal = document.getElementById('rawJsonModal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.className = 'modal fade';
+                    modal.id = 'rawJsonModal';
+                    modal.setAttribute('tabindex', '-1');
+                    modal.setAttribute('aria-labelledby', 'rawJsonModalLabel');
+                    modal.setAttribute('aria-hidden', 'true');
+                    
+                    modal.innerHTML = `
+                        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="rawJsonModalLabel">Raw JSON Data</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="d-flex justify-content-end mb-2">
+                                        <button id="modalCopyBtn" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-clipboard"></i> Copy
+                                        </button>
+                                    </div>
+                                    <pre id="rawJsonContent" class="bg-dark text-light p-3 rounded" style="overflow: auto; max-height: 70vh; font-family: monospace;"></pre>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                }
+                
+                // Set modal content
+                const rawJsonContent = document.getElementById('rawJsonContent');
+                rawJsonContent.textContent = jsonString;
+                
+                // Initialize modal
+                const modalInstance = new bootstrap.Modal(modal);
+                modalInstance.show();
+                
+                // Add copy button functionality
+                document.getElementById('modalCopyBtn').addEventListener('click', () => {
+                    navigator.clipboard.writeText(jsonString).then(() => {
+                        const btn = document.getElementById('modalCopyBtn');
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-success');
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.classList.remove('btn-success');
+                            btn.classList.add('btn-outline-primary');
+                        }, 2000);
+                    });
+                });
+            } catch (error) {
+                console.error('Error displaying raw JSON: ', error);
+                alert('Error displaying raw JSON. See console for details.');
+            }
+        }
+        
+        // Export JSON data
+        function exportJson() {
+            if (!currentCollectionData) return;
+            
+            const { collectionId, data } = currentCollectionData;
+            
+            try {
+                const jsonString = JSON.stringify(data, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${collectionId}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } catch (error) {
+                console.error("Error exporting JSON:", error);
+                alert(`Error exporting JSON: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
