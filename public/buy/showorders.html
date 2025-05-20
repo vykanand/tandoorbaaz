@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <title>TandoorBaaz Orders Management</title>
@@ -9,211 +9,301 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
-        .order-card {
-            margin-bottom: 20px;
+        :root {
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #0dcaf0;
+            --light-color: #f8f9fa;
+            --background-color: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --card-border-radius: 12px;
+            --transition-speed: 0.3s;
+            --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
+            --ease-in: cubic-bezier(0.4, 0, 0.2, 1);
+            --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Global Styles */
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .container-fluid {
+            padding: 1rem;
+        }
+
+        /* Card Styles */
+        .card {
             border: none;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s;
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) var(--ease-out);
+            background: white;
+            backdrop-filter: blur(5px);
+            background-color: rgba(255, 255, 255, 0.95);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: none;
+            border-bottom: none;
+            padding: 1rem;
+        }
+
+        .card-header h5 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Order Card Styles */
+        .order-card {
+            margin-bottom: 1rem;
+            border: none;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed) var(--ease-out);
+            background: white;
+            border-left: 4px solid var(--light-color);
         }
 
         .order-card:hover {
             transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
 
         .order-actions {
             display: flex;
-            gap: 10px;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .order-actions button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Status and Delay Badges */
+        .status-badge, .delay-badge {
+            position: absolute;
+            top: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            z-index: 1;
         }
 
         .status-badge {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            right: 1rem;
         }
 
         .delay-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
+            left: 1rem;
+            animation: pulse 2s infinite;
         }
 
+        /* Kitchen Item Styles */
         .kitchen-item {
-            transition: all 0.3s;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: var(--card-border-radius);
+            box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
+            border-left: 5px solid #6c757d;
+            background: white;
+            margin-bottom: 1rem;
+            transition: all var(--transition-speed) var(--ease-out);
+            background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
         }
 
         .kitchen-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .kitchen-item.bg-danger {
-            animation: pulse-urgent 1.5s infinite;
+        .kitchen-item .card-body {
+            padding: 1.5rem;
         }
 
-        @keyframes pulse-urgent {
+        /* Status Colors */
+        .bg-pending {
+            border-left-color: var(--warning-color);
+            background-color: rgba(255, 193, 7, 0.05);
+        }
+
+        .bg-paid {
+            border-left-color: var(--success-color);
+            background-color: rgba(25, 135, 84, 0.05);
+        }
+
+        .bg-delivered {
+            border-left-color: var(--info-color);
+            background-color: rgba(13, 202, 240, 0.05);
+        }
+
+        /* Animations */
+        @keyframes pulse {
             0% {
                 opacity: 1;
+                transform: scale(1);
             }
 
             50% {
                 opacity: 0.8;
+                transform: scale(1.05);
             }
 
             100% {
                 opacity: 1;
+                transform: scale(1);
             }
         }
 
-        /* Delay level badge colors for pending status */
-        .delay-level-0 {
-            background-color: hsl(120, 80%, 50%);
-            color: white;
-        }
-
-        .delay-level-1 {
-            background-color: hsl(96, 80%, 50%);
-            color: white;
-        }
-
-        .delay-level-2 {
-            background-color: hsl(72, 80%, 50%);
-            color: white;
-        }
-
-        .delay-level-3 {
-            background-color: hsl(48, 80%, 50%);
-            color: white;
-        }
-
-        .delay-level-4 {
-            background-color: hsl(24, 80%, 50%);
-            color: white;
-        }
-
-        .delay-level-5 {
-            background-color: hsl(0, 80%, 50%);
-            color: white;
-        }
-
-        @keyframes pulse {
+        @keyframes float {
             0% {
-                opacity: 1;
+                transform: translateY(0px);
             }
-
             50% {
-                opacity: 0.5;
+                transform: translateY(-10px);
             }
-
             100% {
-                opacity: 1;
+                transform: translateY(0px);
             }
         }
 
-        .alert-pulse {
-            animation: pulse 1s infinite;
-        }
-
-        /* Delay comparison table styles */
-        #delayComparisonTable table {
-            font-size: 0.9rem;
-        }
-
-        #delayComparisonTable .badge {
-            font-size: 0.8rem;
-            padding: 0.35em 0.65em;
-        }
-
-        /* Highlight styles for order cards */
-        .order-card.highlight-danger {
-            box-shadow: 0 0 0 3px #dc3545, 0 2px 10px rgba(0, 0, 0, 0.1);
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
-            background-color: rgba(220, 53, 69, 0.25);
-        }
-
-        .order-card.highlight-warning {
-            box-shadow: 0 0 0 3px #ffc107, 0 2px 10px rgba(0, 0, 0, 0.1);
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
-            background-color: rgba(255, 193, 7, 0.25);
-        }
-
-        .order-card.highlight-info {
-            box-shadow: 0 0 0 3px #0dcaf0, 0 2px 10px rgba(0, 0, 0, 0.1);
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
-            background-color: rgba(13, 202, 240, 0.25);
-        }
-
-        .order-card.highlight-light {
-            box-shadow: 0 0 0 3px #f8f9fa, 0 2px 10px rgba(0, 0, 0, 0.1);
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
-            background-color: rgba(248, 249, 250, 0.5);
-        }
-
-        /* Pulsating animation for highlighted cards */
-        @keyframes highlight-pulse {
-            0% {
-                box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.9), 0 2px 10px rgba(0, 0, 0, 0.2);
-                transform: translateY(-5px) scale(1);
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 0.5rem;
             }
 
-            50% {
-                box-shadow: 0 0 0 6px rgba(255, 193, 7, 0.7), 0 4px 15px rgba(0, 0, 0, 0.3);
-                transform: translateY(-7px) scale(1.02);
+            .card {
+                margin-bottom: 0.75rem;
+                border-radius: 10px;
             }
 
-            100% {
-                box-shadow: 0 0 0 3px rgba(255, 193, 7, 0.9), 0 2px 10px rgba(0, 0, 0, 0.2);
-                transform: translateY(-5px) scale(1);
+            .order-card {
+                margin-bottom: 0.75rem;
+                padding: 1rem;
+            }
+
+            .order-actions {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0.5rem;
+            }
+
+            .order-actions button {
+                width: 100%;
+                padding: 0.75rem;
+                font-size: 0.95rem;
+            }
+
+            .status-badge, .delay-badge {
+                top: 0.5rem;
+                padding: 0.3rem 0.8rem;
+                font-size: 0.85rem;
+                border-radius: 15px;
+            }
+
+            .form-select, .form-control {
+                font-size: 0.95rem;
+                padding: 0.75rem;
+                border-radius: 8px;
+            }
+
+            .summary-card {
+                margin-bottom: 0.75rem;
+                padding: 1rem;
+            }
+
+            .modal-content {
+                border-radius: 12px;
+            }
+
+            .modal-header {
+                border-bottom: 2px solid var(--light-color);
+            }
+
+            .modal-footer {
+                border-top: 2px solid var(--light-color);
+            }
+
+            .order-card {
+                margin-bottom: 0.5rem;
+            }
+
+            .order-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .order-actions button {
+                width: 100%;
+                margin: 0.25rem 0;
+            }
+
+            .status-badge, .delay-badge {
+                top: 0.5rem;
+                padding: 0.3rem 0.8rem;
+            }
+
+            /* Form Controls */
+            .form-select, .form-control {
+                font-size: 0.9rem;
+                padding: 0.5rem;
+            }
+
+            /* Summary Cards */
+            .summary-card {
+                margin-bottom: 0.5rem;
+            }
+
+            .summary-card h3 {
+                font-size: 1.5rem;
             }
         }
 
-        .order-card.highlight-pulse {
-            animation: highlight-pulse 1.5s infinite;
+        /* Form Styles */
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 1rem;
+            transition: all var(--transition-speed) var(--ease-in-out);
+            border: 2px solid var(--light-color);
+            background: rgba(255, 255, 255, 0.95);
         }
 
-        /* Additional border styles for highlighted cards */
-        .order-card.highlight-danger .card-body {
-            border: 2px solid rgba(220, 53, 69, 0.7);
-            border-radius: 4px;
-        }
-
-        .order-card.highlight-warning .card-body {
-            border: 2px solid rgba(255, 193, 7, 0.7);
-            border-radius: 4px;
-        }
-
-        .order-card.highlight-info .card-body {
-            border: 2px solid rgba(13, 202, 240, 0.7);
-            border-radius: 4px;
-        }
-
-        .order-card.highlight-light .card-body {
-            border: 2px solid rgba(108, 117, 125, 0.7);
-            border-radius: 4px;
-        }
-
-        /* Kitchen badge hover effect */
-        .kitchen-badge {
-            transition: all 0.2s ease;
-        }
-
-        .kitchen-badge:hover {
-            transform: scale(1.1);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
         }
 
         .kitchen-badge.active {
-            transform: scale(1.1);
-            box-shadow: 0 0 0 2px #fff, 0 2px 5px rgba(0, 0, 0, 0.3);
+            transform: scale(1.15);
+            box-shadow: 0 0 0 2px #fff, 0 4px 10px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 10;
+        }
+
+        /* Kitchen badge colors */
+        .kitchen-badge[data-portion="half"] {
+            background-color: #6f42c1;
+            /* Purple for half portions */
+        }
+
+        .kitchen-badge[data-portion="full"] {
+            background-color: #fd7e14;
+            /* Orange for full portions */
         }
 
         /* Delay comparison row active state */
@@ -242,22 +332,43 @@
             padding: 0 2px;
             border-radius: 2px;
         }
-        
+
         /* Summary section styles */
         .summary-card {
             transition: all 0.3s ease;
             border: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
         }
-        
+
         .summary-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
-        
+
         .summary-card h3 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-card .card-body {
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+
+        .summary-card .card-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .summary-card .badge {
+            border-radius: 20px;
+            padding: 0.5rem 0.8rem;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -268,52 +379,70 @@
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center"
+                        style="background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);">
                         <h5 class="mb-0"><i class="bi bi-graph-up"></i> Orders Summary</h5>
-                        <button class="btn btn-sm btn-outline-light" onclick="loadOrders()">
+                        <button class="btn btn-sm btn-outline-light" onclick="loadOrders()"
+                            style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             <i class="bi bi-arrow-clockwise"></i> Refresh
                         </button>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="card summary-card bg-light h-100">
+                                <div class="card summary-card h-100"
+                                    style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
                                     <div class="card-body text-center">
                                         <h6 class="card-title"><i class="bi bi-calendar-check"></i> Total Orders</h6>
                                         <h3 id="totalOrdersCount" class="mb-0">0</h3>
-                                        <div class="d-flex justify-content-center align-items-center mt-2">
-                                            <span class="badge bg-primary px-2 py-1">Total Sale: ₹<span id="totalSalesAmount">0</span></span>
+                                        <div class="d-flex justify-content-center align-items-center mt-3">
+                                            <span class="badge bg-primary">Total Sale: ₹<span
+                                                    id="totalSalesAmount">0</span></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="card summary-card bg-warning h-100">
+                                <div class="card summary-card h-100"
+                                    style="background: linear-gradient(135deg, #fff3cd 0%, #ffda6a 100%);">
                                     <div class="card-body text-center">
-                                        <h6 class="card-title"><i class="bi bi-hourglass-split"></i> Pending Orders</h6>
-                                        <h3 id="pendingOrdersCount" class="mb-0">0</h3>
-                                        <p class="text-muted mb-0">Value: ₹<span id="pendingOrdersTotal">0</span></p>
+                                        <h6 class="card-title text-dark"><i class="bi bi-hourglass-split"></i> Pending
+                                            Orders</h6>
+                                        <h3 id="pendingOrdersCount" class="mb-0 text-dark">0</h3>
+                                        <div class="d-flex justify-content-center align-items-center mt-3">
+                                            <span class="badge" style="background-color: #fd7e14;">Value: ₹<span
+                                                    id="pendingOrdersTotal">0</span></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="card summary-card bg-success text-white h-100">
+                                <div class="card summary-card h-100"
+                                    style="background: linear-gradient(135deg, #d1e7dd 0%, #75b798 100%);">
                                     <div class="card-body text-center">
-                                        <h6 class="card-title"><i class="bi bi-cash-coin"></i> Paid Orders</h6>
-                                        <h3 id="paidOrdersCount" class="mb-0">0</h3>
-                                        <div class="d-flex justify-content-between mt-2">
-                                            <small><i class="bi bi-cash"></i> Cash: ₹<span id="cashPaymentsTotal">0</span></small>
-                                            <small><i class="bi bi-credit-card"></i> Online: ₹<span id="onlinePaymentsTotal">0</span></small>
+                                        <h6 class="card-title text-dark"><i class="bi bi-cash-coin"></i> Paid Orders
+                                        </h6>
+                                        <h3 id="paidOrdersCount" class="mb-0 text-dark">0</h3>
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <span class="badge bg-success"><i class="bi bi-cash"></i> Cash: ₹<span
+                                                    id="cashPaymentsTotal">0</span></span>
+                                            <span class="badge bg-success"><i class="bi bi-credit-card"></i> Online:
+                                                ₹<span id="onlinePaymentsTotal">0</span></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="card summary-card bg-info text-white h-100">
+                                <div class="card summary-card h-100"
+                                    style="background: linear-gradient(135deg, #cff4fc 0%, #0dcaf0 100%);">
                                     <div class="card-body text-center">
-                                        <h6 class="card-title"><i class="bi bi-truck"></i> Delivered (Unpaid)</h6>
-                                        <h3 id="deliveredUnpaidCount" class="mb-0">0</h3>
-                                        <p class="text-white mb-0">Value: ₹<span id="deliveredUnpaidTotal">0</span></p>
+                                        <h6 class="card-title text-dark"><i class="bi bi-truck"></i> Delivered (Unpaid)
+                                        </h6>
+                                        <h3 id="deliveredUnpaidCount" class="mb-0 text-dark">0</h3>
+                                        <div class="d-flex justify-content-center align-items-center mt-3">
+                                            <span class="badge bg-info text-dark">Value: ₹<span
+                                                    id="deliveredUnpaidTotal">0</span></span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -322,7 +451,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="row">
             <div class="col-md-8">
                 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -337,9 +466,6 @@
                         </button>
                         <button class="btn btn-primary me-2" onclick="loadOrders()">
                             <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                        <button class="btn btn-info" id="toggleDelayComparisonBtn">
-                            <i class="bi bi-clock-history"></i> Delay Comparison
                         </button>
                     </div>
                 </div>
@@ -359,17 +485,16 @@
                         </div>
                     </div>
                 </div>
-                <div id="delayComparisonContainer" class="mb-4" style="display: none;">
+                <div id="delayComparisonContainer" class="mb-4">
                     <div class="card">
-                        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Order Delay Comparison</h5>
+                        <div class="card-header bg-orange text-white d-flex justify-content-between align-items-center"
+                            style="background-color: #fd7e14;">
+                            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Order Delay Comparison</h5>
                             <div>
                                 <button class="btn btn-sm btn-light me-2" onclick="showDelayComparison()">
                                     <i class="bi bi-arrow-clockwise"></i> Refresh
                                 </button>
-                                <button class="btn btn-sm btn-danger" onclick="debugDelayComparison()">
-                                    <i class="bi bi-bug"></i> Debug
-                                </button>
+
                             </div>
                         </div>
                         <div class="card-body">
@@ -382,19 +507,20 @@
 
             <div class="col-md-4">
                 <div class="card sticky-top" style="top: 20px;">
-                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center"
+                        style="background: linear-gradient(135deg, #e83e8c 0%, #fd7e14 100%);">
                         <div>
                             <h5 class="mb-0"><i class="bi bi-fire"></i> Priority Cooking List</h5>
                             <small class="text-light"><i class="bi bi-sort-down"></i> Sorted by delay priority</small>
                         </div>
                         <div>
-                            <span class="badge bg-danger me-2">Cook in Order</span>
-                            <button class="btn btn-sm btn-outline-light me-1" onclick="renderKitchenList()">
+                            <span class="badge bg-danger me-2" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Cook in
+                                Order</span>
+                            <button class="btn btn-sm btn-outline-light me-1" onclick="renderKitchenList()"
+                                style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                 <i class="bi bi-arrow-clockwise"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-light" onclick="debugKitchenList()">
-                                <i class="bi bi-bug"></i>
-                            </button>
+
                         </div>
                     </div>
                     <div class="card-body" id="kitchenList"></div>
@@ -422,7 +548,8 @@
             <!-- Delivered Orders Section -->
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center"
+                        style="background: linear-gradient(135deg, #20c997 0%, #0dcaf0 100%);">
                         <h5 class="mb-0"><i class="bi bi-truck"></i> Delivered Orders</h5>
                         <button class="btn btn-sm btn-outline-light" onclick="toggleSection('deliveredOrdersSection')">
                             <i class="bi bi-chevron-down" id="deliveredOrdersToggleIcon"></i>
@@ -679,12 +806,10 @@
                 updateUI();
             }, 60000);
 
-            // Show delay comparison on page load
+            // Show delay comparison on page load (now always visible)
             setTimeout(() => {
-                document.getElementById('delayComparisonContainer').style.display = 'block';
                 showDelayComparison();
-                // Debug the delay comparison to ensure it's working
-                console.log("Initial delay comparison setup complete");
+                // Setup delay comparison
             }, 2000); // Longer delay to ensure orders are fully loaded
         });
 
@@ -744,12 +869,10 @@
         function initEventListeners() {
             document.getElementById('saveVehicleNumberBtn').addEventListener('click', saveVehicleNumber);
             document.getElementById('addOrderForm').addEventListener('submit', handleNewOrder);
-            document.getElementById('editOrderForm').addEventListener('submit', handleOrderEdit);
             document.getElementById('editAddOrderItemBtn').addEventListener('click', () => {
                 const row = createEditOrderItemRow();
                 document.getElementById('editOrderItemsContainer').appendChild(row);
             });
-            document.getElementById('toggleDelayComparisonBtn').addEventListener('click', toggleDelayComparison);
 
             // Add a global click handler for document to clear highlights when clicking elsewhere
             document.addEventListener('click', function (event) {
@@ -772,12 +895,10 @@
         }
 
         function handleOrderSnapshot(snapshot) {
-            console.log("Order snapshot received, document count:", snapshot.docs.length);
 
             // Process orders and update state
             state.currentOrders = snapshot.docs.map(doc => {
                 const data = doc.data();
-                console.log(`Order ${doc.id} - status: ${data.status}, updatedAt raw:`, data.updatedAt);
                 // Ensure updatedAt is a Date object
                 let updatedAtDate = null;
                 if (data.updatedAt) {
@@ -787,14 +908,23 @@
                         updatedAtDate = data.updatedAt;
                     } else {
                         console.warn(`Order ${doc.id} has updatedAt in unexpected format:`, data.updatedAt);
-                        updatedAtDate = null;
+                    }
+                }
+
+                // Process createdAt to ensure it's a Date object
+                let createdAtDate = null;
+                if (data.createdAt) {
+                    if (typeof data.createdAt.toDate === 'function') {
+                        createdAtDate = data.createdAt.toDate();
+                    } else if (data.createdAt instanceof Date) {
+                        createdAtDate = data.createdAt;
                     }
                 }
 
                 const order = {
                     docId: doc.id,
                     ...data,
-                    createdAt: data.createdAt ? (typeof data.createdAt.toDate === 'function' ? data.createdAt.toDate() : data.createdAt) : null,
+                    createdAt: createdAtDate,
                     updatedAt: updatedAtDate,
                     // Ensure items is always an array
                     items: Array.isArray(data.items) ? data.items : []
@@ -817,13 +947,6 @@
                 state.filteredOrders = [...state.currentOrders];
                 document.getElementById('searchResultsCount').textContent = state.currentOrders.length;
             }
-
-            // Log the sorted orders to verify they're in the correct order
-            console.log("Orders sorted by delay level:", state.currentOrders.map(o => ({
-                id: o.docId,
-                delayLevel: o.delayLevel,
-                status: o.status
-            })));
 
             // Clean up alerts for orders that are no longer active
             state.currentOrders.forEach(order => {
@@ -848,23 +971,12 @@
         }
 
         function updateUI() {
-            console.log("Updating UI...");
-            console.log("Current orders count:", state.currentOrders.length);
-
-            // Count orders by status
-            const statusCounts = state.currentOrders.reduce((acc, order) => {
-                acc[order.status] = (acc[order.status] || 0) + 1;
-                return acc;
-            }, {});
-            console.log("Orders by status:", statusCounts);
-
+            // Render the orders and kitchen list
             renderOrders();
             renderKitchenList();
 
-            // Update delay comparison if it's visible
-            if (document.getElementById('delayComparisonContainer').style.display !== 'none') {
-                showDelayComparison();
-            }
+            // Always update delay comparison since it's now always visible
+            showDelayComparison();
         }
 
         function searchOrders(query) {
@@ -914,12 +1026,7 @@
             // Use filtered orders if search is active, otherwise use all orders
             const ordersToRender = state.searchQuery ? state.filteredOrders : state.currentOrders;
 
-            // Verify orders are still sorted by delay level
-            console.log("Orders at render time:", ordersToRender.map(o => ({
-                id: o.docId,
-                delayLevel: o.delayLevel,
-                status: o.status
-            })));
+
 
             // Separate orders by status
             const pendingOrders = ordersToRender.filter(order =>
@@ -1013,30 +1120,30 @@
             if (deliveredHeader) {
                 deliveredHeader.innerHTML = `<i class="bi bi-truck"></i> Delivered Orders <span class="badge bg-light text-dark ms-2">${deliveredCount}</span>`;
             }
-            
+
             // Update summary section
             updateOrdersSummary(pendingCount, paidCount, deliveredCount);
         }
-        
+
         function updateOrdersSummary(pendingCount, paidCount, deliveredCount) {
             // Get all orders
             const ordersToRender = state.searchQuery ? state.filteredOrders : state.currentOrders;
             const totalCount = pendingCount + paidCount + deliveredCount;
-            
+
             // Calculate totals
             let pendingTotal = 0;
             let cashPaymentsTotal = 0;
             let onlinePaymentsTotal = 0;
             let deliveredUnpaidTotal = 0;
             let totalSales = 0;
-            
+
             // Process each order
             ordersToRender.forEach(order => {
                 const orderTotal = parseFloat(order.total) || 0;
-                
+
                 // Add to total sales regardless of status
                 totalSales += orderTotal;
-                
+
                 if (order.status === 'preparing' || order.status === 'pending') {
                     pendingTotal += orderTotal;
                 } else if (order.status === 'paid (cash)') {
@@ -1047,7 +1154,7 @@
                     deliveredUnpaidTotal += orderTotal;
                 }
             });
-            
+
             // Update the summary section
             document.getElementById('totalOrdersCount').textContent = totalCount;
             document.getElementById('totalSalesAmount').textContent = totalSales.toFixed(2);
@@ -1211,14 +1318,14 @@
                     ).join(' ');
 
                     return `
-                    <div class="kitchen-item mb-3 p-2 rounded position-relative ${priorityClass}" style="${borderStyle}">
+                    <div class="kitchen-item mb-3 p-3 rounded position-relative ${priorityClass}" style="${borderStyle}">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">${name}</h5>
-                            <span class="badge bg-dark">${orderCount} order${orderCount !== 1 ? 's' : ''}</span>
+                            <h5 class="mb-0" style="font-weight: 600; color: #343a40;">${name}</h5>
+                            <span class="badge bg-dark" style="border-radius: 20px; padding: 6px 12px;">${orderCount} order${orderCount !== 1 ? 's' : ''}</span>
                         </div>
-                        <div class="d-flex justify-content-between mt-2">
-                            ${halfQty > 0 ? `<div class="badge bg-secondary p-2 kitchen-badge" data-dish="${name}" data-portion="half" data-orders='${JSON.stringify(Array.from(portions.orderIds))}' data-priority="${priorityLevel}" style="cursor: pointer;" title="Click to highlight related orders">Half: ${halfQty}</div>` : ''}
-                            ${fullQty > 0 ? `<div class="badge bg-secondary p-2 kitchen-badge" data-dish="${name}" data-portion="full" data-orders='${JSON.stringify(Array.from(portions.orderIds))}' data-priority="${priorityLevel}" style="cursor: pointer;" title="Click to highlight related orders">Full: ${fullQty}</div>` : ''}
+                        <div class="d-flex justify-content-between mt-3">
+                            ${halfQty > 0 ? `<div class="kitchen-badge" data-dish="${name}" data-portion="half" data-orders='${JSON.stringify(Array.from(portions.orderIds))}' data-priority="${priorityLevel}" style="cursor: pointer;" title="Click to highlight related orders">Half: ${halfQty}</div>` : ''}
+                            ${fullQty > 0 ? `<div class="kitchen-badge" data-dish="${name}" data-portion="full" data-orders='${JSON.stringify(Array.from(portions.orderIds))}' data-priority="${priorityLevel}" style="cursor: pointer;" title="Click to highlight related orders">Full: ${fullQty}</div>` : ''}
                         </div>
                         <div class="mt-2">
                             ${statusBadges}
@@ -1423,10 +1530,8 @@
                 }
             });
 
-            // Update the delay comparison if it's visible
-            if (document.getElementById('delayComparisonContainer').style.display !== 'none') {
-                showDelayComparison();
-            }
+            // Always update delay comparison since it's now always visible
+            showDelayComparison();
         }
 
         function calculateDelayLevel(order) {
@@ -1536,87 +1641,12 @@
         }
 
         // Delay comparison functions
-        function debugDelayComparison() {
-            console.log("Debug delay comparison");
-            console.log("Current orders:", state.currentOrders);
-
-            // Check orders by status
-            const preparingOrders = state.currentOrders.filter(order => order.status === 'preparing');
-            const pendingOrders = state.currentOrders.filter(order => order.status === 'pending');
-            const deliveredOrders = state.currentOrders.filter(order => order.status === 'delivered');
-
-            console.log("Orders with 'preparing' status:", preparingOrders);
-            console.log("Orders with 'pending' status:", pendingOrders);
-            console.log("Orders with 'delivered' status:", deliveredOrders);
-
-            // Show delay information for each order
-            state.currentOrders.forEach(order => {
-                const delayInfo = calculateExactDelay(order);
-                console.log(`Order ${order.docId} - Status: ${order.status}, Delay Level: ${delayInfo.delayLevel}, Delay Minutes: ${delayInfo.delayMinutes}`);
-            });
-
-            // Force show the comparison
-            const container = document.getElementById('delayComparisonContainer');
-            container.style.display = 'block';
-            showDelayComparison();
-        }
-
-        function debugKitchenList() {
-            console.log("Debug kitchen list");
-
-            // Check orders with items
-            const ordersWithItems = state.currentOrders.filter(order =>
-                order.items && Array.isArray(order.items) && order.items.length > 0
-            );
-
-            console.log("Orders with items:", ordersWithItems);
-
-            // Check orders that should be in kitchen list
-            const kitchenOrders = state.currentOrders.filter(order =>
-                (order.status === 'preparing' || order.status === 'pending') &&
-                order.items && Array.isArray(order.items) && order.items.length > 0
-            );
-
-            console.log("Orders that should be in kitchen list:", kitchenOrders);
-
-            // Check each order's items
-            kitchenOrders.forEach(order => {
-                console.log(`Order ${order.docId} - Status: ${order.status}, Items:`, order.items);
-            });
-
-            // Force refresh the kitchen list
-            renderKitchenList();
-        }
-
-        function toggleDelayComparison() {
-            console.log("Toggle delay comparison clicked");
-            const container = document.getElementById('delayComparisonContainer');
-
-            // Check the computed style instead of the inline style
-            const displayStyle = window.getComputedStyle(container).display;
-            console.log("Current display style:", displayStyle);
-
-            if (displayStyle === 'none') {
-                container.style.display = 'block';
-                console.log("Showing delay comparison");
-                // Force refresh of the delay comparison table
-                setTimeout(() => {
-                    showDelayComparison();
-                }, 100);
-            } else {
-                container.style.display = 'none';
-                console.log("Hiding delay comparison");
-            }
-        }
 
         function showDelayComparison() {
             const tableContainer = document.getElementById('delayComparisonTable');
 
-            console.log("Current orders:", state.currentOrders);
-
             // Sort orders by delay time (descending)
             const filteredOrders = [...state.currentOrders].filter(order => {
-                console.log(`Order ${order.docId} - status: ${order.status}, createdAt: ${order.createdAt}`);
                 // Include both 'preparing' and 'pending' orders
                 return order.createdAt && (order.status === 'preparing' || order.status === 'pending');
             });
@@ -1659,8 +1689,8 @@
                 const delayText = delayLevel > 0 ? `+${delayMinutes} min` : 'On time';
 
                 tableHTML += `
-                    <tr class="${delayLevel > 2 ? 'table-danger' : delayLevel > 0 ? 'table-warning' : ''} delay-comparison-row" 
-                        data-order-id="${order.docId}" 
+                    <tr class="${delayLevel > 2 ? 'table-danger' : delayLevel > 0 ? 'table-warning' : ''} delay-comparison-row"
+                        data-order-id="${order.docId}"
                         data-delay-level="${delayLevel}"
                         style="cursor: pointer;"
                         title="Click to highlight this order">
@@ -1743,15 +1773,6 @@
             const delayMinutes = Math.max(0, totalMinutes - expectedMinutes);
             const delayLevel = delayMinutes > 0 ? Math.floor(delayMinutes / 5) + 1 : 0;
             console.log(`Order ${order.docId} delay: ${delayMinutes} minutes, level: ${delayLevel}`);
-
-            return {
-                totalMinutes,
-                hours,
-                minutes,
-                expectedMinutes,
-                delayMinutes,
-                delayLevel
-            };
 
             return {
                 totalMinutes,
@@ -2032,8 +2053,22 @@
         // Add remaining functions from previous versions with similar optimizations
 
         function saveVehicleNumber() {
-            // TODO: Implement save vehicle number logic
-            console.log('saveVehicleNumber called');
+            // Get the vehicle number from the input
+            const vehicleNumber = document.getElementById('vehicleNumberInput').value.trim();
+
+            // Save the vehicle number to the order
+            if (state.vehicleOrderId && vehicleNumber) {
+                db.collection('bot_orders').doc(state.vehicleOrderId).update({
+                    vehicleNumber: vehicleNumber,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                })
+                .then(() => {
+                    console.log(`Vehicle number ${vehicleNumber} saved for order ${state.vehicleOrderId}`);
+                })
+                .catch(error => {
+                    console.error('Error saving vehicle number:', error);
+                });
+            }
 
             // Close the modal and move focus to a safe element
             const vehicleModal = document.getElementById('vehicleModal');
@@ -2143,78 +2178,13 @@
             }
         }
 
-        async function handleOrderEdit(e) {
-            e.preventDefault();
-
-            const phone = document.getElementById('editCustomerPhone').value.trim();
-            const comments = document.getElementById('editCustomerComments').value.trim();
-            // Phone validation removed - now optional
-            const items = [];
-            const orderItemsContainer = document.getElementById('editOrderItemsContainer');
-            const orderTotalElem = document.getElementById('editOrderTotal');
-            const rows = orderItemsContainer.querySelectorAll('div.d-flex');
-            if (rows.length === 0) {
-                alert('Please add at least one order item.');
-                return;
-            }
-            for (const row of rows) {
-                const itemSelect = row.querySelector('select.form-select');
-                const portionSelect = row.querySelectorAll('select.form-select')[1];
-                const quantityInput = row.querySelector('input[type="number"]');
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value);
-                if (!itemId || !portionKey || !quantity || quantity <= 0) {
-                    alert('Please fill all item details correctly.');
-                    return;
-                }
-                const itemData = state.menuItems[itemId];
-                const portionData = itemData.portions[portionKey];
-                items.push({
-                    id: itemId,
-                    name: itemData.name,
-                    portion: portionData.name,
-                    quantity,
-                    price: portionData.price
-                });
-            }
-            const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-            try {
-                await db.collection('bot_orders').doc(state.editingOrderId).update({
-                    customerDetails: { phone, comments },
-                    items,
-                    total,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                alert('Order updated successfully.');
-                e.target.reset();
-                orderItemsContainer.innerHTML = '';
-                orderTotalElem.textContent = '0';
-
-                // Close the modal and move focus to a safe element
-                const editOrderModal = document.getElementById('editOrderModal');
-                const refreshButton = document.querySelector('button.btn-primary[onclick="loadOrders()"]');
-
-                // First hide the modal
-                state.modals.editOrder.hide();
-
-                // Then set focus to the refresh button after the modal is fully hidden
-                editOrderModal.addEventListener('hidden.bs.modal', function onHidden() {
-                    if (refreshButton) refreshButton.focus();
-                    // Remove the event listener after it's executed once
-                    editOrderModal.removeEventListener('hidden.bs.modal', onHidden);
-                }, { once: true });
-            } catch (error) {
-                alert('Error updating order: ' + error.message);
-            }
-        }
+        // handleOrderEdit function is already defined above
 
         // Add order form handling
         document.addEventListener('DOMContentLoaded', () => {
             const addOrderItemBtn = document.getElementById('addOrderItemBtn');
             const orderItemsContainer = document.getElementById('orderItemsContainer');
             const orderTotalElem = document.getElementById('orderTotal');
-            const addOrderForm = document.getElementById('addOrderForm');
 
             // Search functionality
             const searchInput = document.getElementById('orderSearchInput');
@@ -2310,10 +2280,10 @@
                             portionSelect.appendChild(option);
                         }
                     }
-                    updatePrice();
+                    updateOrderItemPrice();
                 }
 
-                function updatePrice() {
+                function updateOrderItemPrice() {
                     const itemId = itemSelect.value;
                     const portionKey = portionSelect.value;
                     const quantity = parseInt(quantityInput.value) || 0;
@@ -2342,11 +2312,11 @@
                 });
 
                 portionSelect.addEventListener('change', () => {
-                    updatePrice();
+                    updateOrderItemPrice();
                 });
 
                 quantityInput.addEventListener('input', () => {
-                    updatePrice();
+                    updateOrderItemPrice();
                 });
 
                 removeBtn.addEventListener('click', () => {
@@ -2362,11 +2332,18 @@
                 orderItemsContainer.appendChild(row);
             });
 
+            // Add an initial row when the modal is shown
+            document.getElementById('addOrderModal').addEventListener('shown.bs.modal', () => {
+                // Clear any existing items
+                orderItemsContainer.innerHTML = '';
+                // Add a fresh row
+                const row = createOrderItemRow();
+                orderItemsContainer.appendChild(row);
+            });
+
         });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 </body>
 
 </html>
