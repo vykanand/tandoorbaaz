@@ -2,13 +2,15 @@
 <html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TandoorBaaz Orders Management</title>
     <script>
         // Parse URL parameters
         const urlParams = new URLSearchParams(window.location.search);
         const cartName = urlParams.get('cart') || 'default';
         const cartTitle = urlParams.get('title');
-        
+
         // Update document title with cart name
         document.title = `TandoorBaaz - ${cartName} Orders`;
     </script>
@@ -19,128 +21,349 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
+            /* Mobile specific variables */
+            --bottom-nav-height: 65px;
             --primary-color: #0d6efd;
             --success-color: #198754;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
             --info-color: #0dcaf0;
             --light-color: #f8f9fa;
-            --background-color: #f8f9fa;
-            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            --card-border-radius: 12px;
+            --background-color: #f5f7fa;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --card-border-radius: 16px;
             --transition-speed: 0.3s;
             --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
             --ease-in: cubic-bezier(0.4, 0, 0.2, 1);
             --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+            --header-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+            --success-gradient: linear-gradient(135deg, #20c997 0%, #198754 100%);
+            --warning-gradient: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
+            --info-gradient: linear-gradient(135deg, #0dcaf0 0%, #0d6efd 100%);
         }
 
-        /* Global Styles */
+        /* Global Styles - Mobile First Approach */
         body {
             background-color: var(--background-color);
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             line-height: 1.6;
             color: #333;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            touch-action: manipulation;
         }
 
         .container-fluid {
-            padding: 1rem;
+            padding: 0.75rem;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        /* Improve touch targets by default */
+        button, .btn, a.btn, select, input[type="button"], input[type="submit"] {
+            min-height: 44px;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            touch-action: manipulation;
         }
 
-        /* Card Styles */
+        /* Card Styles - Mobile First */
         .card {
             border: none;
-            border-radius: var(--card-border-radius);
+            border-radius: 10px;
             box-shadow: var(--card-shadow);
             transition: all var(--transition-speed) var(--ease-out);
             background: white;
-            backdrop-filter: blur(5px);
             background-color: rgba(255, 255, 255, 0.95);
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
+            margin-bottom: 0.75rem;
         }
 
         .card-header {
             background: none;
             border-bottom: none;
-            padding: 1rem;
+            padding: 0.75rem;
         }
 
         .card-header h5 {
             margin: 0;
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 600;
         }
+        
+        .card-body {
+            padding: 0.75rem;
+        }
+        
+        /* Desktop hover effects - only apply on non-touch devices */
+        @media (hover: hover) {
+            .card:hover {
+                transform: translateY(-5px);
+            }
+        }
 
-        /* Order Card Styles */
+        /* Order Card Styles - Modern Mobile First */
         .order-card {
             margin-bottom: 1rem;
             border: none;
             box-shadow: var(--card-shadow);
             transition: all var(--transition-speed) var(--ease-out);
             background: white;
-            border-left: 4px solid var(--light-color);
+            border-radius: 18px;
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
         }
-
-        .order-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        
+        .order-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: var(--light-color);
+            transition: all 0.3s ease;
+        }
+        
+        .order-card.bg-pending::before {
+            background: var(--warning-color);
+        }
+        
+        .order-card.bg-paid::before {
+            background: var(--success-color);
+        }
+        
+        .order-card.bg-delivered::before {
+            background: var(--info-color);
+        }
+        
+        .order-card .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+        
+        .order-card .order-id {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .order-card .order-time {
+            font-size: 0.9rem;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .order-card .order-details {
+            margin: 0.75rem 0;
+        }
+        
+        .order-card .order-items {
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            padding: 0.75rem;
+            margin: 0.75rem 0;
+        }
+        
+        .order-card .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
+        }
+        
+        .order-card .order-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
         }
 
         .order-actions {
             display: flex;
-            gap: 0.5rem;
+            gap: 0.75rem;
             margin-top: 1rem;
             flex-wrap: wrap;
-            justify-content: flex-end;
+            justify-content: center;
+            flex-direction: column;
         }
 
         .order-actions button {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
+            width: 100%;
+            padding: 0.85rem;
+            font-size: 1rem;
+            margin-bottom: 0;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .order-actions button i {
+            font-size: 1.1rem;
+        }
+        
+        .order-actions button:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Desktop styles for larger screens */
+        @media (min-width: 769px) {
+            .order-card {
+                margin-bottom: 1.25rem;
+                padding: 1.25rem;
+                border-radius: 20px;
+            }
+            
+            .order-actions {
+                flex-direction: row;
+                justify-content: flex-end;
+            }
+            
+            .order-actions button {
+                width: auto;
+                padding: 0.6rem 1.25rem;
+                font-size: 0.95rem;
+            }
+            
+            /* Desktop hover effects */
+            .order-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            }
+            
+            .order-actions button:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+        }
+        
+        /* Mobile-specific order card styles */
+        @media (max-width: 768px) {
+            .order-card {
+                margin-bottom: 1rem;
+            }
+            
+            /* Swipe actions for order cards */
+            .order-card-swipe-container {
+                position: relative;
+                overflow: hidden;
+                touch-action: pan-y;
+            }
+            
+            .order-card-swipe-actions {
+                position: absolute;
+                top: 0;
+                right: 0;
+                height: 100%;
+                display: flex;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .swipe-action-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 80px;
+                height: 100%;
+                color: white;
+                font-size: 1.5rem;
+            }
+            
+            .swipe-action-complete {
+                background-color: var(--success-color);
+            }
+            
+            .swipe-action-delete {
+                background-color: var(--danger-color);
+            }
         }
 
-        /* Status and Delay Badges */
-        .status-badge, .delay-badge {
+        /* Status and Delay Badges - Mobile First */
+        .status-badge,
+        .delay-badge {
             position: absolute;
-            top: 1rem;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.875rem;
+            top: 0.5rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
             font-weight: 500;
             z-index: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .status-badge {
-            right: 1rem;
+            right: 0.5rem;
         }
 
         .delay-badge {
-            left: 1rem;
+            left: 0.5rem;
             animation: pulse 2s infinite;
         }
+        
+        /* Desktop styles for larger screens */
+        @media (min-width: 769px) {
+            .status-badge,
+            .delay-badge {
+                top: 1rem;
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                font-size: 0.875rem;
+            }
+            
+            .status-badge {
+                right: 1rem;
+            }
+            
+            .delay-badge {
+                left: 1rem;
+            }
+        }
 
-        /* Kitchen Item Styles */
+        /* Kitchen Item Styles - Mobile First */
         .kitchen-item {
-            border-radius: var(--card-border-radius);
+            border-radius: 8px;
             box-shadow: var(--card-shadow);
             position: relative;
             overflow: hidden;
             border-left: 5px solid #6c757d;
             background: white;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             transition: all var(--transition-speed) var(--ease-out);
             background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
         }
 
-        .kitchen-item:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        }
-
         .kitchen-item .card-body {
-            padding: 1.5rem;
+            padding: 0.75rem;
+        }
+        
+        /* Desktop styles for larger screens */
+        @media (min-width: 769px) {
+            .kitchen-item {
+                border-radius: var(--card-border-radius);
+                margin-bottom: 1rem;
+            }
+            
+            .kitchen-item .card-body {
+                padding: 1.5rem;
+            }
+            
+            .kitchen-item:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+            }
         }
 
         /* Status Colors */
@@ -181,109 +404,198 @@
             0% {
                 transform: translateY(0px);
             }
+
             50% {
                 transform: translateY(-10px);
             }
+
             100% {
                 transform: translateY(0px);
             }
         }
 
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
+        /* Mobile-First Responsive Styles */
+        /* Small devices (phones, 576px and down) */
+        @media (max-width: 576px) {
+            body {
+                font-size: 14px;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
             .container-fluid {
                 padding: 0.5rem;
+                max-width: 100%;
+                overflow-x: hidden;
             }
-
+            
+            /* Increase touch targets for better mobile usability */
+            button, 
+            .btn, 
+            select, 
+            input, 
+            a {
+                min-height: 44px;
+                min-width: 44px;
+            }
+            
+            /* Adjust card styles for mobile */
             .card {
                 margin-bottom: 0.75rem;
                 border-radius: 10px;
             }
-
-            .order-card {
-                margin-bottom: 0.75rem;
-                padding: 1rem;
+            
+            .card:hover {
+                transform: none; /* Remove hover effects on mobile */
             }
-
+            
+            .card-header {
+                padding: 0.75rem;
+            }
+            
+            .card-body {
+                padding: 0.75rem;
+            }
+            
+            /* Order card specific styles */
+            .order-card {
+                margin-bottom: 0.5rem;
+                padding: 0.75rem;
+                border-radius: 8px;
+            }
+            
+            .order-card:hover {
+                transform: none; /* Remove hover effects on mobile */
+                box-shadow: var(--card-shadow);
+            }
+            
+            /* Make buttons more touch-friendly */
             .order-actions {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 0.5rem;
+                margin-top: 0.75rem;
             }
-
+            
             .order-actions button {
                 width: 100%;
                 padding: 0.75rem;
-                font-size: 0.95rem;
+                font-size: 1rem;
+                margin: 0.25rem 0;
+                border-radius: 8px;
             }
-
-            .status-badge, .delay-badge {
+            
+            /* Adjust badges for mobile */
+            .status-badge,
+            .delay-badge {
                 top: 0.5rem;
                 padding: 0.3rem 0.8rem;
                 font-size: 0.85rem;
                 border-radius: 15px;
             }
-
-            .form-select, .form-control {
-                font-size: 0.95rem;
+            
+            /* Form controls for better touch */
+            .form-select,
+            .form-control {
+                font-size: 1rem;
                 padding: 0.75rem;
                 border-radius: 8px;
+                height: auto;
             }
-
+            
+            /* Summary cards */
             .summary-card {
+                margin-bottom: 0.75rem;
+                padding: 0.75rem;
+            }
+            
+            .summary-card:hover {
+                transform: none; /* Remove hover effects on mobile */
+            }
+            
+            .summary-card h3 {
+                font-size: 1.5rem;
+            }
+            
+            /* Modal adjustments */
+            .modal-content {
+                border-radius: 12px;
+                margin: 0.5rem;
+            }
+            
+            .modal-header {
+                padding: 0.75rem;
+                border-bottom: 2px solid var(--light-color);
+            }
+            
+            .modal-body {
+                padding: 0.75rem;
+            }
+            
+            .modal-footer {
+                padding: 0.75rem;
+                border-top: 2px solid var(--light-color);
+            }
+            
+            /* Kitchen badge adjustments */
+            .kitchen-badge {
+                padding: 0.4rem 0.6rem;
+                margin: 0.25rem;
+                font-size: 0.85rem;
+            }
+            
+            /* Dish status indicator */
+            .dish-status-indicator {
+                width: 32px;
+                height: 32px;
+            }
+        }
+        
+        /* Medium devices (tablets, 768px and down) */
+        @media (min-width: 577px) and (max-width: 768px) {
+            .container-fluid {
+                padding: 0.75rem;
+            }
+            
+            .card {
+                margin-bottom: 1rem;
+            }
+            
+            .order-card {
                 margin-bottom: 0.75rem;
                 padding: 1rem;
             }
-
-            .modal-content {
-                border-radius: 12px;
-            }
-
-            .modal-header {
-                border-bottom: 2px solid var(--light-color);
-            }
-
-            .modal-footer {
-                border-top: 2px solid var(--light-color);
-            }
-
-            .order-card {
-                margin-bottom: 0.5rem;
-            }
-
+            
             .order-actions {
                 flex-direction: column;
                 align-items: stretch;
             }
-
+            
             .order-actions button {
                 width: 100%;
                 margin: 0.25rem 0;
             }
-
-            .status-badge, .delay-badge {
-                top: 0.5rem;
-                padding: 0.3rem 0.8rem;
-            }
-
-            /* Form Controls */
-            .form-select, .form-control {
-                font-size: 0.9rem;
-                padding: 0.5rem;
-            }
-
-            /* Summary Cards */
-            .summary-card {
-                margin-bottom: 0.5rem;
-            }
-
+            
             .summary-card h3 {
-                font-size: 1.5rem;
+                font-size: 1.75rem;
+            }
+        }
+        
+        /* Disable hover effects on touch devices */
+        @media (hover: none) {
+            .card:hover,
+            .order-card:hover,
+            .kitchen-item:hover,
+            .summary-card:hover,
+            .dish-status-indicator:hover {
+                transform: none;
+                box-shadow: var(--card-shadow);
             }
         }
 
         /* Form Styles */
-        .form-control, .form-select {
+        .form-control,
+        .form-select {
             border-radius: 8px;
             padding: 0.75rem;
             font-size: 1rem;
@@ -292,7 +604,8 @@
             background: rgba(255, 255, 255, 0.95);
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
         }
@@ -342,230 +655,782 @@
             border-radius: 2px;
         }
 
-        /* Summary section styles */
+        /* Summary section styles - Modern Mobile First */
         .summary-card {
-            transition: all 0.3s ease;
+            transition: all 0.3s var(--ease-out);
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
             overflow: hidden;
+            margin-bottom: 1rem;
+            position: relative;
+            background: white;
         }
-
-        .summary-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        
+        .summary-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: var(--primary-color);
+            opacity: 0.8;
+        }
+        
+        .summary-card.total-card::before {
+            background: linear-gradient(to right, #6610f2, #0d6efd);
+        }
+        
+        .summary-card.pending-card::before {
+            background: linear-gradient(to right, #fd7e14, #ffc107);
+        }
+        
+        .summary-card.paid-card::before {
+            background: linear-gradient(to right, #20c997, #198754);
+        }
+        
+        .summary-card.delivered-card::before {
+            background: linear-gradient(to right, #0dcaf0, #0d6efd);
         }
 
         .summary-card h3 {
-            font-size: 2.2rem;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #333, #555);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: none;
         }
 
         .summary-card .card-body {
-            padding: 1.5rem;
-            border-radius: 15px;
+            padding: 1.25rem;
+            border-radius: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 150px;
         }
 
         .summary-card .card-title {
             font-weight: 600;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .summary-card .card-title i {
+            font-size: 1.25rem;
         }
 
         .summary-card .badge {
-            border-radius: 20px;
-            padding: 0.5rem 0.8rem;
+            border-radius: 12px;
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 0.9rem;
+            margin: 0.25rem;
+            transition: all 0.2s ease;
+        }
+        
+        .summary-card .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Desktop styles for larger screens */
+        @media (min-width: 769px) {
+            .summary-card {
+                border-radius: 24px;
+                margin-bottom: 1.5rem;
+            }
+            
+            .summary-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+            }
+            
+            .summary-card h3 {
+                font-size: 2.5rem;
+            }
+            
+            .summary-card .card-body {
+                padding: 1.75rem;
+                border-radius: 24px;
+                min-height: 180px;
+            }
+            
+            .summary-card .card-title {
+                margin-bottom: 1.25rem;
+                font-size: 1.2rem;
+            }
+            
+            .summary-card .badge {
+                border-radius: 16px;
+                padding: 0.6rem 1rem;
+                font-size: 1rem;
+            }
+        }
+        
+        /* Mobile-specific summary card styles */
+        @media (max-width: 768px) {
+            .summary-card {
+                margin-bottom: 1rem;
+            }
+            
+            .summary-card .card-body {
+                padding: 1rem;
+                min-height: 130px;
+            }
+            
+            .summary-card h3 {
+                font-size: 1.75rem;
+            }
+            
+            /* Swipe effect for summary cards on mobile */
+            .summary-cards-container {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none; /* Firefox */
+                padding: 0.5rem 0;
+                margin: 0 -0.75rem;
+                padding: 0 0.75rem;
+            }
+            
+            .summary-cards-container::-webkit-scrollbar {
+                display: none; /* Chrome, Safari, Opera */
+            }
+            
+            .summary-cards-container .col-md-3 {
+                min-width: 85%;
+                scroll-snap-align: center;
+                padding: 0 0.5rem;
+            }
+            
+            /* Scroll indicator dots */
+            .scroll-indicator {
+                display: flex;
+                justify-content: center;
+                gap: 0.5rem;
+                margin: 1rem 0;
+            }
+            
+            .scroll-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: #ddd;
+                transition: all 0.3s ease;
+            }
+            
+            .scroll-dot.active {
+                background-color: var(--primary-color);
+                transform: scale(1.3);
+            }
+        }
+
+        /* Dish status indicator styles - Mobile First */
+        .dish-status-indicator {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.05);
+            margin: 0.25rem;
+        }
+
+        .dish-status-indicator .bi-check-all {
+            color: #198754 !important;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .dish-status-indicator .bi-circle {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        /* Kitchen badge styles - Mobile First */
+        .kitchen-badge {
+            padding: 0.4rem 0.6rem;
+            border-radius: 15px;
+            transition: all 0.2s ease;
             font-weight: 500;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 0.25rem;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+        
+        /* Desktop styles for larger screens */
+        @media (min-width: 769px) {
+            .dish-status-indicator {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .dish-status-indicator:hover {
+                transform: scale(1.2);
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+            
+            .dish-status-indicator .bi-check-all,
+            .dish-status-indicator .bi-circle {
+                font-size: 1rem;
+            }
+            
+            .kitchen-badge {
+                padding: 0.5rem 0.8rem;
+                border-radius: 20px;
+                font-size: 0.9rem;
+            }
+            
+            /* Hide mobile bottom nav on desktop */
+            .mobile-bottom-nav {
+                display: none;
+            }
+        }
+        
+        /* Mobile Bottom Navigation - Modern Design */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--bottom-nav-height);
+            background-color: white;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 1000; /* Higher than sticky elements but lower than FAB */
+            padding: 0.25rem;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+        
+        .mobile-bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+            color: #6c757d;
+            text-decoration: none;
+            padding: 0.5rem;
+            transition: all 0.3s var(--ease-out);
+            position: relative;
+            border-radius: 12px;
+            margin: 0 2px;
+        }
+        
+        .mobile-bottom-nav .nav-item.active {
+            color: var(--primary-color);
+            background-color: rgba(13, 110, 253, 0.08);
+            transform: translateY(-4px);
+        }
+        
+        .mobile-bottom-nav .nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 25%;
+            width: 50%;
+            height: 3px;
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+        
+        .mobile-bottom-nav .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+            transition: transform 0.2s ease;
+        }
+        
+        .mobile-bottom-nav .nav-item.active i {
+            transform: scale(1.1);
+        }
+        
+        .mobile-bottom-nav .nav-item span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        /* Tab content containers */
+        #home-content, #summary-content, #completed-content {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Global body styles */
+        body {
+            background-color: var(--background-color);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            touch-action: manipulation;
+        }
+        
+        /* Add padding to the bottom of the page to account for the fixed nav */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: calc(var(--bottom-nav-height) + 1rem);
+                background-color: var(--background-color);
+            }
+            
+            /* Floating action button for mobile - Modern Design */
+            .mobile-fab {
+                position: fixed;
+                bottom: calc(var(--bottom-nav-height) + 1rem);
+                right: 1rem;
+                width: 60px;
+                height: 60px;
+                border-radius: 30px;
+                background: var(--primary-color);
+                background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 20px rgba(13, 110, 253, 0.4);
+                z-index: 9999; /* Increased z-index to ensure it stays on top */
+                border: none;
+                font-size: 1.5rem;
+                transition: all 0.3s var(--ease-out);
+            }
+            
+            .mobile-fab:active {
+                transform: scale(0.92);
+                box-shadow: 0 2px 10px rgba(13, 110, 253, 0.3);
+            }
+            
+            .mobile-fab i {
+                filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+            }
+            
+            /* Improved container spacing for mobile */
+            .container-fluid {
+                padding: 0.75rem;
+                padding-bottom: calc(var(--bottom-nav-height) + 1.5rem);
+            }
+            
+            /* Improved card styles for mobile */
+            .card {
+                border-radius: var(--card-border-radius);
+                box-shadow: var(--card-shadow);
+                border: none;
+                overflow: hidden;
+                margin-bottom: 1rem;
+            }
+            
+            /* Improved section headers for mobile */
+            .section-header {
+                font-size: 1.5rem;
+                font-weight: 700;
+                margin-bottom: 1rem;
+                color: #333;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            
+            .section-header i {
+                color: var(--primary-color);
+            }
         }
     </style>
 </head>
 
 <body>
-    <div class="container-fluid mt-4">
-        <!-- Order Summary Section -->
-        <div class="row mb-4">
-            <div class="col-12">
+    <div class="container-fluid mt-3">
+        <!-- Mobile Tab Content -->
+        <!-- HOME TAB: Pending Orders -->
+        <div id="home-content">
+            <!-- Mobile Search Bar Removed - Now using unified search bar above pending orders list -->
+            
+            <!-- Mobile Quick Stats -->
+            <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
+                <h2 class="section-header mb-0"><i class="bi bi-hourglass-split"></i> Pending</h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm rounded-circle" style="width: 38px; height: 38px;" onclick="loadOrders()">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button class="btn btn-sm rounded-circle" style="width: 38px; height: 38px; background: var(--warning-gradient); color: white;">
+                        <span id="pendingOrdersCount-mobile">0</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Mobile Kitchen List (Priority) -->
+            <div class="d-md-none mb-3">
                 <div class="card">
-                    <div class="card-header text-white d-flex justify-content-between align-items-center"
-                        style="background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);">
-                        <h5 class="mb-0"><i class="bi bi-graph-up"></i> <span id="cartNameHeader" style="margin-left: 5px;">Orders Summary</span></h5>
-                        <button class="btn btn-sm btn-outline-light" onclick="loadOrders()"
-                            style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="card summary-card h-100"
-                                    style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title"><i class="bi bi-calendar-check"></i> Total Orders</h6>
-                                        <h3 id="totalOrdersCount" class="mb-0">0</h3>
-                                        <div class="d-flex justify-content-center align-items-center mt-3">
-                                            <span class="badge bg-primary">Total Sale: ₹<span
-                                                    id="totalSalesAmount">0</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="card summary-card h-100"
-                                    style="background: linear-gradient(135deg, #fff3cd 0%, #ffda6a 100%);">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title text-dark"><i class="bi bi-hourglass-split"></i> Pending
-                                            Orders</h6>
-                                        <h3 id="pendingOrdersCount" class="mb-0 text-dark">0</h3>
-                                        <div class="d-flex justify-content-center align-items-center mt-3">
-                                            <span class="badge" style="background-color: #fd7e14;">Value: ₹<span
-                                                    id="pendingOrdersTotal">0</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3 mb-md-0">
-                                <div class="card summary-card h-100"
-                                    style="background: linear-gradient(135deg, #d1e7dd 0%, #75b798 100%);">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title text-dark"><i class="bi bi-cash-coin"></i> Paid Orders
-                                        </h6>
-                                        <h3 id="paidOrdersCount" class="mb-0 text-dark">0</h3>
-                                        <div class="d-flex justify-content-between mt-3">
-                                            <span class="badge bg-success"><i class="bi bi-cash"></i> Cash: ₹<span
-                                                    id="cashPaymentsTotal">0</span></span>
-                                            <span class="badge bg-success"><i class="bi bi-credit-card"></i> Online:
-                                                ₹<span id="onlinePaymentsTotal">0</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card summary-card h-100"
-                                    style="background: linear-gradient(135deg, #cff4fc 0%, #0dcaf0 100%);">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title text-dark"><i class="bi bi-truck"></i> Delivered (Unpaid)
-                                        </h6>
-                                        <h3 id="deliveredUnpaidCount" class="mb-0 text-dark">0</h3>
-                                        <div class="d-flex justify-content-center align-items-center mt-3">
-                                            <span class="badge bg-info text-dark">Value: ₹<span
-                                                    id="deliveredUnpaidTotal">0</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-8">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div>
-                        <h2>Pending Orders</h2>
-                        <small class="text-muted"><i class="bi bi-sort-down"></i> Orders sorted by delay (most delayed
-                            first)</small>
-                    </div>
-                    <div>
-                        <button class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addOrderModal">
-                            <i class="bi bi-plus-circle"></i> Add Order
-                        </button>
-                        <button class="btn btn-primary me-2" onclick="loadOrders()">
-                            <i class="bi bi-arrow-clockwise"></i> Refresh
-                        </button>
-                    </div>
-                </div>
-                <!-- Search Bar -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control" id="orderSearchInput"
-                                placeholder="Search by phone number or comments...">
-                            <button class="btn btn-outline-secondary" type="button" id="clearSearchBtn">
-                                <i class="bi bi-x-circle"></i> Clear
-                            </button>
-                        </div>
-                        <div class="form-text mt-2">
-                            <span id="searchResultsCount">0</span> orders found matching your search
-                        </div>
-                    </div>
-                </div>
-                <div id="delayComparisonContainer" class="mb-4">
-                    <div class="card">
-                        <div class="card-header bg-orange text-white d-flex justify-content-between align-items-center"
-                            style="background-color: #fd7e14;">
-                            <h5 class="mb-0"><i class="bi bi-clock-history"></i> Order Delay Comparison</h5>
-                            <div>
-                                <button class="btn btn-sm btn-light me-2" onclick="showDelayComparison()">
-                                    <i class="bi bi-arrow-clockwise"></i> Refresh
-                                </button>
-
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div id="delayComparisonTable"></div>
-                        </div>
-                    </div>
-                </div>
-                <div id="pendingOrdersList" class="row"></div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card sticky-top" style="top: 20px;">
                     <div class="card-header text-white d-flex justify-content-between align-items-center"
                         style="background: linear-gradient(135deg, #e83e8c 0%, #fd7e14 100%);">
+                        <h5 class="mb-0"><i class="bi bi-fire"></i> Priority Cooking</h5>
                         <div>
-                            <h5 class="mb-0"><i class="bi bi-fire"></i> Priority Cooking List</h5>
-                            <small class="text-light"><i class="bi bi-sort-down"></i> Sorted by delay priority</small>
-                        </div>
-                        <div>
-                            <span class="badge bg-danger me-2" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2);">Cook in
-                                Order</span>
-                            <button class="btn btn-sm btn-outline-light me-1" onclick="renderKitchenList()"
-                                style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                                <i class="bi bi-arrow-clockwise"></i>
+                            <button class="btn btn-sm btn-outline-light me-1" onclick="speakKitchenList()" title="Narrate cooking list">
+                                <i class="bi bi-volume-up"></i>
                             </button>
-
+                            <button class="btn btn-sm btn-outline-light" onclick="toggleSection('mobileKitchenList')">
+                                <i class="bi bi-chevron-down" id="kitchenListToggleIcon"></i>
+                            </button>
                         </div>
                     </div>
-                    <div class="card-body" id="kitchenList"></div>
+                    <div class="card-body" id="mobileKitchenList">
+                        <div id="kitchenListMobile"></div>
+                    </div>
                 </div>
             </div>
-        </div>
+            
+            <!-- Desktop Header -->
+            <div class="d-none d-md-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>Pending Orders</h2>
+                    <small class="text-muted"><i class="bi bi-sort-down"></i> Orders sorted by delay level (most delayed first)</small>
+                </div>
+                <div>
+                    <button id="newOrderBtn" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addOrderModal">
+                        <i class="bi bi-plus-circle"></i> Add Order
+                    </button>
+                    <button class="btn btn-primary me-2" onclick="loadOrders()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Desktop Search Bar Removed - Now using unified search bar above pending orders list -->
+            
+            <div class="row">
+                <!-- Main Content Column -->
+                <div class="col-md-8">
+                    <!-- Delay Comparison (hidden on mobile, shown in Summary tab) -->
+                    <div id="delayComparisonContainer" class="mb-4 d-none d-md-block">
+                        <div class="card">
+                            <div class="card-header bg-orange text-white d-flex justify-content-between align-items-center"
+                                style="background-color: #fd7e14;">
+                                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Order Delay Comparison</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-light me-2" onclick="showDelayComparison()">
+                                        <i class="bi bi-arrow-clockwise"></i> Refresh
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="delayComparisonTable"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search Bar Above Pending Orders (visible on both mobile and desktop) -->
+                    <div class="card mb-3">
+                        <div class="card-body p-2">
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                <input type="text" class="form-control" id="pendingOrdersSearchInput"
+                                    placeholder="Search pending orders by phone or comments...">
+                                <button class="btn btn-outline-secondary d-none d-md-block" type="button" id="clearPendingSearchBtn">
+                                    <i class="bi bi-x-circle"></i> Clear
+                                </button>
+                                <button class="btn btn-outline-secondary d-md-none" type="button" id="clearPendingSearchBtn-mobile">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                            <div class="form-text mt-2 d-none d-md-block">
+                                <span id="pendingSearchResultsCount">0</span> pending orders found
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pending Orders List -->
+                    <div id="pendingOrdersList" class="row"></div>
+                </div>
 
-        <!-- Completed Orders Sections -->
-        <div class="row mt-4">
+                <!-- Kitchen List Column (Desktop Only) -->
+                <div class="col-md-4 d-none d-md-block">
+                    <div class="card sticky-top" style="top: 20px; z-index: 10;">
+                        <div class="card-header text-white d-flex justify-content-between align-items-center"
+                            style="background: linear-gradient(135deg, #e83e8c 0%, #fd7e14 100%);">
+                            <div>
+                                <h5 class="mb-0"><i class="bi bi-fire"></i> Priority Cooking List</h5>
+                                <small class="text-light"><i class="bi bi-sort-down"></i> Sorted by delay level (most delayed first)</small>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-outline-light me-1" onclick="speakKitchenList()"
+                                    style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);" title="Narrate cooking list">
+                                    <i class="bi bi-volume-up"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-light me-1" onclick="renderKitchenList()"
+                                    style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <i class="bi bi-arrow-clockwise"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body" id="kitchenList"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mobile Kitchen List moved to top -->
+        </div>
+        
+        <!-- SUMMARY TAB: Dashboard and Analytics -->
+        <div id="summary-content">
+            <h2 class="section-header mb-3"><i class="bi bi-graph-up"></i> <span id="cartNameHeader">Orders Summary</span></h2>
+            
+            <!-- Summary Cards - Swipeable on Mobile -->
+            <div class="summary-cards-container row d-md-flex">
+                <div class="col-md-3 mb-3">
+                    <div class="card summary-card h-100 total-card">
+                        <div class="card-body text-center">
+                            <h6 class="card-title"><i class="bi bi-calendar-check"></i> Total Orders</h6>
+                            <h3 id="totalOrdersCount" class="mb-0">0</h3>
+                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                <span class="badge bg-primary">Total Sale: ₹<span id="totalSalesAmount">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card summary-card h-100 pending-card">
+                        <div class="card-body text-center">
+                            <h6 class="card-title text-dark"><i class="bi bi-hourglass-split"></i> Pending Orders</h6>
+                            <h3 id="pendingOrdersCount" class="mb-0 text-dark">0</h3>
+                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                <span class="badge" style="background-color: #fd7e14;">Value: ₹<span id="pendingOrdersTotal">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card summary-card h-100 paid-card">
+                        <div class="card-body text-center">
+                            <h6 class="card-title text-dark"><i class="bi bi-cash-coin"></i> Paid Orders</h6>
+                            <h3 id="paidOrdersCount" class="mb-0 text-dark">0</h3>
+                            <div class="d-flex justify-content-between mt-3">
+                                <span class="badge bg-success"><i class="bi bi-cash"></i> Cash: ₹<span id="cashPaymentsTotal">0</span></span>
+                                <span class="badge bg-success"><i class="bi bi-credit-card"></i> Online: ₹<span id="onlinePaymentsTotal">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="card summary-card h-100 delivered-card">
+                        <div class="card-body text-center">
+                            <h6 class="card-title text-dark"><i class="bi bi-truck"></i> Delivered (Unpaid)</h6>
+                            <h3 id="deliveredUnpaidCount" class="mb-0 text-dark">0</h3>
+                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                <span class="badge bg-info text-dark">Value: ₹<span id="deliveredUnpaidTotal">0</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Scroll indicator dots for mobile -->
+            <div class="scroll-indicator d-md-none">
+                <div class="scroll-dot active"></div>
+                <div class="scroll-dot"></div>
+                <div class="scroll-dot"></div>
+                <div class="scroll-dot"></div>
+            </div>
+            
+            <!-- Order Delay Comparison (Mobile) -->
+            <div class="card mb-4 mt-4">
+                <div class="card-header text-white d-flex justify-content-between align-items-center"
+                    style="background: var(--warning-gradient);">
+                    <h5 class="mb-0"><i class="bi bi-clock-history"></i> Order Delays</h5>
+                    <div>
+                        <button class="btn btn-sm btn-light me-2" onclick="showDelayComparison()">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-light" onclick="toggleSection('mobileDelaySection')">
+                            <i class="bi bi-chevron-down" id="delayToggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-2" id="mobileDelaySection" style="display: none;">
+                    <div id="delayComparisonTableMobile"></div>
+                </div>
+            </div>
+            
+            <!-- Refresh Button -->
+            <div class="d-grid gap-2 mb-4">
+                <button class="btn btn-primary" onclick="loadOrders()">
+                    <i class="bi bi-arrow-clockwise me-2"></i> Refresh Data
+                </button>
+            </div>
+        </div>
+        
+        <!-- COMPLETED TAB: Paid and Delivered Orders -->
+        <div id="completed-content">
+            <h2 class="section-header mb-3"><i class="bi bi-check-circle"></i> Completed Orders</h2>
+            
             <!-- Paid Orders Section -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Paid Orders</h5>
+            <div class="card mb-4">
+                <div class="card-header text-white d-flex justify-content-between align-items-center"
+                    style="background: var(--success-gradient);">
+                    <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Paid Orders</h5>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-light text-dark me-2">
+                            <span id="paidOrdersCount-badge">0</span> Orders
+                        </span>
                         <button class="btn btn-sm btn-outline-light" onclick="toggleSection('paidOrdersSection')">
                             <i class="bi bi-chevron-down" id="paidOrdersToggleIcon"></i>
                         </button>
                     </div>
-                    <div class="card-body" id="paidOrdersSection">
-                        <div id="paidOrdersList" class="row"></div>
-                    </div>
+                </div>
+                <div class="card-body" id="paidOrdersSection">
+                    <div id="paidOrdersList" class="row"></div>
                 </div>
             </div>
 
             <!-- Delivered Orders Section -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header text-white d-flex justify-content-between align-items-center"
-                        style="background: linear-gradient(135deg, #20c997 0%, #0dcaf0 100%);">
-                        <h5 class="mb-0"><i class="bi bi-truck"></i> Delivered Orders</h5>
+            <div class="card mb-4">
+                <div class="card-header text-white d-flex justify-content-between align-items-center"
+                    style="background: var(--info-gradient);">
+                    <h5 class="mb-0"><i class="bi bi-truck"></i> Delivered Orders</h5>
+                    <div class="d-flex align-items-center">
+                        <span class="badge bg-light text-dark me-2">
+                            <span id="deliveredOrdersCount-badge">0</span> Orders
+                        </span>
                         <button class="btn btn-sm btn-outline-light" onclick="toggleSection('deliveredOrdersSection')">
                             <i class="bi bi-chevron-down" id="deliveredOrdersToggleIcon"></i>
                         </button>
                     </div>
-                    <div class="card-body" id="deliveredOrdersSection">
-                        <div id="deliveredOrdersList" class="row"></div>
+                </div>
+                <div class="card-body" id="deliveredOrdersSection">
+                    <div id="deliveredOrdersList" class="row"></div>
+                </div>
+            </div>
+            
+            <!-- Refresh Button -->
+            <div class="d-grid gap-2 mb-4">
+                <button class="btn btn-primary" onclick="loadOrders()">
+                    <i class="bi bi-arrow-clockwise me-2"></i> Refresh Data
+                </button>
+            </div>
+        </div>
+        
+        <!-- Desktop Layout (Original) -->
+        <div class="d-none d-md-block">
+            <!-- Order Summary Section -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header text-white d-flex justify-content-between align-items-center"
+                            style="background: var(--header-gradient);">
+                            <h5 class="mb-0"><i class="bi bi-graph-up"></i> <span id="cartNameHeader-desktop"
+                                    style="margin-left: 5px;">Orders Summary</span></h5>
+                            <button class="btn btn-sm btn-outline-light" onclick="loadOrders()"
+                                style="box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <i class="bi bi-arrow-clockwise"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <!-- Summary Cards for Desktop -->
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <div class="card summary-card h-100 total-card">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title"><i class="bi bi-calendar-check"></i> Total Orders</h6>
+                                            <h3 id="totalOrdersCount-desktop" class="mb-0">0</h3>
+                                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                                <span class="badge bg-primary">Total Sale: ₹<span id="totalSalesAmount-desktop">0</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card summary-card h-100 pending-card">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-dark"><i class="bi bi-hourglass-split"></i> Pending Orders</h6>
+                                            <h3 id="pendingOrdersCount-desktop" class="mb-0 text-dark">0</h3>
+                                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                                <span class="badge" style="background-color: #fd7e14;">Value: ₹<span id="pendingOrdersTotal-desktop">0</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card summary-card h-100 paid-card">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-dark"><i class="bi bi-cash-coin"></i> Paid Orders</h6>
+                                            <h3 id="paidOrdersCount-desktop" class="mb-0 text-dark">0</h3>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <span class="badge bg-success"><i class="bi bi-cash"></i> Cash: ₹<span id="cashPaymentsTotal-desktop">0</span></span>
+                                                <span class="badge bg-success"><i class="bi bi-credit-card"></i> Online: ₹<span id="onlinePaymentsTotal-desktop">0</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="card summary-card h-100 delivered-card">
+                                        <div class="card-body text-center">
+                                            <h6 class="card-title text-dark"><i class="bi bi-truck"></i> Delivered (Unpaid)</h6>
+                                            <h3 id="deliveredUnpaidCount-desktop" class="mb-0 text-dark">0</h3>
+                                            <div class="d-flex justify-content-center align-items-center mt-3">
+                                                <span class="badge bg-info text-dark">Value: ₹<span id="deliveredUnpaidTotal-desktop">0</span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Orders Sections -->
+            <div class="row mt-4">
+                <!-- Paid Orders Section -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Paid Orders</h5>
+                            <button class="btn btn-sm btn-outline-light" onclick="toggleSection('paidOrdersSection-desktop')">
+                                <i class="bi bi-chevron-down" id="paidOrdersToggleIcon-desktop"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="paidOrdersSection-desktop">
+                            <div id="paidOrdersList-desktop" class="row"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delivered Orders Section -->
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header text-white d-flex justify-content-between align-items-center"
+                            style="background: linear-gradient(135deg, #20c997 0%, #0dcaf0 100%);">
+                            <h5 class="mb-0"><i class="bi bi-truck"></i> Delivered Orders</h5>
+                            <button class="btn btn-sm btn-outline-light" onclick="toggleSection('deliveredOrdersSection-desktop')">
+                                <i class="bi bi-chevron-down" id="deliveredOrdersToggleIcon-desktop"></i>
+                            </button>
+                        </div>
+                        <div class="card-body" id="deliveredOrdersSection-desktop">
+                            <div id="deliveredOrdersList-desktop" class="row"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -807,16 +1672,18 @@
         // Initialize Application
         document.addEventListener('DOMContentLoaded', () => {
             // Update cart title in header if provided in URL
-            const cartTitleElement = document.getElementById('cartNameHeader');
-            if (cartTitle) {
-                // Show the cart title if it exists
-                cartTitleElement.textContent = cartTitle;
-                cartTitleElement.style.display = 'inline';
-            } else {
-                // Hide the cart title element if no title is provided
-                cartTitleElement.style.display = 'none';
-            }
-            
+            const cartTitleElements = document.querySelectorAll('[id^="cartNameHeader"]');
+            cartTitleElements.forEach(element => {
+                if (cartTitle) {
+                    // Show the cart title if it exists
+                    element.textContent = cartTitle;
+                    element.style.display = 'inline';
+                } else {
+                    // Hide the cart title element if no title is provided
+                    element.style.display = 'none';
+                }
+            });
+
             initModals();
             initEventListeners();
             initSectionToggles();
@@ -833,18 +1700,95 @@
                 showDelayComparison();
                 // Setup delay comparison
             }, 2000); // Longer delay to ensure orders are fully loaded
+            
+            // Initialize mobile-specific features
+            if (window.innerWidth < 768) {
+                // Set up summary cards swipe
+                const container = document.querySelector('.summary-cards-container');
+                if (container) {
+                    // Initialize scroll position indicator
+                    container.addEventListener('scroll', function() {
+                        const scrollPosition = this.scrollLeft;
+                        const cardWidth = this.querySelector('.col-md-3').offsetWidth;
+                        const activeIndex = Math.round(scrollPosition / cardWidth);
+                        
+                        document.querySelectorAll('.scroll-dot').forEach((dot, index) => {
+                            if (index === activeIndex) {
+                                dot.classList.add('active');
+                            } else {
+                                dot.classList.remove('active');
+                            }
+                        });
+                    });
+                }
+                
+                // Set home tab as active by default
+                switchTab('home');
+            }
         });
 
         function initSectionToggles() {
             // Initialize section toggle icons
             document.getElementById('paidOrdersToggleIcon').classList.add('bi-chevron-down');
             document.getElementById('deliveredOrdersToggleIcon').classList.add('bi-chevron-down');
+            
+            // Initialize kitchen list toggle icon for mobile - set to up since it's expanded by default
+            if (document.getElementById('kitchenListToggleIcon')) {
+                document.getElementById('kitchenListToggleIcon').classList.add('bi-chevron-up');
+            }
+            
+            // Initialize delay section toggle icon for mobile
+            if (document.getElementById('delayToggleIcon')) {
+                document.getElementById('delayToggleIcon').classList.add('bi-chevron-down');
+            }
 
             // Initially collapse the completed order sections on mobile
             if (window.innerWidth < 768) {
                 toggleSection('paidOrdersSection');
                 toggleSection('deliveredOrdersSection');
+                // The kitchen list is now expanded by default
+                // The delay section is already collapsed by default with style="display: none;"
             }
+            
+            // Initialize scroll indicator for summary cards
+            initSummaryCardSwipe();
+        }
+        
+        function initSummaryCardSwipe() {
+            // Only run on mobile
+            if (window.innerWidth >= 768) return;
+            
+            const container = document.querySelector('.summary-cards-container');
+            if (!container) return;
+            
+            const dots = document.querySelectorAll('.scroll-dot');
+            
+            // Update active dot based on scroll position
+            container.addEventListener('scroll', () => {
+                const scrollPosition = container.scrollLeft;
+                const cardWidth = container.querySelector('.col-md-3').offsetWidth;
+                const activeIndex = Math.round(scrollPosition / cardWidth);
+                
+                // Update active dot
+                dots.forEach((dot, index) => {
+                    if (index === activeIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Make dots clickable
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    const cardWidth = container.querySelector('.col-md-3').offsetWidth;
+                    container.scrollTo({
+                        left: index * cardWidth,
+                        behavior: 'smooth'
+                    });
+                });
+            });
         }
 
         function initModals() {
@@ -909,13 +1853,35 @@
         async function loadOrders() {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
-            
-            // Use a single collection and filter by cartName
+
+            // Modified approach to avoid composite index requirement
+            // Option 1: Query by cartName only and filter client-side
             db.collection('bot_orders')
                 .where('cartName', '==', state.cartName)
-                .where('createdAt', '>=', today)
-                .orderBy('createdAt', 'desc')
-                .onSnapshot(handleOrderSnapshot);
+                .onSnapshot((snapshot) => {
+                    // Filter documents client-side for today's date
+                    const filteredDocs = snapshot.docs.filter(doc => {
+                        const data = doc.data();
+                        const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+                        return createdAt >= today;
+                    });
+
+                    // Sort by createdAt in descending order
+                    filteredDocs.sort((a, b) => {
+                        const aDate = a.data().createdAt?.toDate ? a.data().createdAt.toDate() : new Date(a.data().createdAt);
+                        const bDate = b.data().createdAt?.toDate ? b.data().createdAt.toDate() : new Date(b.data().createdAt);
+                        return bDate - aDate; // descending order
+                    });
+
+                    // Create a modified snapshot with the filtered and sorted docs
+                    const filteredSnapshot = {
+                        docs: filteredDocs,
+                        size: filteredDocs.length,
+                        empty: filteredDocs.length === 0
+                    };
+
+                    handleOrderSnapshot(filteredSnapshot);
+                });
         }
 
         function handleOrderSnapshot(snapshot) {
@@ -925,7 +1891,7 @@
                 const data = doc.data();
                 // Ensure updatedAt is a Date object
                 let updatedAtDate = null;
-if (data.updatedAt) {
+                if (data.updatedAt) {
                     if (typeof data.updatedAt.toDate === 'function') {
                         updatedAtDate = data.updatedAt.toDate();
                     } else if (data.updatedAt instanceof Date) {
@@ -950,8 +1916,11 @@ if (data.updatedAt) {
                     ...data,
                     createdAt: createdAtDate,
                     updatedAt: updatedAtDate,
-                    // Ensure items is always an array
-                    items: Array.isArray(data.items) ? data.items : []
+                    // Ensure items is always an array with cooked status
+                    items: Array.isArray(data.items) ? data.items.map(item => ({
+                        ...item,
+                        cooked: item.cooked || false // Ensure cooked property exists
+                    })) : []
                 };
 
                 // Calculate delay level for each order
@@ -961,7 +1930,27 @@ if (data.updatedAt) {
             });
 
             // Sort orders by delay level in descending order (most delayed first)
-            state.currentOrders.sort((a, b) => b.delayLevel - a.delayLevel);
+            state.currentOrders.sort((a, b) => {
+                // Only apply special sorting to pending/preparing orders
+                const aIsPending = a.status === 'preparing' || a.status === 'pending';
+                const bIsPending = b.status === 'preparing' || b.status === 'pending';
+                
+                // If both are pending/preparing, sort by delay level
+                if (aIsPending && bIsPending) {
+                    if (b.delayLevel !== a.delayLevel) {
+                        return b.delayLevel - a.delayLevel;
+                    }
+                    // If delay levels are equal, sort by creation time (oldest first)
+                    return a.createdAt - b.createdAt;
+                }
+                
+                // If only one is pending/preparing, prioritize it
+                if (aIsPending && !bIsPending) return -1;
+                if (!aIsPending && bIsPending) return 1;
+                
+                // Otherwise, sort by status and then by creation time
+                return a.createdAt - b.createdAt;
+            });
 
             // Initialize filtered orders with all orders
             if (state.searchQuery) {
@@ -969,7 +1958,7 @@ if (data.updatedAt) {
                 searchOrders(state.searchQuery);
             } else {
                 state.filteredOrders = [...state.currentOrders];
-                document.getElementById('searchResultsCount').textContent = state.currentOrders.length;
+                document.getElementById('pendingSearchResultsCount').textContent = state.currentOrders.length;
             }
 
             // Clean up alerts for orders that are no longer active
@@ -1001,15 +1990,41 @@ if (data.updatedAt) {
 
             // Always update delay comparison since it's now always visible
             showDelayComparison();
+            
+            // Update mobile-specific elements
+            if (window.innerWidth < 768) {
+                // Update mobile kitchen list if visible
+                if (document.getElementById('kitchenListMobile')) {
+                    const kitchenListContent = document.getElementById('kitchenList').innerHTML;
+                    document.getElementById('kitchenListMobile').innerHTML = kitchenListContent;
+                }
+                
+                // Update mobile delay comparison if in summary tab
+                if (document.getElementById('summary-content').style.display === 'block') {
+                    const delayComparisonContent = document.getElementById('delayComparisonTable').innerHTML;
+                    document.getElementById('delayComparisonTableMobile').innerHTML = delayComparisonContent;
+                }
+                
+                // Update mobile badges
+                if (document.getElementById('pendingOrdersCount-mobile')) {
+                    document.getElementById('pendingOrdersCount-mobile').textContent = document.getElementById('pendingOrdersCount').textContent;
+                }
+                if (document.getElementById('paidOrdersCount-badge')) {
+                    document.getElementById('paidOrdersCount-badge').textContent = document.getElementById('paidOrdersCount').textContent;
+                }
+                if (document.getElementById('deliveredOrdersCount-badge')) {
+                    document.getElementById('deliveredOrdersCount-badge').textContent = document.getElementById('deliveredUnpaidCount').textContent;
+                }
+            }
         }
 
         function searchOrders(query) {
-            const searchCard = document.querySelector('.card:has(#orderSearchInput)');
+            const searchCard = document.querySelector('.card:has(#pendingOrdersSearchInput)');
 
             if (!query || query.trim() === '') {
                 state.searchQuery = '';
                 state.filteredOrders = [...state.currentOrders];
-                document.getElementById('searchResultsCount').textContent = state.currentOrders.length;
+                document.getElementById('pendingSearchResultsCount').textContent = state.currentOrders.length;
 
                 // Remove active search styling
                 if (searchCard) {
@@ -1037,7 +2052,7 @@ if (data.updatedAt) {
             });
 
             // Update the search results count
-            document.getElementById('searchResultsCount').textContent = state.filteredOrders.length;
+            document.getElementById('pendingSearchResultsCount').textContent = state.filteredOrders.length;
 
             // Add active search styling
             if (searchCard) {
@@ -1062,51 +2077,98 @@ if (data.updatedAt) {
             const deliveredOrders = ordersToRender.filter(order =>
                 order.status === 'delivered');
 
-            // Function to generate order card HTML
-            const generateOrderCard = (order, isCompact = false) => `
-                <div class="${isCompact ? 'col-md-6' : 'col-md-6 col-lg-4'}">
-                    <div id="order-${order.docId}" class="card order-card" style="border-left: 5px solid ${getDelayColor(order)}">
+            // Function to generate order card HTML with modern mobile-first design
+            const generateOrderCard = (order, isCompact = false) => {
+                // Determine status class for styling
+                const statusClass = order.status === 'preparing' || order.status === 'pending' 
+                    ? 'bg-pending' 
+                    : order.status === 'delivered' 
+                        ? 'bg-delivered' 
+                        : 'bg-paid';
+                
+                // Create a more modern card layout
+                return `
+                <div class="${isCompact ? 'col-md-6' : 'col-12 col-md-6 col-lg-4'}">
+                    <div id="order-${order.docId}" class="card order-card ${statusClass}">
                         <div class="card-body ${isCompact ? 'p-3' : ''}">
-                            <span class="badge ${getStatusClass(order.status)} status-badge">${order.status}</span>
-                            ${order.delayLevel > 0 ? `<span class="badge bg-danger delay-badge">Delayed ${order.delayLevel}x</span>` : ''}
-                            <h5 class="card-title">Order #${(order.id ? order.id.toString() : order.docId).slice(-4)}</h5>
-                            <p class="mb-1"><i class="bi bi-phone"></i> ${highlightSearchMatch(order.customerDetails.phone, state.searchQuery)}</p>
-                            <p class="mb-1"><i class="bi bi-chat-left-text"></i> ${highlightSearchMatch(order.customerDetails.comments || '', state.searchQuery)}</p>
-                            <p class="mb-1" title="Order time: ${formatTime(order.createdAt)}"><i class="bi bi-hourglass-split"></i> <strong>${formatElapsedTime(order.createdAt)}</strong></p>
-                            ${order.vehicleNumber ? `<p class="mb-1"><i class="bi bi-truck"></i> ${order.vehicleNumber}</p>` : ''}
-                            <hr>
-                            ${order.items.map(item => `
-                                <div class="d-flex justify-content-between mb-2 order-item" data-dish="${item.name}" data-portion="${item.portion.toLowerCase()}">
-                                    <div>${item.name} (${item.portion}) ×${item.quantity}</div>
-                                    <div>₹${item.price * item.quantity}</div>
-                                </div>
-                            `).join('')}
-                            <hr>
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <strong>Total:</strong>
-                                <h5 class="mb-0">₹${order.total}</h5>
-                            </div>
-                            <div class="order-actions d-flex flex-column gap-2">
+                            <div class="order-header">
                                 <div>
-                                    <label for="statusSelect-${order.docId}" class="form-label visually-hidden">Status</label>
-                                    <select id="statusSelect-${order.docId}" class="form-select form-select-sm" onchange="updateOrderStatus('${order.docId}', this.value)">
+                                    <span class="order-id">Order #${(order.id ? order.id.toString() : order.docId).slice(-4)}</span>
+                                    <span class="badge ${getStatusClass(order.status)} ms-2">${order.status}</span>
+                                </div>
+                                <div class="order-time">
+                                    <i class="bi bi-clock"></i> ${formatElapsedTime(order.createdAt)}
+                                    ${order.delayLevel > 0 && (order.status === 'preparing' || order.status === 'pending') ? 
+                                        `<span class="badge bg-danger ms-2">Delayed ${order.delayLevel}x</span>` : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="order-details">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-phone me-2 text-primary"></i>
+                                    <span>${highlightSearchMatch(order.customerDetails.phone, state.searchQuery)}</span>
+                                </div>
+                                
+                                <div class="d-flex align-items-start mb-2">
+                                    <i class="bi bi-chat-left-text me-2 text-primary"></i>
+                                    <span>${highlightSearchMatch(order.customerDetails.comments || 'No comments', state.searchQuery)}</span>
+                                </div>
+                                
+                                ${order.vehicleNumber ? `
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="bi bi-truck me-2 text-primary"></i>
+                                    <span>${order.vehicleNumber}</span>
+                                </div>` : ''}
+                            </div>
+                            
+                            <div class="order-items">
+                                ${order.items.map((item, index) => `
+                                    <div class="order-item ${item.cooked ? 'bg-light rounded p-2' : ''}" data-dish="${item.name}" data-portion="${item.portion.toLowerCase()}" data-index="${index}">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <span class="dish-status-indicator me-2" onclick="toggleDishCookedStatus('${order.docId}', ${index}, ${!item.cooked})">
+                                                    ${item.cooked ?
+                                                    '<i class="bi bi-check-all text-success" style="font-size: 1.2rem;"></i>' :
+                                                    '<i class="bi bi-circle" style="font-size: 1.2rem;"></i>'}
+                                                </span>
+                                                <span class="${item.cooked ? 'text-success fw-bold' : ''}">${item.name} (${item.portion}) ×${item.quantity}</span>
+                                            </div>
+                                            <div>
+                                                <span class="fw-bold">₹${item.price * item.quantity}</span>
+                                                ${item.cooked ? '<span class="ms-2 badge bg-success">Cooked</span>' : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+                                <span class="fw-bold fs-5">Total:</span>
+                                <span class="fw-bold fs-5">₹${order.total}</span>
+                            </div>
+                            
+                            <div class="order-actions">
+                                <div class="mb-3">
+                                    <label for="statusSelect-${order.docId}" class="form-label">Update Status</label>
+                                    <select id="statusSelect-${order.docId}" class="form-select" onchange="updateOrderStatus('${order.docId}', this.value)">
                                         <option value="preparing" ${order.status === 'preparing' ? 'selected' : ''}>Preparing</option>
                                         <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                                         <option value="paid(online)" ${order.status === 'paid(online)' ? 'selected' : ''}>Paid (Online)</option>
                                         <option value="paid (cash)" ${order.status === 'paid (cash)' ? 'selected' : ''}>Paid (Cash)</option>
                                     </select>
                                 </div>
-                                <button class="btn btn-primary btn-sm" onclick="showEditModal('${order.docId}')">
-                                    <i class="bi bi-pencil"></i> Edit
+                                <button class="btn btn-primary" onclick="showEditModal('${order.docId}')">
+                                    <i class="bi bi-pencil"></i> Edit Order
                                 </button>
-                                <button class="btn btn-danger btn-sm" onclick="deleteOrder('${order.docId}')">
-                                    <i class="bi bi-trash"></i> Delete
+                                <button class="btn btn-outline-danger" onclick="deleteOrder('${order.docId}')">
+                                    <i class="bi bi-trash"></i> Delete Order
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
-            `;
+                `;
+            };
 
             // Render pending orders
             const pendingOrdersHTML = pendingOrders.length > 0
@@ -1123,10 +2185,20 @@ if (data.updatedAt) {
                 ? deliveredOrders.map(order => generateOrderCard(order, true)).join('')
                 : `<div class="col-12"><div class="alert alert-info">No delivered orders at this time.</div></div>`;
 
-            // Update the DOM
+            // Update the DOM for both mobile and desktop views
             document.getElementById('pendingOrdersList').innerHTML = pendingOrdersHTML;
+            
+            // Update mobile and desktop paid orders lists
             document.getElementById('paidOrdersList').innerHTML = paidOrdersHTML;
+            if (document.getElementById('paidOrdersList-desktop')) {
+                document.getElementById('paidOrdersList-desktop').innerHTML = paidOrdersHTML;
+            }
+            
+            // Update mobile and desktop delivered orders lists
             document.getElementById('deliveredOrdersList').innerHTML = deliveredOrdersHTML;
+            if (document.getElementById('deliveredOrdersList-desktop')) {
+                document.getElementById('deliveredOrdersList-desktop').innerHTML = deliveredOrdersHTML;
+            }
 
             // Update counters in section headers
             updateSectionCounters(pendingOrders.length, paidOrders.length, deliveredOrders.length);
@@ -1179,7 +2251,7 @@ if (data.updatedAt) {
                 }
             });
 
-            // Update the summary section
+            // Update the mobile summary section
             document.getElementById('totalOrdersCount').textContent = totalCount;
             document.getElementById('totalSalesAmount').textContent = totalSales.toFixed(2);
             document.getElementById('pendingOrdersCount').textContent = pendingCount;
@@ -1189,19 +2261,212 @@ if (data.updatedAt) {
             document.getElementById('onlinePaymentsTotal').textContent = onlinePaymentsTotal.toFixed(2);
             document.getElementById('deliveredUnpaidCount').textContent = deliveredCount;
             document.getElementById('deliveredUnpaidTotal').textContent = deliveredUnpaidTotal.toFixed(2);
+            
+            // Update the desktop summary section
+            if (document.getElementById('totalOrdersCount-desktop')) {
+                document.getElementById('totalOrdersCount-desktop').textContent = totalCount;
+                document.getElementById('totalSalesAmount-desktop').textContent = totalSales.toFixed(2);
+                document.getElementById('pendingOrdersCount-desktop').textContent = pendingCount;
+                document.getElementById('pendingOrdersTotal-desktop').textContent = pendingTotal.toFixed(2);
+                document.getElementById('paidOrdersCount-desktop').textContent = paidCount;
+                document.getElementById('cashPaymentsTotal-desktop').textContent = cashPaymentsTotal.toFixed(2);
+                document.getElementById('onlinePaymentsTotal-desktop').textContent = onlinePaymentsTotal.toFixed(2);
+                document.getElementById('deliveredUnpaidCount-desktop').textContent = deliveredCount;
+                document.getElementById('deliveredUnpaidTotal-desktop').textContent = deliveredUnpaidTotal.toFixed(2);
+            }
         }
 
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
-            const iconId = sectionId === 'paidOrdersSection' ? 'paidOrdersToggleIcon' : 'deliveredOrdersToggleIcon';
+            let iconId;
+            
+            // Determine which icon to toggle based on the section
+            if (sectionId === 'paidOrdersSection') {
+                iconId = 'paidOrdersToggleIcon';
+            } else if (sectionId === 'deliveredOrdersSection') {
+                iconId = 'deliveredOrdersToggleIcon';
+            } else if (sectionId === 'mobileKitchenList') {
+                iconId = 'kitchenListToggleIcon';
+            } else if (sectionId === 'mobileDelaySection') {
+                iconId = 'delayToggleIcon';
+            }
+            
             const icon = document.getElementById(iconId);
 
             if (section.style.display === 'none') {
                 section.style.display = 'block';
-                icon.classList.replace('bi-chevron-up', 'bi-chevron-down');
+                icon.classList.remove('bi-chevron-down');
+                icon.classList.add('bi-chevron-up');
             } else {
                 section.style.display = 'none';
-                icon.classList.replace('bi-chevron-down', 'bi-chevron-up');
+                icon.classList.remove('bi-chevron-up');
+                icon.classList.add('bi-chevron-down');
+            }
+        }
+
+        // Function to speak the kitchen list items
+        function speakKitchenList() {
+            // Check if the browser supports speech synthesis
+            if ('speechSynthesis' in window) {
+                // Get the kitchen items from the DOM
+                const kitchenItems = document.querySelectorAll('.kitchen-item');
+                
+                // Get available voices
+                let voices = window.speechSynthesis.getVoices();
+                
+                // If voices aren't loaded yet, wait for them
+                if (voices.length === 0) {
+                    window.speechSynthesis.onvoiceschanged = function() {
+                        voices = window.speechSynthesis.getVoices();
+                        speakWithIndianVoice();
+                    };
+                } else {
+                    speakWithIndianVoice();
+                }
+                
+                function speakWithIndianVoice() {
+                    // Find an Indian English voice or Hindi voice
+                    let selectedVoice = null;
+                    
+                    // First try to find a Hindi voice
+                    selectedVoice = voices.find(voice => voice.lang === 'hi-IN');
+                    
+                    // If no Hindi voice, try to find an Indian English voice
+                    if (!selectedVoice) {
+                        selectedVoice = voices.find(voice => 
+                            voice.lang === 'en-IN' || 
+                            voice.name.includes('Indian') || 
+                            voice.name.includes('Hindi')
+                        );
+                    }
+                    
+                    // If still no voice found, use any available voice
+                    if (!selectedVoice && voices.length > 0) {
+                        console.log("No Indian voice found, using default voice");
+                    }
+                    
+                    if (kitchenItems.length === 0) {
+                        // If no items, speak a message
+                        const noItemsMsg = new SpeechSynthesisUtterance("कोई आइटम तैयार करने के लिए नहीं है।"); // Hindi: "There are no items to prepare"
+                        if (selectedVoice) noItemsMsg.voice = selectedVoice;
+                        noItemsMsg.lang = 'hi-IN'; // Set language to Hindi
+                        window.speechSynthesis.speak(noItemsMsg);
+                        return;
+                    }
+                    
+                    // Cancel any ongoing speech
+                    window.speechSynthesis.cancel();
+                    
+                    // Create a visual indicator that speech is active
+                    const speakerButtons = document.querySelectorAll('button[onclick="speakKitchenList()"]');
+                    speakerButtons.forEach(btn => {
+                        const originalIcon = btn.innerHTML;
+                        btn.innerHTML = '<i class="bi bi-volume-up-fill"></i>';
+                        btn.classList.add('btn-light');
+                        btn.classList.remove('btn-outline-light');
+                        
+                        // Reset the button after speech is done
+                        setTimeout(() => {
+                            btn.innerHTML = originalIcon;
+                            btn.classList.remove('btn-light');
+                            btn.classList.add('btn-outline-light');
+                        }, (kitchenItems.length + 1) * 2000); // Estimate speech duration
+                    });
+                    
+                    // Create an introduction message in Hindi
+                    const introMsg = new SpeechSynthesisUtterance("प्राथमिकता वाली कुकिंग लिस्ट। कृपया निम्नलिखित आइटम क्रम से तैयार करें:"); // Hindi: "Priority cooking list. Please prepare the following items in order:"
+                    if (selectedVoice) introMsg.voice = selectedVoice;
+                    introMsg.lang = 'hi-IN'; // Set language to Hindi
+                    introMsg.rate = 0.9; // Slightly slower for better clarity
+                    introMsg.pitch = 1.0; // Normal pitch
+                    introMsg.volume = 1.0; // Full volume
+                    window.speechSynthesis.speak(introMsg);
+                    
+                    // Create a queue of utterances for each kitchen item
+                    kitchenItems.forEach((item, index) => {
+                        // Get the dish name
+                        const dishName = item.querySelector('h5').textContent;
+                        
+                        // Get the quantities
+                        const halfBadge = item.querySelector('.kitchen-badge[data-portion="half"]');
+                        const fullBadge = item.querySelector('.kitchen-badge[data-portion="full"]');
+                        
+                        let halfQty = 0;
+                        let fullQty = 0;
+                        
+                        if (halfBadge) {
+                            halfQty = parseInt(halfBadge.textContent.replace('Half: ', '')) || 0;
+                        }
+                        
+                        if (fullBadge) {
+                            fullQty = parseInt(fullBadge.textContent.replace('Full: ', '')) || 0;
+                        }
+                        
+                        // Create the speech text (mix of English dish names with Hindi structure)
+                        let speechText = `${dishName}: `;
+                        
+                        if (halfQty > 0) {
+                            speechText += `${halfQty} हाफ`; // "half" in Hindi
+                        }
+                        
+                        if (halfQty > 0 && fullQty > 0) {
+                            speechText += " और "; // "and" in Hindi
+                        }
+                        
+                        if (fullQty > 0) {
+                            speechText += `${fullQty} फुल`; // "full" in Hindi
+                        }
+                        
+                        // Create and queue the utterance with a slight delay between items
+                        setTimeout(() => {
+                            const utterance = new SpeechSynthesisUtterance(speechText);
+                            if (selectedVoice) utterance.voice = selectedVoice;
+                            utterance.lang = 'hi-IN'; // Set language to Hindi
+                            utterance.rate = 0.9; // Slightly slower for better clarity
+                            utterance.pitch = 1.0;
+                            utterance.volume = 1.0;
+                            
+                            // Highlight the current item being spoken
+                            const originalBackground = item.style.background;
+                            item.style.background = 'rgba(255, 193, 7, 0.2)';
+                            
+                            utterance.onend = () => {
+                                // Reset the highlight after this item is spoken
+                                item.style.background = originalBackground;
+                            };
+                            
+                            window.speechSynthesis.speak(utterance);
+                        }, (index + 1) * 1500); // Longer delay between items for better comprehension
+                    });
+                    
+                    // Add a stop button functionality
+                    document.addEventListener('click', stopSpeech);
+                    
+                    // Remove the event listener after speech is likely done
+                    setTimeout(() => {
+                        document.removeEventListener('click', stopSpeech);
+                    }, (kitchenItems.length + 2) * 2000);
+                }
+            } else {
+                alert("Sorry, your browser does not support speech synthesis. Please try using a modern browser like Chrome, Edge, or Safari.");
+            }
+        }
+        
+        // Function to stop ongoing speech
+        function stopSpeech() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                
+                // Reset all speaker buttons
+                const speakerButtons = document.querySelectorAll('button[onclick="speakKitchenList()"]');
+                speakerButtons.forEach(btn => {
+                    btn.innerHTML = '<i class="bi bi-volume-up"></i>';
+                    btn.classList.remove('btn-light');
+                    btn.classList.add('btn-outline-light');
+                });
+                
+                // Remove the click event listener
+                document.removeEventListener('click', stopSpeech);
             }
         }
 
@@ -1229,9 +2494,12 @@ if (data.updatedAt) {
                         orderId: o.docId,
                         orderTime: o.createdAt,
                         delayLevel: o.delayLevel || 0,
-                        orderStatus: o.status
+                        orderStatus: o.status,
+                        cooked: item.cooked || false // Track cooked status
                     }));
                 })
+                // Filter out cooked dishes
+                .filter(item => !item.cooked)
                 .reduce((acc, item) => {
                     if (!acc[item.name]) {
                         acc[item.name] = {
@@ -1240,7 +2508,9 @@ if (data.updatedAt) {
                             delayLevels: [],
                             orderTimes: [],
                             priority: 0,
-                            orderIds: new Set()
+                            orderIds: new Set(),
+                            cookedItems: 0,
+                            totalItems: 0
                         };
                     }
                     const portionKey = item.portion.toLowerCase();
@@ -1283,7 +2553,8 @@ if (data.updatedAt) {
                 }
 
                 // Calculate priority score (higher is more urgent)
-                item.priority = (maxDelay * 100) + (orderCount * 10) + Math.min(oldestOrderAge / 5, 20);
+                // Heavily weight the delay level to ensure most delayed items are prioritized
+                item.priority = (maxDelay * 1000) + (orderCount * 10) + Math.min(oldestOrderAge / 5, 20);
             });
 
             // Generate HTML grouped by dish with priority indicators
@@ -1348,8 +2619,8 @@ if (data.updatedAt) {
                             <span class="badge bg-dark" style="border-radius: 20px; padding: 6px 12px;">${orderCount} order${orderCount !== 1 ? 's' : ''}</span>
                         </div>
                         <div class="d-flex justify-content-between mt-3">
-                            ${halfQty > 0 ? `<div class="kitchen-badge" data-dish="${name}" data-portion="half" data-orders='${JSON.stringify(Array.from(portions.orderIds))}' data-priority="${priorityLevel}" style="cursor: pointer;" title="Click to highlight related orders">Half: ${halfQty}</div>` : ''}
-                            ${fullQty > 0 ? `<div class="kitchen-badge" data-dish="${name}" data-portion="full" data-orders='${JSON.stringify(Array.from(portions.orderIds))}' data-priority="${priorityLevel}" style="cursor: pointer;" title="Click to highlight related orders">Full: ${fullQty}</div>` : ''}
+                            ${halfQty > 0 ? `<div class="kitchen-badge badge bg-secondary" data-dish="${name}" data-portion="half" data-orders='${JSON.stringify(Array.from(portions.orderIds))}' data-priority="${priorityLevel}" style="cursor: pointer;" title="Click to highlight related orders">Half: ${halfQty}</div>` : ''}
+                            ${fullQty > 0 ? `<div class="kitchen-badge badge bg-secondary" data-dish="${name}" data-portion="full" data-orders='${JSON.stringify(Array.from(portions.orderIds))}' data-priority="${priorityLevel}" style="cursor: pointer;" title="Click to highlight related orders">Full: ${fullQty}</div>` : ''}
                         </div>
                         <div class="mt-2">
                             ${statusBadges}
@@ -1637,6 +2908,17 @@ if (data.updatedAt) {
         }
 
         function getDelayColor(order) {
+            // Only show delay colors for pending or preparing orders
+            if (order.status !== 'preparing' && order.status !== 'pending') {
+                // Use default colors for delivered or paid orders
+                if (order.status === 'delivered') {
+                    return '#0dcaf0'; // info color for delivered
+                } else if (order.status === 'paid(online)' || order.status === 'paid (cash)') {
+                    return '#198754'; // success color for paid
+                }
+                return '#6c757d'; // default gray
+            }
+            
             // Clamp delayLevel between 0 and 5 for color mapping
             const delayLevel = Math.min(Math.max(order.delayLevel || 0, 0), 5);
             // Map delayLevel 0 (green) to 5 (dark red)
@@ -1667,7 +2949,8 @@ if (data.updatedAt) {
         // Delay comparison functions
 
         function showDelayComparison() {
-            const tableContainer = document.getElementById('delayComparisonTable');
+            const desktopTableContainer = document.getElementById('delayComparisonTable');
+            const mobileTableContainer = document.getElementById('delayComparisonTableMobile');
 
             // Sort orders by delay time (descending)
             const filteredOrders = [...state.currentOrders].filter(order => {
@@ -1682,15 +2965,25 @@ if (data.updatedAt) {
                     const delayInfo = calculateExactDelay(order);
                     return { ...order, delayInfo };
                 })
-                .sort((a, b) => b.delayInfo.totalMinutes - a.delayInfo.totalMinutes);
+                .sort((a, b) => {
+                    // First sort by delay level (most delayed first)
+                    if (b.delayInfo.delayLevel !== a.delayInfo.delayLevel) {
+                        return b.delayInfo.delayLevel - a.delayInfo.delayLevel;
+                    }
+                    // If delay levels are equal, sort by total minutes (most time elapsed first)
+                    return b.delayInfo.totalMinutes - a.delayInfo.totalMinutes;
+                });
 
+            // Handle empty orders case
             if (sortedOrders.length === 0) {
-                tableContainer.innerHTML = '<p class="text-center">No active orders to compare.</p>';
+                const emptyMessage = '<p class="text-center">No active orders to compare.</p>';
+                if (desktopTableContainer) desktopTableContainer.innerHTML = emptyMessage;
+                if (mobileTableContainer) mobileTableContainer.innerHTML = emptyMessage;
                 return;
             }
 
-            // Create the comparison table
-            let tableHTML = `
+            // Create the desktop comparison table
+            let desktopTableHTML = `
                 <div class="table-responsive">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark">
@@ -1707,18 +3000,34 @@ if (data.updatedAt) {
                         <tbody>
             `;
 
+            // Create a simplified mobile comparison table
+            let mobileTableHTML = `
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><i class="bi bi-chat-left-text"></i> Order</th>
+                                <th><i class="bi bi-hourglass-split"></i> Time</th>
+                                <th><i class="bi bi-graph-up-arrow"></i> Delay</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
             sortedOrders.forEach(order => {
                 const { totalMinutes, hours, minutes, expectedMinutes, delayMinutes, delayLevel } = order.delayInfo;
                 const delayClass = delayLevel > 0 ? 'text-danger' : 'text-success';
                 const delayText = delayLevel > 0 ? `+${delayMinutes} min` : 'On time';
+                const orderNumber = (order.id ? order.id.toString() : order.docId).slice(-4);
 
-                tableHTML += `
+                // Desktop table row
+                desktopTableHTML += `
                     <tr class="${delayLevel > 2 ? 'table-danger' : delayLevel > 0 ? 'table-warning' : ''} delay-comparison-row"
                         data-order-id="${order.docId}"
                         data-delay-level="${delayLevel}"
                         style="cursor: pointer;"
                         title="Click to highlight this order">
-                        <td title="Order #${(order.id ? order.id.toString() : order.docId).slice(-4)} - ${order.customerDetails && order.customerDetails.comments ? order.customerDetails.comments : 'No comment'}" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        <td title="Order #${orderNumber} - ${order.customerDetails && order.customerDetails.comments ? order.customerDetails.comments : 'No comment'}" style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                             ${order.customerDetails && order.customerDetails.comments ? order.customerDetails.comments : '<em class="text-muted">No comment</em>'}
                         </td>
                         <td><span class="badge ${getStatusClass(order.status)}">${order.status}</span></td>
@@ -1731,9 +3040,31 @@ if (data.updatedAt) {
                         </td>
                     </tr>
                 `;
+
+                // Mobile table row (simplified)
+                mobileTableHTML += `
+                    <tr class="${delayLevel > 2 ? 'table-danger' : delayLevel > 0 ? 'table-warning' : ''} delay-comparison-row"
+                        data-order-id="${order.docId}"
+                        data-delay-level="${delayLevel}"
+                        style="cursor: pointer;"
+                        title="Click to highlight this order">
+                        <td>
+                            <strong>#${orderNumber}</strong>
+                            <span class="badge ${getStatusClass(order.status)}">${order.status}</span>
+                        </td>
+                        <td><strong>${hours > 0 ? `${hours}h ${minutes}m` : `${totalMinutes}m`}</strong></td>
+                        <td class="${delayClass}"><strong>${delayText}</strong></td>
+                    </tr>
+                `;
             });
 
-            tableHTML += `
+            desktopTableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            mobileTableHTML += `
                         </tbody>
                     </table>
                 </div>
@@ -1744,19 +3075,36 @@ if (data.updatedAt) {
             const criticalOrders = sortedOrders.filter(order => order.delayInfo.delayLevel > 2);
 
             if (sortedOrders.length > 0) {
-                tableHTML += `
+                const summaryHTML = `
                 <div class="alert ${criticalOrders.length > 0 ? 'alert-danger' : delayedOrders.length > 0 ? 'alert-warning' : 'alert-success'} mt-3">
                     <h6 class="mb-2"><i class="bi bi-info-circle"></i> Summary</h6>
                     <div class="d-flex justify-content-between">
-                        <span><strong>Total Orders:</strong> ${sortedOrders.length}</span>
-                        <span><strong>Delayed Orders:</strong> ${delayedOrders.length} (${Math.round(delayedOrders.length / sortedOrders.length * 100)}%)</span>
-                        <span><strong>Critical Delays:</strong> ${criticalOrders.length} (${Math.round(criticalOrders.length / sortedOrders.length * 100)}%)</span>
+                        <span><strong>Total:</strong> ${sortedOrders.length}</span>
+                        <span><strong>Delayed:</strong> ${delayedOrders.length} (${Math.round(delayedOrders.length / sortedOrders.length * 100)}%)</span>
+                        <span><strong>Critical:</strong> ${criticalOrders.length}</span>
                     </div>
                 </div>
                 `;
+                
+                desktopTableHTML += summaryHTML;
+                
+                // Simplified summary for mobile
+                const mobileSummaryHTML = `
+                <div class="alert ${criticalOrders.length > 0 ? 'alert-danger' : delayedOrders.length > 0 ? 'alert-warning' : 'alert-success'} mt-2 p-2">
+                    <div class="d-flex justify-content-between">
+                        <small><strong>Total:</strong> ${sortedOrders.length}</small>
+                        <small><strong>Delayed:</strong> ${delayedOrders.length}</small>
+                        <small><strong>Critical:</strong> ${criticalOrders.length}</small>
+                    </div>
+                </div>
+                `;
+                
+                mobileTableHTML += mobileSummaryHTML;
             }
 
-            tableContainer.innerHTML = tableHTML;
+            // Update both desktop and mobile containers
+            if (desktopTableContainer) desktopTableContainer.innerHTML = desktopTableHTML;
+            if (mobileTableContainer) mobileTableContainer.innerHTML = mobileTableHTML;
 
             // Add event listeners to the delay comparison rows
             setTimeout(() => {
@@ -2022,13 +3370,13 @@ if (data.updatedAt) {
         async function updateOrderStatus(docId, newStatus) {
             try {
                 console.log(`Updating order ${docId} status to ${newStatus}...`);
-                
+
                 await db.collection('bot_orders').doc(docId).update({
                     status: newStatus,
                     cartName: state.cartName, // Ensure cartName is included
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                
+
                 console.log(`Order ${docId} status updated to ${newStatus}`);
 
                 // Clear alert for this order if it's no longer active
@@ -2093,12 +3441,12 @@ if (data.updatedAt) {
                     cartName: state.cartName, // Ensure cartName is included
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 })
-                .then(() => {
-                    console.log(`Vehicle number ${vehicleNumber} saved for order ${state.vehicleOrderId}`);
-                })
-                .catch(error => {
-                    console.error('Error saving vehicle number:', error);
-                });
+                    .then(() => {
+                        console.log(`Vehicle number ${vehicleNumber} saved for order ${state.vehicleOrderId}`);
+                    })
+                    .catch(error => {
+                        console.error('Error saving vehicle number:', error);
+                    });
             }
 
             // Close the modal and move focus to a safe element
@@ -2218,23 +3566,31 @@ if (data.updatedAt) {
             const orderItemsContainer = document.getElementById('orderItemsContainer');
             const orderTotalElem = document.getElementById('orderTotal');
 
-            // Search functionality
-            const searchInput = document.getElementById('orderSearchInput');
-            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            // Search functionality for pending orders
+            const pendingSearchInput = document.getElementById('pendingOrdersSearchInput');
+            const clearPendingSearchBtn = document.getElementById('clearPendingSearchBtn');
+            const clearPendingSearchBtnMobile = document.getElementById('clearPendingSearchBtn-mobile');
 
             // Initialize search results count
-            document.getElementById('searchResultsCount').textContent = state.currentOrders.length;
+            document.getElementById('pendingSearchResultsCount').textContent = state.currentOrders.length;
 
             // Add event listener for search input
-            searchInput.addEventListener('input', (e) => {
+            pendingSearchInput.addEventListener('input', (e) => {
                 const query = e.target.value;
                 searchOrders(query);
                 renderOrders();
             });
 
-            // Add event listener for clear button
-            clearSearchBtn.addEventListener('click', () => {
-                searchInput.value = '';
+            // Add event listener for desktop clear button
+            clearPendingSearchBtn.addEventListener('click', () => {
+                pendingSearchInput.value = '';
+                searchOrders('');
+                renderOrders();
+            });
+            
+            // Add event listener for mobile clear button
+            clearPendingSearchBtnMobile.addEventListener('click', () => {
+                pendingSearchInput.value = '';
                 searchOrders('');
                 renderOrders();
             });
@@ -2246,7 +3602,7 @@ if (data.updatedAt) {
                     // Prevent the default browser search
                     e.preventDefault();
                     // Focus the search input
-                    searchInput.focus();
+                    pendingSearchInput.focus();
                 }
             });
 
@@ -2373,9 +3729,134 @@ if (data.updatedAt) {
                 orderItemsContainer.appendChild(row);
             });
 
+            // Function to toggle dish cooked status
+            window.toggleDishCookedStatus = async function (orderId, itemIndex, cookedStatus) {
+                try {
+                    console.log(`Toggling dish cooked status for order ${orderId}, item index ${itemIndex} to ${cookedStatus}`);
+
+                    // First, get the current order to access the items array
+                    const orderDoc = await db.collection('bot_orders').doc(orderId).get();
+                    if (!orderDoc.exists) {
+                        console.error(`Order ${orderId} not found`);
+                        return;
+                    }
+
+                    const orderData = orderDoc.data();
+                    if (!orderData.items || !Array.isArray(orderData.items) || itemIndex >= orderData.items.length) {
+                        console.error(`Invalid items array or item index for order ${orderId}`);
+                        return;
+                    }
+
+                    // Create a copy of the items array
+                    const updatedItems = [...orderData.items];
+
+                    // Update the cooked status of the specific item
+                    updatedItems[itemIndex] = {
+                        ...updatedItems[itemIndex],
+                        cooked: cookedStatus
+                    };
+
+                    // Update the order in Firestore
+                    await db.collection('bot_orders').doc(orderId).update({
+                        items: updatedItems,
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+
+                    console.log(`Dish cooked status updated for order ${orderId}, item index ${itemIndex}`);
+
+                    // No need to refresh the UI as the real-time listener will update it
+                } catch (error) {
+                    console.error(`Error updating dish cooked status:`, error);
+                    alert(`Error updating dish status: ${error.message}`);
+                }
+            };
         });
     </script>
 
+    <!-- Mobile Bottom Navigation -->
+    <div class="mobile-bottom-nav d-md-none">
+        <a href="#" class="nav-item" id="nav-home" onclick="switchTab('home'); return false;">
+            <i class="bi bi-house-door"></i>
+            <span>Orders</span>
+        </a>
+        <a href="#" class="nav-item" id="nav-summary" onclick="switchTab('summary'); return false;">
+            <i class="bi bi-graph-up"></i>
+            <span>Summary</span>
+        </a>
+        <a href="#" class="nav-item" id="nav-completed" onclick="switchTab('completed'); return false;">
+            <i class="bi bi-check-circle"></i>
+            <span>Completed</span>
+        </a>
+        <a href="#" class="nav-item" onclick="document.getElementById('newOrderBtn').click(); return false;">
+            <i class="bi bi-plus-circle"></i>
+            <span>New</span>
+        </a>
+    </div>
+    
+    <!-- Mobile Floating Action Button -->
+    <button class="mobile-fab d-md-none" onclick="document.getElementById('newOrderBtn').click();">
+        <i class="bi bi-plus-lg"></i>
+    </button>
+    
+    <script>
+        // Tab switching functionality for mobile
+        function switchTab(tabName) {
+            // Hide all content sections first
+            document.getElementById('home-content').style.display = 'none';
+            document.getElementById('summary-content').style.display = 'none';
+            document.getElementById('completed-content').style.display = 'none';
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Show the selected content and mark nav item as active
+            document.getElementById(`${tabName}-content`).style.display = 'block';
+            document.getElementById(`nav-${tabName}`).classList.add('active');
+            
+            // Refresh data if needed
+            if (tabName === 'summary') {
+                // Update the delay comparison data
+                showDelayComparison();
+                
+                // Keep the delay section collapsed by default on mobile
+                if (window.innerWidth < 768) {
+                    const mobileDelaySection = document.getElementById('mobileDelaySection');
+                    if (mobileDelaySection) {
+                        mobileDelaySection.style.display = 'none';
+                    }
+                    
+                    const delayToggleIcon = document.getElementById('delayToggleIcon');
+                    if (delayToggleIcon) {
+                        delayToggleIcon.classList.remove('bi-chevron-up');
+                        delayToggleIcon.classList.add('bi-chevron-down');
+                    }
+                }
+            } else if (tabName === 'completed') {
+                // Ensure completed orders are visible
+                document.getElementById('paidOrdersSection').style.display = 'block';
+                document.getElementById('deliveredOrdersSection').style.display = 'block';
+                
+                // Update toggle icons
+                document.getElementById('paidOrdersToggleIcon').classList.remove('bi-chevron-down');
+                document.getElementById('paidOrdersToggleIcon').classList.add('bi-chevron-up');
+                document.getElementById('deliveredOrdersToggleIcon').classList.remove('bi-chevron-down');
+                document.getElementById('deliveredOrdersToggleIcon').classList.add('bi-chevron-up');
+            }
+            
+            // Scroll to top for better UX
+            window.scrollTo(0, 0);
+        }
+        
+        // Initialize the tabs on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set home tab as active by default
+            setTimeout(() => {
+                switchTab('home');
+            }, 100);
+        });
+    </script>
 </body>
 
 </html>
