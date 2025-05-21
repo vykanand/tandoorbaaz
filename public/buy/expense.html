@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TandoorBaaz Expense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #FF6B6B;
+            --secondary-color: #4ECDC4;
+            --dark-color: #292F36;
+            --light-color: #F7FFF7;
+            --success-color: #2ECC71;
+            --warning-color: #FFD166;
+            --danger-color: #FF6B6B;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--dark-color);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #FF8E53 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        .person-name {
+            font-weight: 700;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-container {
+            padding: 25px 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: var(--transition);
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+        }
+
+        .input-group .currency-symbol {
+            position: absolute;
+            left: 15px;
+            top: 45px;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .input-group .amount-input {
+            padding-left: 30px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 6px rgba(255, 107, 107, 0.2);
+        }
+
+        .btn:hover {
+            background-color: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
+        }
+
+        .btn i {
+            font-size: 1.2rem;
+        }
+
+        .success-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--success-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .success-message.show {
+            opacity: 1;
+        }
+
+        .success-message i {
+            font-size: 1.2rem;
+        }
+
+        .recent-expenses {
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #eee;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .recent-expenses h3 {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .expense-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .expense-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .expense-details {
+            flex: 1;
+        }
+
+        .expense-comment {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .expense-time {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .expense-amount {
+            font-weight: 600;
+            color: var(--danger-color);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-style: italic;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .app-container {
+            animation: fadeIn 0.5s ease;
+        }
+
+        .expense-item {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .form-container {
+                padding: 20px 15px;
+            }
+            
+            .input-group input {
+                padding: 12px;
+            }
+            
+            .btn {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="header">
+            <h1><i class="fas fa-money-bill-wave"></i> TandoorBaaz</h1>
+            <p>Quick Expense Logger</p>
+        </div>
+        
+        <div class="form-container">
+            <form id="expenseForm">
+                <div class="input-group">
+                    <label for="expenseAmount">Amount</label>
+                    <span class="currency-symbol">₹</span>
+                    <input type="number" id="expenseAmount" class="amount-input" placeholder="Enter amount" required>
+                </div>
+                
+                <div class="input-group">
+                    <label for="expenseComment">Comment</label>
+                    <input type="text" id="expenseComment" placeholder="What's this expense for?" required>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <i class="fas fa-save"></i> Save Expense
+                </button>
+            </form>
+        </div>
+        
+        <div class="recent-expenses">
+            <h3><i class="fas fa-history"></i> Recent Expenses</h3>
+            <div class="expense-list" id="expenseList">
+                <div class="loading">Loading recent expenses...</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="success-message" id="successMessage">
+        <i class="fas fa-check-circle"></i> Expense saved successfully!
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAEKHWdRyzI8WyBeGeesjDrM-nEzOXCuNk",
+            authDomain: "billion1-a9324.firebaseapp.com",
+            projectId: "billion1-a9324",
+            storageBucket: "billion1-a9324.appspot.com",
+            messagingSenderId: "443716692865",
+            appId: "1:443716692865:web:96813fe32a44f8342cd680",
+            measurementId: "G-FE7NFHY5PG"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
+        // Parse URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const personName = urlParams.get('name') || 'Unknown';
+        
+        // Update header with person name
+        document.querySelector('.header p').innerHTML = `Expense Logger for <span class="person-name">${personName}</span>`;
+        
+        // DOM Elements
+        const expenseForm = document.getElementById('expenseForm');
+        const expenseAmount = document.getElementById('expenseAmount');
+        const expenseComment = document.getElementById('expenseComment');
+        const expenseList = document.getElementById('expenseList');
+        const successMessage = document.getElementById('successMessage');
+        
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Focus on amount field when page loads
+            expenseAmount.focus();
+            
+            // Load recent expenses
+            loadRecentExpenses();
+        });
+        
+        expenseForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const amount = parseFloat(expenseAmount.value);
+            const comment = expenseComment.value;
+            
+            // Get today's date
+            const today = new Date();
+            const dateStr = today.toISOString().split('T')[0];
+            
+            // Create expense object
+            const expense = {
+                date: dateStr,
+                amount: amount,
+                description: comment,
+                type: 'other',
+                recipientName: personName,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            // Save to Firebase
+            db.collection('expenses').add(expense)
+                .then(() => {
+                    // Show success message
+                    showSuccessMessage();
+                    
+                    // Reset form
+                    expenseAmount.value = '';
+                    expenseComment.value = '';
+                    expenseAmount.focus();
+                    
+                    // Reload recent expenses
+                    loadRecentExpenses();
+                })
+                .catch((error) => {
+                    console.error('Error adding expense: ', error);
+                    alert('Error saving expense: ' + error.message);
+                });
+        });
+        
+        // Functions
+        function loadRecentExpenses() {
+            expenseList.innerHTML = '<div class="loading">Loading recent expenses...</div>';
+            
+            // Query for recent expenses for this person
+            db.collection('expenses')
+                .where('recipientName', '==', personName)
+                .orderBy('timestamp', 'desc')
+                .limit(5)
+                .get()
+                .then((snapshot) => {
+                    if (snapshot.empty) {
+                        expenseList.innerHTML = '<div class="empty-state">No recent expenses found</div>';
+                        return;
+                    }
+                    
+                    expenseList.innerHTML = '';
+                    
+                    snapshot.forEach((doc) => {
+                        const expense = doc.data();
+                        const timestamp = expense.timestamp ? expense.timestamp.toDate() : new Date();
+                        
+                        // Format time
+                        const timeStr = timestamp.toLocaleTimeString('en-US', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        
+                        // Format date
+                        const dateStr = timestamp.toLocaleDateString('en-US', {
+                            day: 'numeric',
+                            month: 'short'
+                        });
+                        
+                        // Create expense item
+                        const expenseItem = document.createElement('div');
+                        expenseItem.className = 'expense-item';
+                        expenseItem.innerHTML = `
+                            <div class="expense-details">
+                                <div class="expense-comment">${expense.description}</div>
+                                <div class="expense-time">${dateStr}, ${timeStr}</div>
+                            </div>
+                            <div class="expense-amount">₹${expense.amount.toLocaleString('en-IN')}</div>
+                        `;
+                        
+                        expenseList.appendChild(expenseItem);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error loading expenses: ', error);
+                    expenseList.innerHTML = '<div class="empty-state">Error loading expenses</div>';
+                });
+        }
+        
+        function showSuccessMessage() {
+            successMessage.classList.add('show');
+            
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

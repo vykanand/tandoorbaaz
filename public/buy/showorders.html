@@ -13,6 +13,120 @@
 
         // Update document title with cart name
         document.title = `TandoorBaaz - ${cartName} Orders`;
+        
+        // Store information
+        const stores = [
+            { id: 'samriddhi', name: 'Samriddhi' },
+            { id: 'eros', name: 'Eros' }
+        ];
+        
+        // Function to change store with confirmation
+        function changeStore(storeId, selectorId) {
+            // If no store selected or same store selected, reset the selector and return
+            if (!storeId || storeId === cartName) {
+                document.getElementById(selectorId).value = cartName;
+                return;
+            }
+            
+            // Get store names for clear messaging
+            const currentStoreName = getStoreName(cartName);
+            const newStoreName = getStoreName(storeId);
+            
+            // Create a confirmation modal programmatically
+            const confirmModal = document.createElement('div');
+            confirmModal.className = 'modal fade';
+            confirmModal.id = 'storeChangeConfirmModal';
+            confirmModal.setAttribute('tabindex', '-1');
+            confirmModal.setAttribute('aria-labelledby', 'storeChangeConfirmModalLabel');
+            confirmModal.setAttribute('aria-hidden', 'true');
+            
+            confirmModal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title" id="storeChangeConfirmModalLabel">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>Change Store?
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="mb-2">You are about to switch from:</p>
+                            <div class="alert alert-primary mb-3">
+                                <strong><i class="bi bi-shop me-2"></i>${currentStoreName}</strong>
+                            </div>
+                            <p class="mb-2">to:</p>
+                            <div class="alert alert-success mb-3">
+                                <strong><i class="bi bi-shop me-2"></i>${newStoreName}</strong>
+                            </div>
+                            <p class="text-danger">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                This will load a different set of orders. Any unsaved changes will be lost.
+                            </p>
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="checkbox" id="confirmStoreChange">
+                                <label class="form-check-label" for="confirmStoreChange">
+                                    Yes, I want to switch to ${newStoreName}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="cancelStoreChange">Cancel</button>
+                            <button type="button" class="btn btn-primary" id="confirmStoreChangeBtn" disabled>
+                                Switch to ${newStoreName}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add the modal to the document
+            document.body.appendChild(confirmModal);
+            
+            // Initialize the modal
+            const modal = new bootstrap.Modal(document.getElementById('storeChangeConfirmModal'));
+            modal.show();
+            
+            // Handle checkbox change
+            document.getElementById('confirmStoreChange').addEventListener('change', function() {
+                document.getElementById('confirmStoreChangeBtn').disabled = !this.checked;
+            });
+            
+            // Handle cancel button
+            document.getElementById('cancelStoreChange').addEventListener('click', function() {
+                // Reset the selector to the current store
+                document.getElementById(selectorId).value = cartName;
+                
+                // Remove the modal after hiding
+                modal._element.addEventListener('hidden.bs.modal', function() {
+                    document.body.removeChild(confirmModal);
+                });
+            });
+            
+            // Handle confirm button
+            document.getElementById('confirmStoreChangeBtn').addEventListener('click', function() {
+                if (document.getElementById('confirmStoreChange').checked) {
+                    // Proceed with store change
+                    window.location.href = `showorders.html?cart=${storeId}`;
+                }
+            });
+            
+            // Clean up modal when hidden
+            confirmModal.addEventListener('hidden.bs.modal', function() {
+                // Reset the selector to the current store if modal is dismissed
+                document.getElementById(selectorId).value = cartName;
+                
+                // Remove the modal from DOM after it's hidden
+                if (document.body.contains(confirmModal)) {
+                    document.body.removeChild(confirmModal);
+                }
+            });
+        }
+        
+        // Function to get store display name
+        function getStoreName(storeId) {
+            const store = stores.find(s => s.id === storeId);
+            return store ? store.name : storeId;
+        }
     </script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -129,6 +243,18 @@
         
         .order-card.bg-pending::before {
             background: var(--warning-color);
+        }
+        
+        /* Delayed order card styling */
+        .order-card.delayed {
+            background-color: rgba(220, 53, 69, 0.25) !important; /* More intense red background */
+            border: 2px solid var(--danger-color) !important;
+            box-shadow: 0 0 15px rgba(220, 53, 69, 0.5) !important; /* Red glow effect */
+        }
+        
+        .order-card.delayed::before {
+            background: #ff0000 !important; /* Bright red left border */
+            width: 8px !important; /* Thicker left border */
         }
         
         .order-card.bg-paid::before {
@@ -310,7 +436,11 @@
 
         .delay-badge {
             left: 0.5rem;
-            animation: pulse 2s infinite;
+            animation: pulse 1.5s infinite; /* Faster pulsing */
+            background-color: #ff0000 !important; /* Bright red background */
+            color: white !important; /* White text for better contrast */
+            font-weight: 700 !important; /* Bolder text */
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.7) !important; /* Red glow effect */
         }
         
         /* Desktop styles for larger screens */
@@ -344,6 +474,14 @@
             transition: all var(--transition-speed) var(--ease-out);
             background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.8));
         }
+        
+        /* Delayed kitchen item styling */
+        .kitchen-item.delayed {
+            background: linear-gradient(to right, rgba(220, 53, 69, 0.3), rgba(220, 53, 69, 0.15)) !important; /* Stronger red gradient */
+            border: 2px solid var(--danger-color) !important;
+            border-left: 8px solid #ff0000 !important; /* Brighter and thicker left border */
+            box-shadow: 0 0 12px rgba(220, 53, 69, 0.6) !important; /* Red glow effect */
+        }
 
         .kitchen-item .card-body {
             padding: 0.75rem;
@@ -366,6 +504,31 @@
             }
         }
 
+        /* Store Selector Styling */
+        .store-selector {
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.2);
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .store-selector:focus {
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.4);
+            border-color: var(--primary-color);
+        }
+        
+        .store-name {
+            color: var(--primary-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
         /* Status Colors */
         .bg-pending {
             border-left-color: var(--warning-color);
@@ -387,16 +550,19 @@
             0% {
                 opacity: 1;
                 transform: scale(1);
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
             }
 
             50% {
-                opacity: 0.8;
-                transform: scale(1.05);
+                opacity: 0.9;
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(255, 0, 0, 0.9);
             }
 
             100% {
                 opacity: 1;
                 transform: scale(1);
+                box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
             }
         }
 
@@ -1069,6 +1235,20 @@
         <div id="home-content">
             <!-- Mobile Search Bar Removed - Now using unified search bar above pending orders list -->
             
+            <!-- Store Selection Dropdown - Mobile -->
+            <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
+                <h2 class="section-header mb-0">
+                    <i class="bi bi-shop"></i> <span id="storeName-mobile" class="store-name"></span>
+                </h2>
+                <div class="d-flex gap-2">
+                    <select class="form-select store-selector" style="width: auto;" id="storeSelector-mobile" onchange="changeStore(this.value, 'storeSelector-mobile')">
+                        <option value="">Select Store</option>
+                        <option value="samriddhi">Samriddhi</option>
+                        <option value="eros">Eros</option>
+                    </select>
+                </div>
+            </div>
+            
             <!-- Mobile Quick Stats -->
             <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
                 <h2 class="section-header mb-0"><i class="bi bi-hourglass-split"></i> Pending</h2>
@@ -1106,10 +1286,21 @@
             <!-- Desktop Header -->
             <div class="d-none d-md-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h2>Pending Orders</h2>
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <h2><i class="bi bi-shop"></i> <span id="storeName-desktop" class="store-name"></span></h2>
+                        <select class="form-select store-selector" style="width: auto;" id="storeSelector-desktop" onchange="changeStore(this.value, 'storeSelector-desktop')">
+                            <option value="">Select Store</option>
+                            <option value="samriddhi">Samriddhi</option>
+                            <option value="eros">Eros</option>
+                        </select>
+                    </div>
+                    <h3>Pending Orders</h3>
                     <small class="text-muted"><i class="bi bi-sort-down"></i> Orders sorted by delay level (most delayed first)</small>
                 </div>
                 <div>
+                    <a href="analytics.html" class="btn btn-info me-2" target="_blank">
+                        <i class="bi bi-calculator"></i> Analytics
+                    </a>
                     <button id="newOrderBtn" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addOrderModal">
                         <i class="bi bi-plus-circle"></i> Add Order
                     </button>
@@ -1997,6 +2188,13 @@
                 if (document.getElementById('kitchenListMobile')) {
                     const kitchenListContent = document.getElementById('kitchenList').innerHTML;
                     document.getElementById('kitchenListMobile').innerHTML = kitchenListContent;
+                    
+                    // Ensure event listeners are reattached for mobile kitchen badges
+                    setTimeout(() => {
+                        document.querySelectorAll('#kitchenListMobile .kitchen-badge').forEach(badge => {
+                            badge.addEventListener('click', handleKitchenBadgeClick);
+                        });
+                    }, 100);
                 }
                 
                 // Update mobile delay comparison if in summary tab
@@ -2087,9 +2285,13 @@
                         : 'bg-paid';
                 
                 // Create a more modern card layout
+                // Add 'delayed' class if the order is delayed and in pending/preparing status
+                const isDelayed = order.delayLevel > 0 && (order.status === 'preparing' || order.status === 'pending');
+                const delayedClass = isDelayed ? 'delayed' : '';
+                
                 return `
                 <div class="${isCompact ? 'col-md-6' : 'col-12 col-md-6 col-lg-4'}">
-                    <div id="order-${order.docId}" class="card order-card ${statusClass}">
+                    <div id="order-${order.docId}" class="card order-card ${statusClass} ${delayedClass}">
                         <div class="card-body ${isCompact ? 'p-3' : ''}">
                             <div class="order-header">
                                 <div>
@@ -2098,7 +2300,7 @@
                                 </div>
                                 <div class="order-time">
                                     <i class="bi bi-clock"></i> ${formatElapsedTime(order.createdAt)}
-                                    ${order.delayLevel > 0 && (order.status === 'preparing' || order.status === 'pending') ? 
+                                    ${isDelayed ? 
                                         `<span class="badge bg-danger ms-2">Delayed ${order.delayLevel}x</span>` : ''}
                                 </div>
                             </div>
@@ -2346,8 +2548,8 @@
                     }
                     
                     if (kitchenItems.length === 0) {
-                        // If no items, speak a message
-                        const noItemsMsg = new SpeechSynthesisUtterance("कोई आइटम तैयार करने के लिए नहीं है।"); // Hindi: "There are no items to prepare"
+                        // If no items, speak a simple message
+                        const noItemsMsg = new SpeechSynthesisUtterance("कोई आइटम नहीं"); // Hindi: "No items"
                         if (selectedVoice) noItemsMsg.voice = selectedVoice;
                         noItemsMsg.lang = 'hi-IN'; // Set language to Hindi
                         window.speechSynthesis.speak(noItemsMsg);
@@ -2370,17 +2572,10 @@
                             btn.innerHTML = originalIcon;
                             btn.classList.remove('btn-light');
                             btn.classList.add('btn-outline-light');
-                        }, (kitchenItems.length + 1) * 2000); // Estimate speech duration
+                        }, kitchenItems.length * 2000); // Estimate speech duration based on number of items
                     });
                     
-                    // Create an introduction message in Hindi
-                    const introMsg = new SpeechSynthesisUtterance("प्राथमिकता वाली कुकिंग लिस्ट। कृपया निम्नलिखित आइटम क्रम से तैयार करें:"); // Hindi: "Priority cooking list. Please prepare the following items in order:"
-                    if (selectedVoice) introMsg.voice = selectedVoice;
-                    introMsg.lang = 'hi-IN'; // Set language to Hindi
-                    introMsg.rate = 0.9; // Slightly slower for better clarity
-                    introMsg.pitch = 1.0; // Normal pitch
-                    introMsg.volume = 1.0; // Full volume
-                    window.speechSynthesis.speak(introMsg);
+                    // No introduction message - we'll only narrate the items directly
                     
                     // Create a queue of utterances for each kitchen item
                     kitchenItems.forEach((item, index) => {
@@ -2402,19 +2597,15 @@
                             fullQty = parseInt(fullBadge.textContent.replace('Full: ', '')) || 0;
                         }
                         
-                        // Create the speech text (mix of English dish names with Hindi structure)
-                        let speechText = `${dishName}: `;
+                        // Create the speech text - just dish name and quantities, nothing extra
+                        let speechText = `${dishName}`;
                         
                         if (halfQty > 0) {
-                            speechText += `${halfQty} हाफ`; // "half" in Hindi
-                        }
-                        
-                        if (halfQty > 0 && fullQty > 0) {
-                            speechText += " और "; // "and" in Hindi
+                            speechText += `, ${halfQty} हाफ`; // "half" in Hindi
                         }
                         
                         if (fullQty > 0) {
-                            speechText += `${fullQty} फुल`; // "full" in Hindi
+                            speechText += `, ${fullQty} फुल`; // "full" in Hindi
                         }
                         
                         // Create and queue the utterance with a slight delay between items
@@ -2436,7 +2627,7 @@
                             };
                             
                             window.speechSynthesis.speak(utterance);
-                        }, (index + 1) * 1500); // Longer delay between items for better comprehension
+                        }, index * 1800); // Adequate delay between items for clear separation
                     });
                     
                     // Add a stop button functionality
@@ -2445,7 +2636,7 @@
                     // Remove the event listener after speech is likely done
                     setTimeout(() => {
                         document.removeEventListener('click', stopSpeech);
-                    }, (kitchenItems.length + 2) * 2000);
+                    }, kitchenItems.length * 2000 + 1000); // Based on item count plus a small buffer
                 }
             } else {
                 alert("Sorry, your browser does not support speech synthesis. Please try using a modern browser like Chrome, Edge, or Safari.");
@@ -2612,8 +2803,12 @@
                         `<span class="badge ${getStatusClass(status)}">${status}: ${count}</span>`
                     ).join(' ');
 
+                    // Add 'delayed' class for critical priority items (maxDelay >= 3)
+                    const isDelayed = maxDelay >= 3;
+                    const delayedClass = isDelayed ? 'delayed' : '';
+                    
                     return `
-                    <div class="kitchen-item mb-3 p-3 rounded position-relative ${priorityClass}" style="${borderStyle}">
+                    <div class="kitchen-item mb-3 p-3 rounded position-relative ${priorityClass} ${delayedClass}" style="${borderStyle}">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0" style="font-weight: 600; color: #343a40;">${name}</h5>
                             <span class="badge bg-dark" style="border-radius: 20px; padding: 6px 12px;">${orderCount} order${orderCount !== 1 ? 's' : ''}</span>
@@ -3771,6 +3966,65 @@
                 }
             };
         });
+
+        // Initialize store selector and update store name in header
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set the current store in the dropdown and enhance the selected option
+            const storeSelectors = ['storeSelector-mobile', 'storeSelector-desktop'];
+            storeSelectors.forEach(selectorId => {
+                const selector = document.getElementById(selectorId);
+                if (selector) {
+                    // Set the current value
+                    selector.value = cartName;
+                    
+                    // Enhance the dropdown options to show the current store more clearly
+                    Array.from(selector.options).forEach(option => {
+                        if (option.value === cartName) {
+                            option.textContent = `✓ ${option.textContent} (Current)`;
+                            option.style.fontWeight = 'bold';
+                            option.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
+                        }
+                    });
+                    
+                    // Add a title attribute for better UX
+                    selector.title = `Currently viewing: ${getStoreName(cartName)}`;
+                }
+            });
+            
+            // Update store name in the header with enhanced styling
+            const storeDisplayName = getStoreName(cartName);
+            const storeNameElements = ['storeName-mobile', 'storeName-desktop'];
+            storeNameElements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.textContent = storeDisplayName;
+                    
+                    // Add a tooltip for clarity
+                    element.title = `Currently viewing orders for ${storeDisplayName}`;
+                }
+            });
+            
+            // Add a visual indicator of current store in the page
+            const currentStoreIndicator = document.createElement('div');
+            currentStoreIndicator.className = 'alert alert-info alert-dismissible fade show mb-3';
+            currentStoreIndicator.innerHTML = `
+                <strong><i class="bi bi-info-circle-fill me-2"></i>Currently viewing:</strong> 
+                <span class="badge bg-primary ms-2 p-2">${storeDisplayName}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            // Insert the indicator at the top of the content area
+            const contentArea = document.querySelector('.container-fluid');
+            if (contentArea) {
+                contentArea.insertBefore(currentStoreIndicator, contentArea.firstChild);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    const bsAlert = new bootstrap.Alert(currentStoreIndicator);
+                    bsAlert.close();
+                }, 5000);
+            }
+        });
     </script>
 
     <!-- Mobile Bottom Navigation -->
@@ -3786,6 +4040,10 @@
         <a href="#" class="nav-item" id="nav-completed" onclick="switchTab('completed'); return false;">
             <i class="bi bi-check-circle"></i>
             <span>Completed</span>
+        </a>
+        <a href="analytics.html" class="nav-item" target="_blank">
+            <i class="bi bi-calculator"></i>
+            <span>Analytics</span>
         </a>
         <a href="#" class="nav-item" onclick="document.getElementById('newOrderBtn').click(); return false;">
             <i class="bi bi-plus-circle"></i>
