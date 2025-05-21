@@ -2510,8 +2510,11 @@
         function speakKitchenList() {
             // Check if the browser supports speech synthesis
             if ('speechSynthesis' in window) {
-                // Get the kitchen items from the DOM
-                const kitchenItems = document.querySelectorAll('.kitchen-item');
+                // Get the kitchen items from the DOM - only from the main kitchen list to avoid duplicates
+                // In mobile mode, we'll use the mobile kitchen list, otherwise use the desktop one
+                const isMobile = window.innerWidth < 768;
+                const kitchenListId = isMobile ? 'kitchenListMobile' : 'kitchenList';
+                const kitchenItems = document.querySelectorAll(`#${kitchenListId} .kitchen-item`);
                 
                 // Get available voices
                 let voices = window.speechSynthesis.getVoices();
