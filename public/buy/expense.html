@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #FF6B6B;
@@ -41,7 +42,7 @@
 
         .app-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 600px;
             background-color: white;
             border-radius: 20px;
             overflow: hidden;
@@ -119,7 +120,7 @@
             padding-left: 30px;
         }
 
-        .btn {
+        .btn-primary {
             width: 100%;
             padding: 15px;
             border: none;
@@ -137,13 +138,13 @@
             box-shadow: 0 4px 6px rgba(255, 107, 107, 0.2);
         }
 
-        .btn:hover {
+        .btn-primary:hover {
             background-color: #ff5252;
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(255, 107, 107, 0.3);
         }
 
-        .btn:active {
+        .btn-primary:active {
             transform: translateY(0);
             box-shadow: 0 2px 4px rgba(255, 107, 107, 0.2);
         }
@@ -178,24 +179,39 @@
             font-size: 1.2rem;
         }
 
-        .recent-expenses {
+        .expenses-container {
             padding: 20px;
             background-color: #f9f9f9;
             border-top: 1px solid #eee;
             border-radius: 0 0 20px 20px;
         }
 
-        .recent-expenses h3 {
-            font-size: 1.1rem;
+        .nav-tabs {
+            border-bottom: 1px solid #ddd;
             margin-bottom: 15px;
-            color: var(--dark-color);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            background: transparent;
+        }
+
+        .tab-content {
+            padding-top: 10px;
         }
 
         .expense-list {
-            max-height: 200px;
+            max-height: 300px;
             overflow-y: auto;
         }
 
@@ -208,6 +224,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
 
         .expense-details {
@@ -227,6 +244,30 @@
         .expense-amount {
             font-weight: 600;
             color: var(--danger-color);
+            margin-right: 10px;
+        }
+
+        .expense-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .expense-actions button {
+            border: none;
+            background: none;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #666;
+            padding: 5px;
+        }
+
+        .expense-actions .edit-btn:hover {
+            color: var(--primary-color);
+        }
+
+        .expense-actions .delete-btn:hover {
+            color: var(--danger-color);
         }
 
         .loading {
@@ -240,6 +281,24 @@
             padding: 20px;
             color: #888;
             font-style: italic;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #FF8E53 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border-bottom: none;
+        }
+
+        .modal-footer {
+            border-top: none;
         }
 
         /* Animations */
@@ -270,7 +329,7 @@
                 padding: 12px;
             }
             
-            .btn {
+            .btn-primary {
                 padding: 12px;
             }
         }
@@ -296,16 +355,15 @@
                     <input type="text" id="expenseComment" placeholder="What's this expense for?" required>
                 </div>
                 
-                <button type="submit" class="btn">
+                <button type="submit" class="btn btn-primary">
                     <i class="fas fa-save"></i> Save Expense
                 </button>
             </form>
         </div>
         
-        <div class="recent-expenses">
-            <h3><i class="fas fa-history"></i> Recent Expenses</h3>
-            <div class="expense-list" id="expenseList">
-                <div class="loading">Loading recent expenses...</div>
+        <div class="expenses-container">
+            <div class="expense-list" id="allExpensesList">
+                <div class="loading">Loading all expenses...</div>
             </div>
         </div>
     </div>
@@ -314,9 +372,64 @@
         <i class="fas fa-check-circle"></i> Expense saved successfully!
     </div>
 
+    <!-- Edit Expense Modal -->
+    <div class="modal fade" id="editExpenseModal" tabindex="-1" aria-labelledby="editExpenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editExpenseModalLabel">Edit Expense</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editExpenseForm">
+                        <input type="hidden" id="editExpenseId">
+                        <div class="mb-3">
+                            <label for="editExpenseAmount" class="form-label">Amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">₹</span>
+                                <input type="number" class="form-control" id="editExpenseAmount" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editExpenseComment" class="form-label">Comment</label>
+                            <input type="text" class="form-control" id="editExpenseComment" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveEditBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteExpenseModal" tabindex="-1" aria-labelledby="deleteExpenseModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteExpenseModalLabel">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this expense?</p>
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This action cannot be undone.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
         // Initialize Firebase
@@ -335,25 +448,35 @@
         
         // Parse URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const personName = urlParams.get('name') || 'Unknown';
+        const personName = urlParams.get('person') || 'Unknown';
         
         // Update header with person name
         document.querySelector('.header p').innerHTML = `Expense Logger for <span class="person-name">${personName}</span>`;
+        document.title = `TandoorBaaz Expense - ${personName}`;
         
         // DOM Elements
         const expenseForm = document.getElementById('expenseForm');
         const expenseAmount = document.getElementById('expenseAmount');
         const expenseComment = document.getElementById('expenseComment');
-        const expenseList = document.getElementById('expenseList');
+        const allExpensesList = document.getElementById('allExpensesList');
         const successMessage = document.getElementById('successMessage');
+        
+        // Modal elements
+        const editExpenseModal = new bootstrap.Modal(document.getElementById('editExpenseModal'));
+        const deleteExpenseModal = new bootstrap.Modal(document.getElementById('deleteExpenseModal'));
+        const editExpenseId = document.getElementById('editExpenseId');
+        const editExpenseAmount = document.getElementById('editExpenseAmount');
+        const editExpenseComment = document.getElementById('editExpenseComment');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
         
         // Event Listeners
         document.addEventListener('DOMContentLoaded', () => {
             // Focus on amount field when page loads
             expenseAmount.focus();
             
-            // Load recent expenses
-            loadRecentExpenses();
+            // Load all expenses
+            loadAllExpenses();
         });
         
         expenseForm.addEventListener('submit', function(e) {
@@ -362,22 +485,33 @@
             const amount = parseFloat(expenseAmount.value);
             const comment = expenseComment.value;
             
-            // Get today's date
-            const today = new Date();
-            const dateStr = today.toISOString().split('T')[0];
+            // Get current date and time
+            const now = new Date();
+            
+            // Format date in the format: May 14, 2025 10:05:53 PM
+            const options = { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            const dateStr = now.toLocaleString('en-US', options);
             
             // Create expense object
             const expense = {
                 date: dateStr,
                 amount: amount,
                 description: comment,
-                type: 'other',
-                recipientName: personName,
+                type: 'expense',
+                personName: personName,
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             };
             
             // Save to Firebase
-            db.collection('expenses').add(expense)
+            db.collection('tandoorbaaz_expense').add(expense)
                 .then(() => {
                     // Show success message
                     showSuccessMessage();
@@ -387,8 +521,8 @@
                     expenseComment.value = '';
                     expenseAmount.focus();
                     
-                    // Reload recent expenses
-                    loadRecentExpenses();
+                    // Reload all expenses
+                    loadAllExpenses();
                 })
                 .catch((error) => {
                     console.error('Error adding expense: ', error);
@@ -396,61 +530,143 @@
                 });
         });
         
-        // Functions
-        function loadRecentExpenses() {
-            expenseList.innerHTML = '<div class="loading">Loading recent expenses...</div>';
+        // Edit expense
+        saveEditBtn.addEventListener('click', function() {
+            const id = editExpenseId.value;
+            const amount = parseFloat(editExpenseAmount.value);
+            const comment = editExpenseComment.value;
             
-            // Query for recent expenses for this person
-            db.collection('expenses')
-                .where('recipientName', '==', personName)
+            if (!id || isNaN(amount) || !comment) {
+                alert('Please fill all fields correctly');
+                return;
+            }
+            
+            db.collection('tandoorbaaz_expense').doc(id).update({
+                amount: amount,
+                description: comment,
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                editExpenseModal.hide();
+                showSuccessMessage('Expense updated successfully!');
+                
+                // Reload expenses
+                loadAllExpenses();
+            })
+            .catch((error) => {
+                console.error('Error updating expense: ', error);
+                alert('Error updating expense: ' + error.message);
+            });
+        });
+        
+        // Delete expense
+        confirmDeleteBtn.addEventListener('click', function() {
+            const id = editExpenseId.value;
+            
+            if (!id) {
+                alert('No expense selected for deletion');
+                return;
+            }
+            
+            db.collection('tandoorbaaz_expense').doc(id).delete()
+            .then(() => {
+                deleteExpenseModal.hide();
+                showSuccessMessage('Expense deleted successfully!');
+                
+                // Reload expenses
+                loadAllExpenses();
+            })
+            .catch((error) => {
+                console.error('Error deleting expense: ', error);
+                alert('Error deleting expense: ' + error.message);
+            });
+        });
+        
+        // Functions
+        
+        function loadAllExpenses() {
+            allExpensesList.innerHTML = '<div class="loading">Loading all expenses...</div>';
+            
+            // Query for all expenses
+            db.collection('tandoorbaaz_expense')
                 .orderBy('timestamp', 'desc')
-                .limit(5)
                 .get()
                 .then((snapshot) => {
                     if (snapshot.empty) {
-                        expenseList.innerHTML = '<div class="empty-state">No recent expenses found</div>';
+                        allExpensesList.innerHTML = '<div class="empty-state">No expenses found</div>';
                         return;
                     }
                     
-                    expenseList.innerHTML = '';
+                    allExpensesList.innerHTML = '';
                     
                     snapshot.forEach((doc) => {
                         const expense = doc.data();
+                        const expenseId = doc.id;
                         const timestamp = expense.timestamp ? expense.timestamp.toDate() : new Date();
                         
-                        // Format time
-                        const timeStr = timestamp.toLocaleTimeString('en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                        });
-                        
-                        // Format date
-                        const dateStr = timestamp.toLocaleDateString('en-US', {
-                            day: 'numeric',
-                            month: 'short'
-                        });
-                        
-                        // Create expense item
-                        const expenseItem = document.createElement('div');
-                        expenseItem.className = 'expense-item';
-                        expenseItem.innerHTML = `
-                            <div class="expense-details">
-                                <div class="expense-comment">${expense.description}</div>
-                                <div class="expense-time">${dateStr}, ${timeStr}</div>
-                            </div>
-                            <div class="expense-amount">₹${expense.amount.toLocaleString('en-IN')}</div>
-                        `;
-                        
-                        expenseList.appendChild(expenseItem);
+                        // Create expense item with the formatted date and time
+                        const expenseItem = createExpenseItem(expense, timestamp, expenseId);
+                        allExpensesList.appendChild(expenseItem);
                     });
                 })
                 .catch((error) => {
-                    console.error('Error loading expenses: ', error);
-                    expenseList.innerHTML = '<div class="empty-state">Error loading expenses</div>';
+                    console.error('Error loading all expenses: ', error);
+                    allExpensesList.innerHTML = '<div class="empty-state">Error loading expenses</div>';
                 });
         }
         
-        function showSuccessMessage() {
+        function createExpenseItem(expense, timestamp, docId) {
+            // Format date and time (May 14, 2025 10:05:53 PM)
+            const options = { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            };
+            const formattedDateTime = timestamp.toLocaleString('en-US', options);
+            
+            // Create expense item element
+            const expenseItem = document.createElement('div');
+            expenseItem.className = 'expense-item';
+            expenseItem.innerHTML = `
+                <div class="expense-details">
+                    <div class="expense-comment">${expense.description}</div>
+                    <div class="expense-time">${formattedDateTime}</div>
+                    <div class="expense-person">${expense.personName}</div>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="expense-amount">₹${expense.amount.toLocaleString('en-IN')}</div>
+                    <div class="expense-actions">
+                        <button class="edit-btn" title="Edit expense"><i class="fas fa-edit"></i></button>
+                        <button class="delete-btn" title="Delete expense"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners for edit and delete buttons
+            const editBtn = expenseItem.querySelector('.edit-btn');
+            const deleteBtn = expenseItem.querySelector('.delete-btn');
+            
+            editBtn.addEventListener('click', () => {
+                editExpenseId.value = docId;
+                editExpenseAmount.value = expense.amount;
+                editExpenseComment.value = expense.description;
+                editExpenseModal.show();
+            });
+            
+            deleteBtn.addEventListener('click', () => {
+                editExpenseId.value = docId;
+                deleteExpenseModal.show();
+            });
+            
+            return expenseItem;
+        }
+        
+        function showSuccessMessage(message = 'Expense saved successfully!') {
+            successMessage.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
             successMessage.classList.add('show');
             
             setTimeout(() => {
