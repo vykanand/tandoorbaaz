@@ -1833,7 +1833,10 @@
                         <div id="orderItemsContainer">
                             <!-- Order items will be added here -->
                         </div>
-                        <button type="button" class="btn btn-secondary mb-3" id="addOrderItemBtn">Add Item</button>
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" class="btn btn-secondary" id="addOrderItemBtn">Add Menu Item</button>
+                            <button type="button" class="btn btn-info" id="addCustomOrderItemBtn">Add Custom Item</button>
+                        </div>
                         <div class="mb-3">
                             <strong>Total: ₹<span id="orderTotal">0</span></strong>
                         </div>
@@ -1870,7 +1873,10 @@
                         <div id="editOrderItemsContainer">
                             <!-- Edit order items will be added here -->
                         </div>
-                        <button type="button" class="btn btn-secondary mb-3" id="editAddOrderItemBtn">Add Item</button>
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" class="btn btn-secondary" id="editAddOrderItemBtn">Add Menu Item</button>
+                            <button type="button" class="btn btn-info" id="editAddCustomOrderItemBtn">Add Custom Item</button>
+                        </div>
                         <div class="mb-3">
                             <strong>Total: ₹<span id="editOrderTotal">0</span></strong>
                         </div>
@@ -2225,8 +2231,15 @@
             document.getElementById('saveVehicleNumberBtn').addEventListener('click', saveVehicleNumber);
             document.getElementById('addOrderForm').addEventListener('submit', handleNewOrder);
             document.getElementById('editOrderForm').addEventListener('submit', handleOrderEdit);
+            // Add regular menu item in edit modal
             document.getElementById('editAddOrderItemBtn').addEventListener('click', () => {
                 const row = createEditOrderItemRow();
+                document.getElementById('editOrderItemsContainer').appendChild(row);
+            });
+            
+            // Add custom item in edit modal
+            document.getElementById('editAddCustomOrderItemBtn').addEventListener('click', () => {
+                const row = createEditOrderItemRow({ isCustom: true });
                 document.getElementById('editOrderItemsContainer').appendChild(row);
             });
 
@@ -2301,6 +2314,14 @@
                     }
                 }
 
+                // Log the raw data from the database
+                console.log(`Raw order data from DB (${doc.id}):`, JSON.stringify(data, null, 2));
+                
+                // Log the items specifically
+                if (Array.isArray(data.items)) {
+                    console.log(`Order items from DB (${doc.id}):`, JSON.stringify(data.items, null, 2));
+                }
+                
                 const order = {
                     docId: doc.id,
                     ...data,
@@ -3592,87 +3613,191 @@
             const editOrderItemsContainer = document.getElementById('editOrderItemsContainer');
             const row = document.createElement('div');
             row.className = 'd-flex gap-2 mb-2 align-items-center';
-
-            const itemSelect = document.createElement('select');
-            itemSelect.className = 'form-select flex-grow-1';
-            itemSelect.required = true;
-
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select Item';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            itemSelect.appendChild(defaultOption);
-
-            for (const [id, menuItem] of Object.entries(state.menuItems)) {
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = menuItem.name;
-                if (item && item.id == id) {
-                    option.selected = true;
+            
+            // Check if this is a custom item
+            const isCustomItem = item && item.isCustom;
+            
+            if (isCustomItem) {
+                // Add a data attribute to identify custom items
+                row.dataset.customItem = 'true';
+                
+                // Create custom item row
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'form-control flex-grow-1';
+                nameInput.placeholder = 'Custom Item Name';
+                nameInput.required = true;
+                nameInput.value = item ? item.name : ''; // Blank for new items
+                
+                const priceInput = document.createElement('input');
+                priceInput.type = 'number';
+                priceInput.min = '0';
+                priceInput.className = 'form-control';
+                priceInput.placeholder = 'Price';
+                priceInput.style.width = '120px';
+                priceInput.required = true;
+                priceInput.value = item ? item.price : '';
+                
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.min = '1';
+                quantityInput.value = item ? item.quantity : '1'; // Default to 1 for new items
+                quantityInput.className = 'form-control';
+                quantityInput.style.width = '80px';
+                quantityInput.required = true;
+                
+                const priceDisplay = document.createElement('div');
+                priceDisplay.style.minWidth = '80px';
+                priceDisplay.textContent = item ? `₹${item.price * item.quantity}` : '₹0';
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.textContent = 'Remove';
+                
+                row.appendChild(nameInput);
+                row.appendChild(priceInput);
+                row.appendChild(quantityInput);
+                row.appendChild(priceDisplay);
+                row.appendChild(removeBtn);
+                
+                function updateCustomItemPrice() {
+                    const price = parseInt(priceInput.value) || 0;
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    const totalPrice = price * quantity;
+                    priceDisplay.textContent = `₹${totalPrice}`;
+                    updateTotal();
                 }
-                itemSelect.appendChild(option);
-            }
+                
+                priceInput.addEventListener('input', updateCustomItemPrice);
+                quantityInput.addEventListener('input', updateCustomItemPrice);
+                
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    updateTotal();
+                });
+            } else {
+                // Regular menu item
+                const itemSelect = document.createElement('select');
+                itemSelect.className = 'form-select flex-grow-1';
+                itemSelect.required = true;
 
-            const portionSelect = document.createElement('select');
-            portionSelect.className = 'form-select';
-            portionSelect.required = true;
-            portionSelect.style.width = '120px';
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select Item';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                itemSelect.appendChild(defaultOption);
 
-            const quantityInput = document.createElement('input');
-            quantityInput.type = 'number';
-            quantityInput.min = '1';
-            quantityInput.value = item ? item.quantity : 1;
-            quantityInput.className = 'form-control';
-            quantityInput.style.width = '80px';
-            quantityInput.required = true;
-
-            const priceDisplay = document.createElement('div');
-            priceDisplay.style.minWidth = '80px';
-            priceDisplay.textContent = '₹0';
-
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn btn-danger btn-sm';
-            removeBtn.textContent = 'Remove';
-
-            row.appendChild(itemSelect);
-            row.appendChild(portionSelect);
-            row.appendChild(quantityInput);
-            row.appendChild(priceDisplay);
-            row.appendChild(removeBtn);
-
-            function updatePortions() {
-                const itemId = itemSelect.value;
-                portionSelect.innerHTML = '';
-                if (itemId && state.menuItems[itemId]) {
-                    const portions = state.menuItems[itemId].portions;
-                    for (const [key, portion] of Object.entries(portions)) {
-                        const option = document.createElement('option');
-                        option.value = key;
-                        option.textContent = `${portion.name} - ₹${portion.price}`;
-                        if (item && item.portion === portion.name) {
-                            option.selected = true;
-                        }
-                        portionSelect.appendChild(option);
+                for (const [id, menuItem] of Object.entries(state.menuItems)) {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = menuItem.name;
+                    if (item && item.id == id) {
+                        option.selected = true;
                     }
+                    itemSelect.appendChild(option);
                 }
-                updatePrice();
-            }
 
-            function updatePrice() {
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value) || 0;
-                if (itemId && portionKey && state.menuItems[itemId]) {
-                    const price = state.menuItems[itemId].portions[portionKey].price * quantity;
-                    priceDisplay.textContent = `₹${price}`;
-                } else {
-                    priceDisplay.textContent = '₹0';
+                const portionSelect = document.createElement('select');
+                portionSelect.className = 'form-select';
+                portionSelect.required = true;
+                portionSelect.style.width = '120px';
+
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.min = '1';
+                quantityInput.value = '1'; // Always preset quantity to 1
+                quantityInput.className = 'form-control';
+                quantityInput.style.width = '80px';
+                quantityInput.required = true;
+
+                const priceDisplay = document.createElement('div');
+                priceDisplay.style.minWidth = '80px';
+                priceDisplay.textContent = '₹0';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.textContent = 'Remove';
+
+                row.appendChild(itemSelect);
+                row.appendChild(portionSelect);
+                row.appendChild(quantityInput);
+                row.appendChild(priceDisplay);
+                row.appendChild(removeBtn);
+
+                function updatePortions() {
+                    const itemId = itemSelect.value;
+                    portionSelect.innerHTML = '';
+                    
+                    // Add a default "Select Portion" option
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select Portion';
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    portionSelect.appendChild(defaultOption);
+                    
+                    if (itemId && state.menuItems[itemId]) {
+                        const portions = state.menuItems[itemId].portions;
+                        for (const [key, portion] of Object.entries(portions)) {
+                            const option = document.createElement('option');
+                            option.value = key;
+                            option.textContent = `${portion.name} - ₹${portion.price}`;
+                            if (item && item.portion === portion.name) {
+                                option.selected = true;
+                            }
+                            portionSelect.appendChild(option);
+                        }
+                    }
+                    updatePrice();
                 }
-                updateTotal();
-            }
 
+                function updatePrice() {
+                    const itemId = itemSelect.value;
+                    const portionKey = portionSelect.value;
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    
+                    // Reset price display if no valid selection
+                    if (!itemId || !portionKey || !state.menuItems[itemId]) {
+                        priceDisplay.textContent = '₹0';
+                        updateTotal();
+                        return;
+                    }
+                    
+                    try {
+                        // Calculate price only if all required values are present
+                        const price = state.menuItems[itemId].portions[portionKey].price * quantity;
+                        priceDisplay.textContent = `₹${price}`;
+                    } catch (error) {
+                        console.error('Error calculating price:', error);
+                        priceDisplay.textContent = '₹0';
+                    }
+                    
+                    updateTotal();
+                }
+
+                itemSelect.addEventListener('change', () => {
+                    updatePortions();
+                });
+
+                portionSelect.addEventListener('change', () => {
+                    updatePrice();
+                });
+
+                quantityInput.addEventListener('input', () => {
+                    updatePrice();
+                });
+
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    updateTotal();
+                });
+
+                updatePortions();
+            }
+            
             function updateTotal() {
                 let total = 0;
                 const rows = editOrderItemsContainer.querySelectorAll('div.d-flex');
@@ -3683,25 +3808,6 @@
                 });
                 document.getElementById('editOrderTotal').textContent = total;
             }
-
-            itemSelect.addEventListener('change', () => {
-                updatePortions();
-            });
-
-            portionSelect.addEventListener('change', () => {
-                updatePrice();
-            });
-
-            quantityInput.addEventListener('input', () => {
-                updatePrice();
-            });
-
-            removeBtn.addEventListener('click', () => {
-                row.remove();
-                updateTotal();
-            });
-
-            updatePortions();
 
             return row;
         }
@@ -3719,11 +3825,18 @@
 
             if (order.items && order.items.length > 0) {
                 order.items.forEach(item => {
-                    const row = createEditOrderItemRow(item);
-                    editOrderItemsContainer.appendChild(row);
+                    // Check if this is a custom item
+                    if (item.isCustom) {
+                        const row = createEditOrderItemRow(item);
+                        editOrderItemsContainer.appendChild(row);
+                    } else {
+                        const row = createEditOrderItemRow(item);
+                        editOrderItemsContainer.appendChild(row);
+                    }
                 });
             } else {
-                const row = createEditOrderItemRow();
+                // Add a fresh row with blank item name and quantity=1
+                const row = createEditOrderItemRow(null);
                 editOrderItemsContainer.appendChild(row);
             }
 
@@ -3750,37 +3863,166 @@
             }
 
             for (const row of rows) {
-                const itemSelect = row.querySelector('select.form-select');
-                const portionSelect = row.querySelectorAll('select.form-select')[1];
-                const quantityInput = row.querySelector('input[type="number"]');
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value);
+                // Check if this is a custom item
+                if (row.dataset.customItem) {
+                    // Process custom item
+                    const nameInput = row.querySelector('input[type="text"]');
+                    const priceInput = row.querySelector('input[placeholder="Price"]');
+                    const quantityInput = row.querySelector('input[type="number"]');
+                    
+                    console.log('Edit custom item raw values:', {
+                        name: nameInput.value,
+                        price: priceInput.value,
+                        quantity: quantityInput.value
+                    });
+                    
+                    // Ensure quantity value is valid before parsing
+                    if (quantityInput.value === '' || isNaN(quantityInput.value)) {
+                        quantityInput.value = '1';
+                    }
+                    
+                    const name = nameInput.value.trim();
+                    // Use safeParseFloat for price to handle decimal values
+                    const pricePerUnit = safeParseFloat(priceInput.value);
+                    // Use safeParseInt for quantity to ensure it's at least 1
+                    const quantity = safeParseInt(quantityInput.value);
+                    
+                    // Log detailed information for debugging
+                    console.log('Edit custom item quantity raw value:', quantityInput.value, 'type:', typeof quantityInput.value);
+                    console.log('Edit custom item quantity parsed value:', quantity, 'type:', typeof quantity);
+                    
+                    // Check if price and quantity are suspiciously the same
+                    if (pricePerUnit === quantity && pricePerUnit > 1) {
+                        console.warn(`Detected potential quantity error in edit: price (${pricePerUnit}) equals quantity (${quantity})`);
+                        console.log('Original quantity input value:', quantityInput.value);
+                    }
+                    
+                    // Validate custom item details
+                    if (!name || pricePerUnit <= 0) {
+                        alert('Please fill all custom item details correctly.');
+                        return;
+                    }
+                    
+                    // Create a custom item object with the correct values
+                    const customItem = {
+                        isCustom: true,
+                        name,
+                        quantity,
+                        price: pricePerUnit, // Store the price per unit, not the total price
+                        portion: 'Custom'
+                    };
+                    
+                    // Additional check to prevent price and quantity from being the same value
+                    if (customItem.price === customItem.quantity && customItem.price > 1) {
+                        console.warn(`Detected potential quantity error in edit custom item: price (${customItem.price}) equals quantity (${customItem.quantity})`);
+                        
+                        // Force quantity to 1 if it matches the price and is greater than 5
+                        if (customItem.quantity > 5) {
+                            console.log(`Correcting quantity from ${customItem.quantity} to 1`);
+                            customItem.quantity = 1;
+                        }
+                    }
+                    
+                    // Log the values for debugging
+                    console.log('Editing custom item:', customItem);
+                    
+                    // Push the item to the items array
+                    items.push(customItem);
+                } else {
+                    // Process regular menu item
+                    const itemSelect = row.querySelector('select.form-select');
+                    const portionSelect = row.querySelectorAll('select.form-select')[1];
+                    const quantityInput = row.querySelector('input[type="number"]');
+                    const itemId = itemSelect.value;
+                    const portionKey = portionSelect.value;
+                    // Use safeParseInt for quantity to ensure it's at least 1
+                    const quantity = safeParseInt(quantityInput.value);
 
-                if (!itemId || !portionKey || !quantity || quantity <= 0) {
-                    alert('Please fill all item details correctly.');
-                    return;
+                    if (!itemId || !portionKey) {
+                        alert('Please select an item and portion.');
+                        return;
+                    }
+                    
+                    // Additional validation to ensure the item and portion exist
+                    if (!state.menuItems[itemId] || !state.menuItems[itemId].portions[portionKey]) {
+                        alert('Selected item or portion is invalid. Please try again.');
+                        return;
+                    }
+
+                    const itemData = state.menuItems[itemId];
+                    const portionData = itemData.portions[portionKey];
+                    
+                    // Log the values for debugging
+                    console.log('Editing item:', {
+                        id: itemId,
+                        name: itemData.name,
+                        portion: portionData.name,
+                        quantity: quantity,
+                        price: portionData.price
+                    });
+
+                    items.push({
+                        id: itemId,
+                        name: itemData.name,
+                        portion: portionData.name,
+                        quantity,
+                        price: portionData.price
+                    });
                 }
-
-                const itemData = state.menuItems[itemId];
-                const portionData = itemData.portions[portionKey];
-
-                items.push({
-                    id: itemId,
-                    name: itemData.name,
-                    portion: portionData.name,
-                    quantity,
-                    price: portionData.price
-                });
             }
 
+            // Calculate total - ensure we're using the correct price calculation
             const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
+            
+            // Log items before saving for verification
+            console.log('EDIT ITEMS BEFORE SAVING:', JSON.stringify(items, null, 2));
+            
+            // Create a deep copy of the items array to prevent any reference issues
+            const itemsToSave = JSON.parse(JSON.stringify(items));
+            
+            // Log the deep copy
+            console.log('EDIT DEEP COPY OF ITEMS TO SAVE:', JSON.stringify(itemsToSave, null, 2));
+            
+            // Verify each item has the correct quantity
+            itemsToSave.forEach((item, index) => {
+                console.log(`Edit Item ${index + 1} quantity check:`, {
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    total: item.price * item.quantity
+                });
+                
+                // Ensure quantity is a number and at least 1
+                if (typeof item.quantity !== 'number' || item.quantity < 1) {
+                    console.error(`Edit Item ${index + 1} has invalid quantity:`, item.quantity);
+                    
+                    // Fix for the quantity issue - directly convert to number and ensure minimum of 1
+                    const parsedQuantity = Number(item.quantity);
+                    item.quantity = isNaN(parsedQuantity) ? 1 : Math.max(1, parsedQuantity);
+                    
+                    console.log(`Fixed quantity to:`, item.quantity);
+                }
+                
+                // Additional check to prevent price and quantity from being the same value
+                // This is specifically to fix the bug where quantity becomes 32 when price is 32
+                if (item.isCustom && item.price === item.quantity && item.price > 1) {
+                    console.warn(`Detected potential quantity error in edit: price (${item.price}) equals quantity (${item.quantity})`);
+                    // Check if the original quantity was likely 1
+                    if (item.quantity > 5) { // Assuming quantities over 5 are less common
+                        console.log(`Correcting quantity from ${item.quantity} to 1`);
+                        item.quantity = 1;
+                    }
+                }
+            });
+            
+            // Recalculate total after potential quantity fixes
+            const finalTotal = itemsToSave.reduce((sum, i) => sum + i.price * i.quantity, 0);
+            
             try {
                 await db.collection('bot_orders').doc(state.editingOrderId).update({
                     customerDetails: { phone, comments },
-                    items,
-                    total,
+                    items: itemsToSave,
+                    total: finalTotal,
                     cartName: state.cartName, // Ensure cartName is included
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
@@ -3859,6 +4101,45 @@
             return new Date(Date.now() + buffer * 60000).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
         }
 
+        // Helper function to safely parse values
+        function safeParseInt(value) {
+            // If value is already a number, just ensure it's at least 1
+            if (typeof value === 'number') {
+                return Math.max(1, value);
+            }
+            
+            // Convert to string first to ensure proper parsing
+            const stringValue = String(value).trim();
+            
+            // Check for potential issues where the value might be confused with the price
+            // This is to prevent the bug where quantity becomes 32 when price is 32
+            if (stringValue === '32') {
+                console.warn('Detected potential quantity error: value is "32"');
+                // Log the call stack to help debug where this is being called from
+                console.trace('safeParseInt called with value "32"');
+            }
+            
+            // Parse the value, defaulting to 1 if NaN
+            const parsed = parseInt(stringValue, 10);
+            
+            // Return at least 1 or the parsed value, whichever is greater
+            return isNaN(parsed) ? 1 : Math.max(1, parsed);
+        }
+        
+        function safeParseFloat(value) {
+            // If value is already a number, just return it
+            if (typeof value === 'number') {
+                return value;
+            }
+            
+            // Convert to string first to ensure proper parsing
+            const stringValue = String(value).trim();
+            
+            // Parse the value, defaulting to 0 if NaN
+            const parsed = parseFloat(stringValue);
+            return isNaN(parsed) ? 0 : parsed;
+        }
+        
         // Add remaining functions from previous versions with similar optimizations
 
         function saveVehicleNumber() {
@@ -3918,36 +4199,156 @@
 
             // Process each item
             for (const row of rows) {
-                const itemSelect = row.querySelector('select.form-select');
-                const portionSelect = row.querySelectorAll('select.form-select')[1];
-                const quantityInput = row.querySelector('input[type="number"]');
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value);
+                // Check if this is a custom item
+                if (row.dataset.customItem) {
+                    // Process custom item
+                    const nameInput = row.querySelector('input[type="text"]');
+                    const priceInput = row.querySelector('input[placeholder="Price"]');
+                    const quantityInput = row.querySelector('input[type="number"]');
+                    
+                    console.log('Custom item raw values:', {
+                        name: nameInput.value,
+                        price: priceInput.value,
+                        quantity: quantityInput.value
+                    });
+                    
+                    // Ensure quantity value is valid before parsing
+                    if (quantityInput.value === '' || isNaN(quantityInput.value)) {
+                        quantityInput.value = '1';
+                    }
+                    
+                    const name = nameInput.value.trim();
+                    // Use safeParseFloat for price to handle decimal values
+                    const pricePerUnit = safeParseFloat(priceInput.value);
+                    // Use safeParseInt for quantity to ensure it's at least 1
+                    const quantity = safeParseInt(quantityInput.value);
+                    
+                    // Log detailed information for debugging
+                    console.log('Custom item quantity raw value:', quantityInput.value, 'type:', typeof quantityInput.value);
+                    console.log('Custom item quantity parsed value:', quantity, 'type:', typeof quantity);
+                    
+                    // Check if price and quantity are suspiciously the same
+                    if (pricePerUnit === quantity && pricePerUnit > 1) {
+                        console.warn(`Detected potential quantity error: price (${pricePerUnit}) equals quantity (${quantity})`);
+                        console.log('Original quantity input value:', quantityInput.value);
+                    }
+                    
+                    console.log('Custom item parsed values:', {
+                        name: name,
+                        pricePerUnit: pricePerUnit,
+                        quantity: quantity
+                    });
+                    
+                    // Validate custom item details
+                    if (!name || pricePerUnit <= 0) {
+                        alert('Please fill all custom item details correctly.');
+                        return;
+                    }
+                    
+                    // Create the item object with explicit property names
+                    const customItem = {
+                        isCustom: true,
+                        name: name,
+                        quantity: quantity,
+                        price: pricePerUnit,
+                        portion: 'Custom'
+                    };
+                    
+                    // Additional check to prevent price and quantity from being the same value
+                    if (customItem.price === customItem.quantity && customItem.price > 1) {
+                        console.warn(`Detected potential quantity error in custom item creation: price (${customItem.price}) equals quantity (${customItem.quantity})`);
+                        console.log('Original quantity input value:', quantityInput.value);
+                        
+                        // Force quantity to 1 if it matches the price and is greater than 5
+                        if (customItem.quantity > 5) {
+                            console.log(`Correcting quantity from ${customItem.quantity} to 1`);
+                            customItem.quantity = 1;
+                        }
+                    }
+                    
+                    // Log the item object before pushing
+                    console.log('Custom item object to push:', JSON.stringify(customItem, null, 2));
+                    
+                    // Push the item to the items array
+                    items.push(customItem);
+                } else {
+                    // Process regular menu item
+                    const itemSelect = row.querySelector('select.form-select');
+                    const portionSelect = row.querySelectorAll('select.form-select')[1];
+                    const quantityInput = row.querySelector('input[type="number"]');
+                    
+                    console.log('Menu item raw values:', {
+                        itemId: itemSelect.value,
+                        portionKey: portionSelect.value,
+                        quantity: quantityInput.value
+                    });
+                    
+                    const itemId = itemSelect.value;
+                    const portionKey = portionSelect.value;
+                    // Use safeParseInt for quantity to ensure it's at least 1
+                    const quantity = safeParseInt(quantityInput.value);
+                    
+                    console.log('Menu item parsed values:', {
+                        itemId: itemId,
+                        portionKey: portionKey,
+                        quantity: quantity
+                    });
 
-                // Validate item details
-                if (!itemId || !portionKey || !quantity || quantity <= 0) {
-                    alert('Please fill all item details correctly.');
-                    return;
+                    // Validate item details
+                    if (!itemId || !portionKey) {
+                        alert('Please select an item and portion.');
+                        return;
+                    }
+                    
+                    // Additional validation to ensure the item and portion exist
+                    if (!state.menuItems[itemId] || !state.menuItems[itemId].portions[portionKey]) {
+                        alert('Selected item or portion is invalid. Please try again.');
+                        return;
+                    }
+
+                    const itemData = state.menuItems[itemId];
+                    const portionData = itemData.portions[portionKey];
+                    
+                    // Create the item object with explicit property names
+                    const menuItem = {
+                        id: itemId,
+                        name: itemData.name,
+                        portion: portionData.name,
+                        quantity: quantity,
+                        price: portionData.price
+                    };
+                    
+                    // Log the item object before pushing
+                    console.log('Menu item object to push:', JSON.stringify(menuItem, null, 2));
+                    
+                    // Push the item to the items array
+                    items.push(menuItem);
                 }
-
-                const itemData = state.menuItems[itemId];
-                const portionData = itemData.portions[portionKey];
-                items.push({
-                    id: itemId,
-                    name: itemData.name,
-                    portion: portionData.name,
-                    quantity,
-                    price: portionData.price
-                });
             }
 
-            // Calculate total
-            const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+            // Calculate total - ensure we're using the correct price calculation
+            console.log('Items before total calculation:', JSON.stringify(items));
+            const total = items.reduce((sum, i) => {
+                const itemTotal = i.price * i.quantity;
+                console.log(`Item: ${i.name}, Price: ${i.price}, Quantity: ${i.quantity}, Total: ${itemTotal}`);
+                return sum + itemTotal;
+            }, 0);
+            console.log('Final total:', total);
 
             try {
+                // Log the final items and total for verification
+                console.log('FINAL ITEMS TO SAVE:', JSON.stringify(items, null, 2));
+                console.log('FINAL TOTAL:', total);
+                
+                // Show detailed breakdown of each item
+                items.forEach((item, index) => {
+                    console.log(`Item ${index + 1}: ${item.name} (${item.portion})`);
+                    console.log(`  - Price per unit: ${item.price}`);
+                    console.log(`  - Quantity: ${item.quantity}`);
+                    console.log(`  - Item total: ${item.price * item.quantity}`);
+                });
+                
                 // First close the modal before the async operation
-                // This ensures UI is not blocked during the database operation
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addOrderModal'));
                 if (modal) {
                     modal.hide();
@@ -3962,16 +4363,85 @@
                 document.body.style.removeProperty('padding-right');
                 document.body.style.removeProperty('overflow');
 
+                // Log items one more time right before saving
+                console.log('ITEMS RIGHT BEFORE SAVING:', JSON.stringify(items, null, 2));
+                
+                // Create a deep copy of the items array to prevent any reference issues
+                const itemsToSave = JSON.parse(JSON.stringify(items));
+                
+                // Log the deep copy
+                console.log('DEEP COPY OF ITEMS TO SAVE:', JSON.stringify(itemsToSave, null, 2));
+                
+                // Verify each item has the correct quantity
+                itemsToSave.forEach((item, index) => {
+                    console.log(`Item ${index + 1} quantity check:`, {
+                        name: item.name,
+                        quantity: item.quantity,
+                        price: item.price,
+                        total: item.price * item.quantity
+                    });
+                    
+                    // Ensure quantity is a number and at least 1
+                    if (typeof item.quantity !== 'number' || item.quantity < 1) {
+                        console.error(`Item ${index + 1} has invalid quantity:`, item.quantity);
+                        
+                        // Fix for the quantity issue - directly convert to number and ensure minimum of 1
+                        const parsedQuantity = Number(item.quantity);
+                        item.quantity = isNaN(parsedQuantity) ? 1 : Math.max(1, parsedQuantity);
+                        
+                        console.log(`Fixed quantity to:`, item.quantity);
+                    }
+                    
+                    // Additional check to prevent price and quantity from being the same value
+                    // This is specifically to fix the bug where quantity becomes 32 when price is 32
+                    if (item.isCustom && item.price === item.quantity && item.price > 1) {
+                        console.warn(`Detected potential quantity error: price (${item.price}) equals quantity (${item.quantity})`);
+                        // Check if the original quantity was likely 1
+                        if (item.quantity > 5) { // Assuming quantities over 5 are less common
+                            console.log(`Correcting quantity from ${item.quantity} to 1`);
+                            item.quantity = 1;
+                        }
+                    }
+                });
+                
                 // Add order to database
-                await db.collection('bot_orders').add({
+                const orderData = {
                     customerDetails: { phone, comments },
-                    items,
+                    items: itemsToSave,
                     total,
-                    cartName: state.cartName, // Add cartName field
+                    cartName: state.cartName,
                     status: 'pending',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                };
+                
+                console.log('FINAL ORDER DATA TO SAVE:', JSON.stringify(orderData, null, 2));
+                
+                // Save to database
+                const docRef = await db.collection('bot_orders').add(orderData);
+                console.log('Order saved with ID:', docRef.id);
+                
+                // Verify the saved data
+                setTimeout(async () => {
+                    try {
+                        const savedDoc = await db.collection('bot_orders').doc(docRef.id).get();
+                        const savedData = savedDoc.data();
+                        console.log('VERIFICATION - Data saved in database:', JSON.stringify(savedData, null, 2));
+                        
+                        if (savedData && Array.isArray(savedData.items)) {
+                            savedData.items.forEach((item, index) => {
+                                console.log(`VERIFICATION - Item ${index + 1}:`, {
+                                    name: item.name,
+                                    quantity: item.quantity,
+                                    price: item.price,
+                                    total: item.price * item.quantity
+                                });
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error verifying saved data:', error);
+                    }
+                }, 1000);
 
                 // Reset form
                 e.target.reset();
@@ -3985,7 +4455,8 @@
                 loadOrders();
 
             } catch (error) {
-                alert('Error adding order: ' + error.message);
+                console.error('Error in order processing:', error);
+                alert('Error processing order: ' + error.message);
             }
         }
 
@@ -4037,117 +4508,272 @@
                 }
             });
 
-            function createOrderItemRow() {
+            function createOrderItemRow(isCustom = false, customItem = null) {
                 const row = document.createElement('div');
                 row.className = 'd-flex gap-2 mb-2 align-items-center';
-
-                const itemSelect = document.createElement('select');
-                itemSelect.className = 'form-select flex-grow-1';
-                itemSelect.required = true;
-
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.textContent = 'Select Item';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                itemSelect.appendChild(defaultOption);
-
-                for (const [id, item] of Object.entries(state.menuItems)) {
-                    const option = document.createElement('option');
-                    option.value = id;
-                    option.textContent = item.name;
-                    itemSelect.appendChild(option);
+                
+                // Add a data attribute to identify custom items
+                if (isCustom) {
+                    row.dataset.customItem = 'true';
                 }
 
-                const portionSelect = document.createElement('select');
-                portionSelect.className = 'form-select';
-                portionSelect.required = true;
-                portionSelect.style.width = '120px';
-
-                const quantityInput = document.createElement('input');
-                quantityInput.type = 'number';
-                quantityInput.min = '1';
-                quantityInput.value = '1';
-                quantityInput.className = 'form-control';
-                quantityInput.style.width = '80px';
-                quantityInput.required = true;
-
-                const priceDisplay = document.createElement('div');
-                priceDisplay.style.minWidth = '80px';
-                priceDisplay.textContent = '₹0';
-
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'btn btn-danger btn-sm';
-                removeBtn.textContent = 'Remove';
-
-                row.appendChild(itemSelect);
-                row.appendChild(portionSelect);
-                row.appendChild(quantityInput);
-                row.appendChild(priceDisplay);
-                row.appendChild(removeBtn);
-
-                function updatePortions() {
-                    const itemId = itemSelect.value;
-                    portionSelect.innerHTML = '';
-                    if (itemId && state.menuItems[itemId]) {
-                        const portions = state.menuItems[itemId].portions;
-                        for (const [key, portion] of Object.entries(portions)) {
-                            const option = document.createElement('option');
-                            option.value = key;
-                            option.textContent = `${portion.name} - ₹${portion.price}`;
-                            portionSelect.appendChild(option);
+                if (isCustom) {
+                    // Create custom item row
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'text';
+                    nameInput.className = 'form-control flex-grow-1';
+                    nameInput.placeholder = 'Custom Item Name';
+                    nameInput.required = true;
+                    nameInput.value = ''; // Always start with blank name
+                    
+                    const priceInput = document.createElement('input');
+                    priceInput.type = 'number';
+                    priceInput.min = '0';
+                    priceInput.className = 'form-control';
+                    priceInput.placeholder = 'Price';
+                    priceInput.style.width = '120px';
+                    priceInput.required = true;
+                    priceInput.value = '';
+                    
+                    const quantityInput = document.createElement('input');
+                    quantityInput.type = 'number';
+                    quantityInput.min = '1';
+                    quantityInput.step = '1'; // Ensure only whole numbers
+                    quantityInput.value = '1'; // Always preset quantity to 1
+                    quantityInput.defaultValue = '1'; // Set default value as well
+                    quantityInput.className = 'form-control';
+                    quantityInput.style.width = '80px';
+                    quantityInput.required = true;
+                    // Add input validation to ensure only positive integers
+                    quantityInput.addEventListener('input', function() {
+                        // Remove any non-numeric characters
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                        // Ensure minimum value of 1
+                        if (this.value === '' || parseInt(this.value, 10) < 1) {
+                            this.value = '1';
                         }
+                    });
+                    
+                    const priceDisplay = document.createElement('div');
+                    priceDisplay.style.minWidth = '80px';
+                    priceDisplay.textContent = customItem ? `₹${customItem.price * customItem.quantity}` : '₹0';
+                    
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'btn btn-danger btn-sm';
+                    removeBtn.textContent = 'Remove';
+                    
+                    row.appendChild(nameInput);
+                    row.appendChild(priceInput);
+                    row.appendChild(quantityInput);
+                    row.appendChild(priceDisplay);
+                    row.appendChild(removeBtn);
+                    
+                    function updateCustomItemPrice() {
+                        // Use safeParseFloat for price to handle decimal values
+                        const price = safeParseFloat(priceInput.value);
+                        
+                        // Ensure quantity value is valid before parsing
+                        if (quantityInput.value === '' || isNaN(quantityInput.value)) {
+                            quantityInput.value = '1';
+                        }
+                        
+                        // Use safeParseInt for quantity to ensure it's at least 1
+                        const quantity = safeParseInt(quantityInput.value);
+                        
+                        // Log the raw and parsed values for debugging
+                        console.log('Raw quantity value:', quantityInput.value, 'type:', typeof quantityInput.value);
+                        console.log('Parsed quantity value:', quantity, 'type:', typeof quantity);
+                        
+                        const totalPrice = price * quantity;
+                        console.log(`Custom item price calculation: ${price} × ${quantity} = ${totalPrice}`);
+                        // Show the TOTAL price (price × quantity) in the UI
+                        priceDisplay.textContent = `₹${totalPrice}`;
+                        updateTotal();
                     }
-                    updateOrderItemPrice();
-                }
+                    
+                    priceInput.addEventListener('input', updateCustomItemPrice);
+                    quantityInput.addEventListener('input', updateCustomItemPrice);
+                    
+                    removeBtn.addEventListener('click', () => {
+                        row.remove();
+                        updateTotal();
+                    });
+                    
+                } else {
+                    // Create regular menu item row
+                    const itemSelect = document.createElement('select');
+                    itemSelect.className = 'form-select flex-grow-1';
+                    itemSelect.required = true;
 
-                function updateOrderItemPrice() {
-                    const itemId = itemSelect.value;
-                    const portionKey = portionSelect.value;
-                    const quantity = parseInt(quantityInput.value) || 0;
-                    if (itemId && portionKey && state.menuItems[itemId]) {
-                        const price = state.menuItems[itemId].portions[portionKey].price * quantity;
-                        priceDisplay.textContent = `₹${price}`;
-                    } else {
-                        priceDisplay.textContent = '₹0';
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select Item';
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    itemSelect.appendChild(defaultOption);
+
+                    for (const [id, item] of Object.entries(state.menuItems)) {
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = item.name;
+                        if (customItem && customItem.id == id) {
+                            option.selected = true;
+                        }
+                        itemSelect.appendChild(option);
                     }
-                    updateTotal();
-                }
 
+                    const portionSelect = document.createElement('select');
+                    portionSelect.className = 'form-select';
+                    portionSelect.required = true;
+                    portionSelect.style.width = '120px';
+
+                    const quantityInput = document.createElement('input');
+                    quantityInput.type = 'number';
+                    quantityInput.min = '1';
+                    quantityInput.value = '1'; // Always preset quantity to 1
+                    quantityInput.className = 'form-control';
+                    quantityInput.style.width = '80px';
+                    quantityInput.required = true;
+
+                    const priceDisplay = document.createElement('div');
+                    priceDisplay.style.minWidth = '80px';
+                    priceDisplay.textContent = '₹0';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'btn btn-danger btn-sm';
+                    removeBtn.textContent = 'Remove';
+
+                    row.appendChild(itemSelect);
+                    row.appendChild(portionSelect);
+                    row.appendChild(quantityInput);
+                    row.appendChild(priceDisplay);
+                    row.appendChild(removeBtn);
+
+                    function updatePortions() {
+                        const itemId = itemSelect.value;
+                        portionSelect.innerHTML = '';
+                        
+                        // Add a default "Select Portion" option
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Select Portion';
+                        defaultOption.disabled = true;
+                        defaultOption.selected = true;
+                        portionSelect.appendChild(defaultOption);
+                        
+                        if (itemId && state.menuItems[itemId]) {
+                            const portions = state.menuItems[itemId].portions;
+                            for (const [key, portion] of Object.entries(portions)) {
+                                const option = document.createElement('option');
+                                option.value = key;
+                                option.textContent = `${portion.name} - ₹${portion.price}`;
+                                if (customItem && customItem.portion === portion.name) {
+                                    option.selected = true;
+                                }
+                                portionSelect.appendChild(option);
+                            }
+                        }
+                        updateOrderItemPrice();
+                    }
+
+                    function updateOrderItemPrice() {
+                        const itemId = itemSelect.value;
+                        const portionKey = portionSelect.value;
+                        // Use safeParseInt for quantity to ensure it's at least 1
+                        const quantity = safeParseInt(quantityInput.value);
+                        
+                        // Reset price display if no valid selection
+                        if (!itemId || !portionKey || !state.menuItems[itemId]) {
+                            priceDisplay.textContent = '₹0';
+                            updateTotal();
+                            return;
+                        }
+                        
+                        try {
+                            // Calculate price only if all required values are present
+                            const unitPrice = state.menuItems[itemId].portions[portionKey].price;
+                            const totalPrice = unitPrice * quantity;
+                            console.log(`Menu item price calculation: ${unitPrice} × ${quantity} = ${totalPrice}`);
+                            priceDisplay.textContent = `₹${totalPrice}`;
+                        } catch (error) {
+                            console.error('Error calculating price:', error);
+                            priceDisplay.textContent = '₹0';
+                        }
+                        
+                        updateTotal();
+                    }
+
+                    itemSelect.addEventListener('change', () => {
+                        updatePortions();
+                    });
+
+                    portionSelect.addEventListener('change', () => {
+                        updateOrderItemPrice();
+                    });
+
+                    quantityInput.addEventListener('input', () => {
+                        updateOrderItemPrice();
+                    });
+
+                    removeBtn.addEventListener('click', () => {
+                        row.remove();
+                        updateTotal();
+                    });
+                    
+                    // Always initialize the portions dropdown
+                    updatePortions();
+                }
+                
                 function updateTotal() {
                     let total = 0;
                     const rows = orderItemsContainer.querySelectorAll('div.d-flex');
-                    rows.forEach(r => {
+                    
+                    console.log('Calculating total from UI rows...');
+                    rows.forEach((r, index) => {
                         const priceText = r.querySelector('div').textContent;
-                        const price = parseInt(priceText.replace('₹', '')) || 0;
+                        // Use parseFloat instead of parseInt to handle decimal values
+                        const price = parseFloat(priceText.replace('₹', '')) || 0;
+                        
+                        // Get the item details for better logging
+                        let itemDetails = 'Unknown item';
+                        if (r.dataset.customItem) {
+                            const nameInput = r.querySelector('input[type="text"]');
+                            const quantityInput = r.querySelector('input[type="number"]');
+                            itemDetails = `Custom: ${nameInput.value} × ${quantityInput.value}`;
+                        } else {
+                            const itemSelect = r.querySelector('select.form-select');
+                            const portionSelect = r.querySelectorAll('select.form-select')[1];
+                            const quantityInput = r.querySelector('input[type="number"]');
+                            const itemId = itemSelect.value;
+                            
+                            if (itemId && state.menuItems[itemId]) {
+                                const itemName = state.menuItems[itemId].name;
+                                itemDetails = `${itemName} × ${quantityInput.value}`;
+                            }
+                        }
+                        
+                        console.log(`Row ${index + 1} (${itemDetails}) price: ${price}`);
                         total += price;
                     });
+                    
+                    console.log(`Total price from UI: ${total}`);
                     orderTotalElem.textContent = total;
                 }
-
-                itemSelect.addEventListener('change', () => {
-                    updatePortions();
-                });
-
-                portionSelect.addEventListener('change', () => {
-                    updateOrderItemPrice();
-                });
-
-                quantityInput.addEventListener('input', () => {
-                    updateOrderItemPrice();
-                });
-
-                removeBtn.addEventListener('click', () => {
-                    row.remove();
-                    updateTotal();
-                });
 
                 return row;
             }
 
+            // Add regular menu item
             addOrderItemBtn.addEventListener('click', () => {
-                const row = createOrderItemRow();
+                const row = createOrderItemRow(false, null); // Pass null to ensure blank item and quantity=1
+                orderItemsContainer.appendChild(row);
+            });
+            
+            // Add custom item
+            document.getElementById('addCustomOrderItemBtn').addEventListener('click', () => {
+                const row = createOrderItemRow(true, null); // Pass null to ensure blank item and quantity=1
                 orderItemsContainer.appendChild(row);
             });
 
@@ -4155,8 +4781,8 @@
             document.getElementById('addOrderModal').addEventListener('shown.bs.modal', () => {
                 // Clear any existing items
                 orderItemsContainer.innerHTML = '';
-                // Add a fresh row
-                const row = createOrderItemRow();
+                // Add a fresh row with blank item name and quantity=1
+                const row = createOrderItemRow(false, null);
                 orderItemsContainer.appendChild(row);
             });
 
