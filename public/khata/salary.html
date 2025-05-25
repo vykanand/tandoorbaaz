@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Salary Tracker - BK, Rachit, Vikas, Tandoorbaaz</title>
+    <title>Tandoorbaaz Expense Tracker - BK, Rachit, Vikas, Tandoorbaaz</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -276,6 +276,20 @@
             border-bottom: 1px solid #eee;
             padding-bottom: 5px;
         }
+        
+        /* Worker detail styles */
+        #workerDetailSection {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        
+        #workerDetailTitle {
+            margin-top: 0;
+            color: #2c3e50;
+        }
     </style>
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -283,7 +297,7 @@
 </head>
 
 <body>
-    <h1>Tandoorbaaz Salary Tracker</h1>
+    <h1>Tandoorbaaz Expense Tracker</h1>
     <div id="statusMessage" class="status-message"></div>
 
     <div class="loading-overlay" id="loadingOverlay">
@@ -291,7 +305,7 @@
     </div>
 
     <div class="tabs">
-        <div class="tab active" data-tab="payments">Salary Payments</div>
+        <div class="tab active" data-tab="payments">Vendor and Salary Payments</div>
         <div class="tab" data-tab="summary">Payment Summary</div>
     </div>
 
@@ -325,7 +339,7 @@
             </div>
         </div>
 
-        <h2>Salary Payments</h2>
+        <h2>Vendor and Salary Payments</h2>
         <div class="transaction-filters">
             <div class="form-group">
                 <label for="paymentSearch">Search:</label>
@@ -369,7 +383,7 @@
             </select>
         </div>
 
-        <button class="danger" onclick="clearAllTransactions()">Clear All Salary Payments</button>
+        <button class="danger" onclick="clearAllTransactions()">Clear All Vendor and Salary Payments</button>
     </div>
 
     <div id="summaryTab" class="tab-content">
@@ -394,17 +408,36 @@
             </div>
 
             <div class="summary-section">
-                <h3>Worker Payments</h3>
-                <p>Total amount received by each worker:</p>
+                <h3>Vendor and Salary Payments</h3>
+                <p>Total amount received by each vendor/worker:</p>
                 <table class="summary-table">
                     <thead>
                         <tr>
-                            <th>Worker</th>
+                            <th>Vendor/Worker</th>
                             <th>Total Received</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="workerSummaryBody">
                         <!-- Worker summary rows will be added here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="summary-section" id="workerDetailSection" style="display: none;">
+                <h3 id="workerDetailTitle">Expense Breakup</h3>
+                <button class="secondary" onclick="hideWorkerDetail()">Back to Summary</button>
+                <table class="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Employer</th>
+                            <th>Amount</th>
+                            <th>Purpose</th>
+                        </tr>
+                    </thead>
+                    <tbody id="workerDetailBody">
+                        <!-- Worker detail rows will be added here -->
                     </tbody>
                 </table>
             </div>
@@ -460,7 +493,7 @@
             <h3>Employers and Workers</h3>
             <p>The list of employers and workers is currently hardcoded in the application.</p>
             <p>Employers: BK, Rachit, Vikas, Tandoorbaaz</p>
-            <p>Workers: Daksh, Nishu, Sumit, Prashant</p>
+            <p>Workers: Daksh, Nishu, Sumit, Prashant, Paneer Butter, Chicken Afzal, Tandoorbaaz Expense</p>
         </div>
     </div>
 
@@ -485,7 +518,7 @@
 
         // Global variables
         const employers = ['Tandoorbaaz', 'BK', 'Rachit', 'Vikas'];
-        const workers = ['Sumit', 'Daksh', 'Nishu', 'Prashant'];
+        const workers = ['Sumit', 'Daksh', 'Nishu', 'Prashant', 'Paneer Butter', 'Chicken Afzal', 'Tandoorbaaz Expense'];
         let salaryPayments = [];
         let people = [...employers, ...workers]; // Initialize people with employers and workers
 
@@ -1020,6 +1053,106 @@
             summaryDiv.innerHTML = summaryHTML;
         }
 
+        // Show detailed expense breakup for a specific worker
+        function showWorkerDetail(worker) {
+            const workerDetailSection = document.getElementById('workerDetailSection');
+            const workerDetailTitle = document.getElementById('workerDetailTitle');
+            const workerDetailBody = document.getElementById('workerDetailBody');
+            
+            // Update title
+            workerDetailTitle.textContent = `Expense Breakup for ${worker}`;
+            
+            // Filter payments for this worker
+            const workerPayments = salaryPayments.filter(payment => payment.worker === worker);
+            
+            // Sort by date (newest first) - handle different date formats
+            workerPayments.sort((a, b) => {
+                // Convert Firebase Timestamp or Date object to JavaScript Date
+                const getDateValue = (payment) => {
+                    if (!payment.date) return new Date(0); // Default to epoch if no date
+                    
+                    if (payment.date instanceof Date) {
+                        return payment.date;
+                    }
+                    
+                    // Handle Firebase Timestamp
+                    if (payment.date && typeof payment.date.toDate === 'function') {
+                        return payment.date.toDate();
+                    }
+                    
+                    // Handle string date or timestamp number
+                    return new Date(payment.date);
+                };
+                
+                return getDateValue(b) - getDateValue(a);
+            });
+            
+            // Clear previous content
+            workerDetailBody.innerHTML = '';
+            
+            // Display worker payments
+            if (workerPayments.length === 0) {
+                const row = document.createElement('tr');
+                const cell = document.createElement('td');
+                cell.colSpan = 4;
+                cell.textContent = 'No payments found for this worker';
+                cell.style.textAlign = 'center';
+                row.appendChild(cell);
+                workerDetailBody.appendChild(row);
+            } else {
+                workerPayments.forEach(payment => {
+                    // Handle different date formats
+                    let formattedDate = 'N/A';
+                    
+                    if (payment.date) {
+                        let dateObj;
+                        
+                        if (payment.date instanceof Date) {
+                            dateObj = payment.date;
+                        } else if (typeof payment.date.toDate === 'function') {
+                            dateObj = payment.date.toDate();
+                        } else {
+                            dateObj = new Date(payment.date);
+                        }
+                        
+                        formattedDate = `${dateObj.getDate()}/${dateObj.getMonth() + 1}/${dateObj.getFullYear()}`;
+                    }
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${formattedDate}</td>
+                        <td>${payment.employer || 'Unknown'}</td>
+                        <td>₹${typeof payment.amount === 'number' ? payment.amount.toFixed(2) : payment.amount}</td>
+                        <td>${payment.purpose || 'N/A'}</td>
+                    `;
+                    workerDetailBody.appendChild(row);
+                });
+            }
+            
+            // Show the detail section
+            workerDetailSection.style.display = 'block';
+            
+            // Hide the summary tables
+            document.querySelectorAll('#summaryTab .summary-section').forEach(section => {
+                if (section.id !== 'workerDetailSection') {
+                    section.style.display = 'none';
+                }
+            });
+        }
+        
+        // Hide worker detail view and show summary tables
+        function hideWorkerDetail() {
+            // Hide the detail section
+            document.getElementById('workerDetailSection').style.display = 'none';
+            
+            // Show the summary tables
+            document.querySelectorAll('#summaryTab .summary-section').forEach(section => {
+                if (section.id !== 'workerDetailSection') {
+                    section.style.display = 'block';
+                }
+            });
+        }
+        
         // Update summary tables in the Summary tab
         function updateSummaryTables() {
             // Update employer summary table
@@ -1047,15 +1180,26 @@
             
             workerSummaryBody.innerHTML = '';
             
-            workers.forEach(worker => {
+            // Create an array of workers with their total received amounts
+            const workerTotals = workers.map(worker => {
                 const totalReceived = salaryPayments
                     .filter(payment => payment.worker === worker)
                     .reduce((sum, payment) => sum + payment.amount, 0);
-                
+                return { worker, totalReceived };
+            });
+            
+            // Sort by total received in decreasing order
+            workerTotals.sort((a, b) => b.totalReceived - a.totalReceived);
+            
+            // Create rows for each worker in sorted order
+            workerTotals.forEach(({ worker, totalReceived }) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${worker}</td>
                     <td>₹${totalReceived.toFixed(2)}</td>
+                    <td>
+                        <button class="secondary" onclick="showWorkerDetail('${worker}')">View Details</button>
+                    </td>
                 `;
                 workerSummaryBody.appendChild(row);
             });
