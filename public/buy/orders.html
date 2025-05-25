@@ -13,33 +13,39 @@
 
         // Update document title with cart name
         document.title = `TandoorBaaz - ${cartName} Orders`;
-        
+
         // Store information
         const stores = [
             { id: 'samriddhi', name: 'Samriddhi' },
             { id: 'eros', name: 'Eros' }
         ];
-        
-        // Function to change store with confirmation
+
+        // Function to get store display name
+        function getStoreName(storeId) {
+            const store = stores.find(s => s.id === storeId);
+            return store ? store.name : storeId;
+        }
+
+        // Function to create and handle store change modal
         function changeStore(storeId, selectorId) {
             // If no store selected or same store selected, reset the selector and return
             if (!storeId || storeId === cartName) {
                 document.getElementById(selectorId).value = cartName;
                 return;
             }
-            
-            // Get store names for clear messaging
+
             const currentStoreName = getStoreName(cartName);
             const newStoreName = getStoreName(storeId);
-            
-            // Create a confirmation modal programmatically
+
+            // Create modal element
             const confirmModal = document.createElement('div');
             confirmModal.className = 'modal fade';
             confirmModal.id = 'storeChangeConfirmModal';
             confirmModal.setAttribute('tabindex', '-1');
             confirmModal.setAttribute('aria-labelledby', 'storeChangeConfirmModalLabel');
             confirmModal.setAttribute('aria-hidden', 'true');
-            
+
+            // Set modal content
             confirmModal.innerHTML = `
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
@@ -78,56 +84,42 @@
                     </div>
                 </div>
             `;
-            
-            // Add the modal to the document
+
+            // Add modal to document and show it
             document.body.appendChild(confirmModal);
-            
-            // Initialize the modal
             const modal = new bootstrap.Modal(document.getElementById('storeChangeConfirmModal'));
             modal.show();
-            
+
             // Handle checkbox change
-            document.getElementById('confirmStoreChange').addEventListener('change', function() {
+            document.getElementById('confirmStoreChange').addEventListener('change', function () {
                 document.getElementById('confirmStoreChangeBtn').disabled = !this.checked;
             });
-            
-            // Handle cancel button
-            document.getElementById('cancelStoreChange').addEventListener('click', function() {
-                // Reset the selector to the current store
-                document.getElementById(selectorId).value = cartName;
-                
-                // Remove the modal after hiding
-                modal._element.addEventListener('hidden.bs.modal', function() {
-                    document.body.removeChild(confirmModal);
-                });
-            });
-            
-            // Handle confirm button
-            document.getElementById('confirmStoreChangeBtn').addEventListener('click', function() {
+
+            // Handle confirm button click
+            document.getElementById('confirmStoreChangeBtn').addEventListener('click', function () {
                 if (document.getElementById('confirmStoreChange').checked) {
-                    // Proceed with store change
                     window.location.href = `showorders.html?cart=${storeId}`;
                 }
             });
-            
-            // Clean up modal when hidden
-            confirmModal.addEventListener('hidden.bs.modal', function() {
-                // Reset the selector to the current store if modal is dismissed
+
+            // Handle modal dismissal
+            const handleModalHidden = function () {
                 document.getElementById(selectorId).value = cartName;
-                
-                // Remove the modal from DOM after it's hidden
                 if (document.body.contains(confirmModal)) {
                     document.body.removeChild(confirmModal);
                 }
+            };
+
+            // Handle cancel button click
+            document.getElementById('cancelStoreChange').addEventListener('click', function () {
+                modal._element.addEventListener('hidden.bs.modal', handleModalHidden, { once: true });
             });
-        }
-        
-        // Function to get store display name
-        function getStoreName(storeId) {
-            const store = stores.find(s => s.id === storeId);
-            return store ? store.name : storeId;
+
+            // Clean up modal when hidden
+            confirmModal.addEventListener('hidden.bs.modal', handleModalHidden);
         }
     </script>
+    <!-- External resources -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -135,7 +127,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
-            /* Mobile specific variables */
+            /* Core variables */
             --bottom-nav-height: 65px;
             --primary-color: #0d6efd;
             --success-color: #198754;
@@ -144,12 +136,14 @@
             --info-color: #0dcaf0;
             --light-color: #f8f9fa;
             --background-color: #f5f7fa;
+
+            /* UI effects */
             --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             --card-border-radius: 16px;
             --transition-speed: 0.3s;
             --ease-out: cubic-bezier(0.25, 0.1, 0.25, 1);
-            --ease-in: cubic-bezier(0.4, 0, 0.2, 1);
-            --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Gradients */
             --header-gradient: linear-gradient(135deg, #0d6efd 0%, #6610f2 100%);
             --success-gradient: linear-gradient(135deg, #20c997 0%, #198754 100%);
             --warning-gradient: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%);
@@ -164,18 +158,21 @@
             color: #333;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
             touch-action: manipulation;
         }
 
         .container-fluid {
             padding: 0.75rem;
             width: 100%;
-            max-width: 100%;
         }
-        
-        /* Improve touch targets by default */
-        button, .btn, a.btn, select, input[type="button"], input[type="submit"] {
+
+        /* Interactive elements */
+        button,
+        .btn,
+        a.btn,
+        select,
+        input[type="button"],
+        input[type="submit"] {
             min-height: 44px;
             padding: 0.5rem 1rem;
             border-radius: 8px;
@@ -183,13 +180,12 @@
             touch-action: manipulation;
         }
 
-        /* Card Styles - Mobile First */
+        /* Card Styles */
         .card {
             border: none;
             border-radius: 10px;
             box-shadow: var(--card-shadow);
-            transition: all var(--transition-speed) var(--ease-out);
-            background: white;
+            transition: transform var(--transition-speed) var(--ease-out);
             background-color: rgba(255, 255, 255, 0.95);
             margin-bottom: 0.75rem;
         }
@@ -205,292 +201,562 @@
             font-size: 1.1rem;
             font-weight: 600;
         }
-        
+
         .card-body {
             padding: 0.75rem;
         }
-        
-        /* Desktop hover effects - only apply on non-touch devices */
+
+        /* Desktop hover effects - only on non-touch devices */
         @media (hover: hover) {
             .card:hover {
                 transform: translateY(-5px);
             }
         }
 
-        /* Order Card Styles - Modern Mobile First */
+        /* Order Card Styles - Enhanced Modern Design */
         .order-card {
-            margin-bottom: 0.75rem;
+            margin-bottom: 1rem;
             border: none;
-            box-shadow: var(--card-shadow);
-            transition: all var(--transition-speed) var(--ease-out);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             background: white;
-            border-radius: 12px;
-            padding: 0.75rem;
+            border-radius: 16px;
+            padding: 1rem;
             position: relative;
             overflow: hidden;
             width: 100%;
-            max-width: 100%;
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            border-left: 1px solid rgba(255, 255, 255, 0.3);
         }
-        
+
+        /* Status indicator styling - more modern approach */
         .order-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            width: 4px;
+            width: 6px;
             height: 100%;
             background: var(--light-color);
             transition: all 0.3s ease;
         }
-        
+
+        /* Status indicator at the top */
+        .order-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        /* Status-specific styling with gradients */
         .order-card.bg-pending::before {
-            background: var(--warning-color);
+            background: var(--warning-gradient);
         }
-        
-        /* Delayed order card styling */
-        .order-card.delayed {
-            background-color: rgba(220, 53, 69, 0.25) !important; /* More intense red background */
-            border: 1px solid var(--danger-color) !important;
-            box-shadow: 0 0 10px rgba(220, 53, 69, 0.4) !important; /* Red glow effect */
-        }
-        
-        .order-card.delayed::before {
-            background: #ff0000 !important; /* Bright red left border */
-            width: 6px !important; /* Thicker left border */
-        }
-        
+
         .order-card.bg-paid::before {
-            background: var(--success-color);
+            background: var(--success-gradient);
         }
-        
+
         .order-card.bg-delivered::before {
-            background: var(--info-color);
+            background: var(--info-gradient);
         }
-        
+
+        .order-card.bg-pending::after {
+            background: var(--warning-gradient);
+        }
+
+        .order-card.bg-paid::after {
+            background: var(--success-gradient);
+        }
+
+        .order-card.bg-delivered::after {
+            background: var(--info-gradient);
+        }
+
+        /* Delayed order styling - more attention-grabbing */
+        .order-card.delayed {
+            background-color: rgba(220, 53, 69, 0.15) !important;
+            border: 1px solid var(--danger-color) !important;
+            box-shadow: 0 0 20px rgba(220, 53, 69, 0.5) !important;
+            animation: pulse-delay 2s infinite;
+        }
+
+        @keyframes pulse-delay {
+            0% {
+                box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 25px rgba(220, 53, 69, 0.7);
+            }
+
+            100% {
+                box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+            }
+        }
+
+        .order-card.delayed::before {
+            background: linear-gradient(to bottom, #ff0000, #cc0000) !important;
+            width: 8px !important;
+        }
+
+        /* Order card components - enhanced */
         .order-card .order-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         }
-        
+
         .order-card .order-id {
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
-            color: #333;
+            color: #222;
+            letter-spacing: -0.5px;
         }
-        
+
         .order-card .order-time {
-            font-size: 0.8rem;
-            color: #666;
+            font-size: 0.85rem;
+            color: #555;
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.3rem;
+            background-color: rgba(0, 0, 0, 0.03);
+            padding: 0.25rem 0.5rem;
+            border-radius: 6px;
         }
-        
+
         .order-card .order-details {
-            margin: 0.5rem 0;
-            font-size: 0.9rem;
+            margin: 0.75rem 0;
+            font-size: 0.95rem;
+            background-color: rgba(13, 110, 253, 0.03);
+            padding: 0.75rem;
+            border-radius: 10px;
         }
-        
+
+        /* Order items list - enhanced */
         .order-card .order-items {
             background-color: rgba(0, 0, 0, 0.02);
-            border-radius: 8px;
-            padding: 0.5rem;
-            margin: 0.5rem 0;
+            border-radius: 12px;
+            padding: 0.75rem;
+            margin: 0.75rem 0;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
-        
+
         .order-card .order-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.4rem;
-            padding-bottom: 0.4rem;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            padding-bottom: 0.5rem;
             border-bottom: 1px dashed rgba(0, 0, 0, 0.1);
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            transition: background-color 0.2s ease;
+            border-radius: 8px;
         }
-        
+
+        .order-card .order-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
         .order-card .order-item:last-child {
             margin-bottom: 0;
-            padding-bottom: 0;
+            padding-bottom: 0.5rem;
             border-bottom: none;
         }
 
+        /* Add subtle animation for new orders */
+        .order-card.new-order {
+            animation: highlight-new 2s ease-in-out;
+        }
+
+        @keyframes highlight-new {
+            0% {
+                box-shadow: 0 0 0 rgba(13, 110, 253, 0);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(13, 110, 253, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        /* Enhanced badge styling */
+        .order-card .badge {
+            padding: 0.4rem 0.6rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .order-card .badge.bg-warning,
+        .order-card .badge.bg-warning-subtle {
+            background: var(--warning-gradient) !important;
+            color: #000 !important;
+        }
+
+        .order-card .badge.bg-success,
+        .order-card .badge.bg-success-subtle {
+            background: var(--success-gradient) !important;
+            color: white !important;
+        }
+
+        .order-card .badge.bg-info,
+        .order-card .badge.bg-info-subtle {
+            background: var(--info-gradient) !important;
+            color: white !important;
+        }
+
+        .order-card .badge.bg-danger,
+        .order-card .badge.bg-danger-subtle {
+            background: linear-gradient(135deg, #ff4d4d, #dc3545) !important;
+            color: white !important;
+        }
+
+        /* Enhanced dish status indicators */
+        .dish-status-indicator {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease;
+        }
+
+        .dish-status-indicator:hover {
+            background-color: rgba(0, 0, 0, 0.08);
+            transform: scale(1.1);
+        }
+
+        /* Action buttons - Enhanced */
         .order-actions {
             display: flex;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-            flex-wrap: wrap;
-            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
             flex-direction: column;
+            padding-top: 0.75rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .order-actions button {
             width: 100%;
-            padding: 0.6rem;
-            font-size: 0.9rem;
-            margin-bottom: 0;
-            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 0.95rem;
+            border-radius: 12px;
             font-weight: 600;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.4rem;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
         }
-        
+
+        .order-actions button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
+            z-index: -1;
+            transition: all 0.3s ease;
+        }
+
+        .order-actions button:hover::before {
+            opacity: 0.8;
+        }
+
+        .order-actions button.btn-primary {
+            background: var(--header-gradient);
+            border: none;
+        }
+
+        .order-actions button.btn-success {
+            background: var(--success-gradient);
+            border: none;
+        }
+
+        .order-actions button.btn-warning {
+            background: var(--warning-gradient);
+            border: none;
+        }
+
+        .order-actions button.btn-outline-danger:hover {
+            background: linear-gradient(45deg, #dc3545, #ff4d5a);
+            border-color: transparent;
+            color: white;
+        }
+
         .order-actions button i {
-            font-size: 1rem;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease;
         }
-        
+
+        .order-actions button:hover i {
+            transform: translateY(-2px);
+        }
+
         .order-actions button:active {
             transform: scale(0.98);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
         }
-        
-        /* Desktop styles for larger screens */
+
+        /* Desktop styles for larger screens - Enhanced */
         @media (min-width: 769px) {
             .order-card {
-                margin-bottom: 1.25rem;
-                padding: 1.25rem;
+                margin-bottom: 1.5rem;
+                padding: 1.5rem;
                 border-radius: 20px;
                 max-width: none;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+                transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             }
-            
+
+            .order-card:hover {
+                transform: translateY(-7px);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            }
+
+            .order-card:hover::before {
+                width: 8px;
+            }
+
+            .order-card:hover::after {
+                height: 6px;
+            }
+
             .order-card::before {
                 width: 6px;
             }
-            
+
+            .order-card::after {
+                height: 5px;
+            }
+
             .order-card .order-id {
-                font-size: 1.1rem;
+                font-size: 1.25rem;
+                letter-spacing: -0.5px;
             }
-            
+
             .order-card .order-time {
-                font-size: 0.9rem;
+                font-size: 0.95rem;
+                padding: 0.3rem 0.6rem;
+                border-radius: 8px;
             }
-            
+
             .order-card .order-details {
-                margin: 0.75rem 0;
-                font-size: 1rem;
-            }
-            
-            .order-card .order-items {
-                padding: 0.75rem;
-                margin: 0.75rem 0;
+                margin: 1rem 0;
+                font-size: 1.05rem;
+                padding: 1rem;
                 border-radius: 12px;
             }
-            
-            .order-card .order-item {
-                margin-bottom: 0.5rem;
-                padding-bottom: 0.5rem;
-                font-size: 1rem;
+
+            .order-card .order-items {
+                padding: 1rem;
+                margin: 1rem 0;
+                border-radius: 14px;
+                box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.02);
             }
-            
+
+            .order-card .order-item {
+                margin-bottom: 0.75rem;
+                padding: 0.75rem;
+                padding-bottom: 0.75rem;
+                font-size: 1.05rem;
+                border-radius: 10px;
+                transition: all 0.2s ease;
+            }
+
+            .order-card .order-item:hover {
+                background-color: rgba(0, 0, 0, 0.03);
+                transform: translateX(3px);
+            }
+
+            /* Status badge effects */
+            .order-card:hover .badge {
+                transform: scale(1.05);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
             .order-actions {
                 flex-direction: row;
-                justify-content: flex-end;
-                margin-top: 1rem;
-                gap: 0.75rem;
+                flex-wrap: wrap;
             }
-            
+
             .order-actions button {
-                width: auto;
-                padding: 0.6rem 1.25rem;
-                font-size: 0.95rem;
-                border-radius: 12px;
+                transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
             }
-            
-            /* Desktop hover effects */
-            .order-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-            }
-            
+
             .order-actions button:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
             }
         }
-        
+
+        .order-actions {
+            flex-direction: row;
+            justify-content: flex-end;
+            margin-top: 1rem;
+            gap: 0.75rem;
+        }
+
+        .order-actions button {
+            width: auto;
+            padding: 0.6rem 1.25rem;
+            font-size: 0.95rem;
+            border-radius: 12px;
+        }
+
+        /* Desktop hover effects */
+        .order-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .order-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        }
+
         /* Mobile-specific styles */
         @media (max-width: 768px) {
+
             /* Mobile kitchen list styles */
             #mobileKitchenList {
                 padding: 0.5rem !important;
             }
-            
+
             #mobileKitchenList .kitchen-item {
                 margin-bottom: 0.5rem;
             }
-            
-            /* Mobile order card styles */
+
+            /* Mobile order card styles - Enhanced */
             .order-card {
-                margin-bottom: 0.6rem;
+                margin-bottom: 1rem;
                 width: 100%;
                 max-width: 100%;
+                border-radius: 16px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
             }
-            
+
             .order-card .card-body {
-                padding: 0.6rem;
+                padding: 0.85rem;
             }
-            
+
             .order-card .order-header {
-                margin-bottom: 0.4rem;
+                margin-bottom: 0.6rem;
+                padding-bottom: 0.6rem;
             }
-            
+
             .order-card .order-details {
-                margin: 0.4rem 0;
+                margin: 0.6rem 0;
+                padding: 0.7rem;
+                border-radius: 10px;
             }
-            
+
             .order-card .order-details .d-flex {
-                margin-bottom: 0.3rem !important;
+                margin-bottom: 0.5rem !important;
+                padding: 0.3rem;
+                border-radius: 6px;
+                transition: background-color 0.2s ease;
             }
-            
+
+            .order-card .order-details .d-flex:active {
+                background-color: rgba(0, 0, 0, 0.02);
+            }
+
+            .order-card .order-details .d-flex i {
+                font-size: 1.1rem;
+                color: var(--primary-color);
+            }
+
             .order-card .order-items {
-                padding: 0.4rem;
-                margin: 0.4rem 0;
+                padding: 0.6rem;
+                margin: 0.6rem 0;
+                border-radius: 10px;
+                background-color: rgba(0, 0, 0, 0.02);
+                border: 1px solid rgba(0, 0, 0, 0.04);
             }
-            
+
             .order-card .order-item {
-                margin-bottom: 0.3rem;
-                padding-bottom: 0.3rem;
+                margin-bottom: 0.5rem;
+                padding: 0.5rem;
+                padding-bottom: 0.5rem;
+                border-radius: 8px;
+                transition: background-color 0.2s ease;
             }
-            
+
+            .order-card .order-item:active {
+                background-color: rgba(0, 0, 0, 0.03);
+            }
+
             .order-card .d-flex.justify-content-between.align-items-center.mt-3.mb-3 {
-                margin-top: 0.4rem !important;
-                margin-bottom: 0.4rem !important;
+                margin-top: 0.6rem !important;
+                margin-bottom: 0.6rem !important;
+                padding: 0.5rem;
+                background-color: rgba(25, 135, 84, 0.05);
+                border-radius: 8px;
             }
-            
+
             .order-card .fw-bold.fs-5 {
-                font-size: 1rem !important;
+                font-size: 1.1rem !important;
+                color: #222;
             }
-            
+
             .order-actions {
                 margin-top: 0.5rem;
                 gap: 0.4rem;
             }
-            
+
             .order-actions .mb-3 {
                 margin-bottom: 0.4rem !important;
             }
-            
+
             .order-actions .form-label {
                 margin-bottom: 0.2rem;
                 font-size: 0.85rem;
             }
-            
+
             .order-actions button {
                 padding: 0.5rem;
                 font-size: 0.85rem;
             }
-            
-            /* Swipe actions for order cards */
+
+            /* Swipe actions for order cards - Enhanced */
             .order-card-swipe-container {
                 position: relative;
                 overflow: hidden;
                 touch-action: pan-y;
+                border-radius: 16px;
+                box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s ease;
             }
-            
+
+            .order-card-swipe-container:active {
+                transform: scale(0.98);
+            }
+
             .order-card-swipe-actions {
                 position: absolute;
                 top: 0;
@@ -498,25 +764,57 @@
                 height: 100%;
                 display: flex;
                 transform: translateX(100%);
-                transition: transform 0.3s ease;
+                transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                border-top-right-radius: 16px;
+                border-bottom-right-radius: 16px;
+                overflow: hidden;
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
             }
-            
+
             .swipe-action-btn {
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: 70px;
+                width: 80px;
                 height: 100%;
                 color: white;
                 font-size: 1.3rem;
+                transition: all 0.2s ease;
+                position: relative;
+                overflow: hidden;
             }
-            
+
+            .swipe-action-btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.2));
+                opacity: 0;
+                transition: opacity 0.2s ease;
+            }
+
+            .swipe-action-btn:active::before {
+                opacity: 1;
+            }
+
             .swipe-action-complete {
-                background-color: var(--success-color);
+                background: var(--success-gradient);
             }
-            
+
             .swipe-action-delete {
-                background-color: var(--danger-color);
+                background: linear-gradient(135deg, #ff4d4d, #dc3545);
+            }
+
+            .swipe-action-btn i {
+                transform: scale(1);
+                transition: transform 0.2s ease;
+            }
+
+            .swipe-action-btn:active i {
+                transform: scale(1.2);
             }
         }
 
@@ -539,15 +837,21 @@
 
         .delay-badge {
             left: 0.5rem;
-            animation: pulse 1.5s infinite; /* Faster pulsing */
-            background-color: #ff0000 !important; /* Bright red background */
-            color: white !important; /* White text for better contrast */
-            font-weight: 700 !important; /* Bolder text */
-            box-shadow: 0 0 10px rgba(255, 0, 0, 0.7) !important; /* Red glow effect */
+            animation: pulse 1.5s infinite;
+            /* Faster pulsing */
+            background-color: #ff0000 !important;
+            /* Bright red background */
+            color: white !important;
+            /* White text for better contrast */
+            font-weight: 700 !important;
+            /* Bolder text */
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.7) !important;
+            /* Red glow effect */
         }
-        
+
         /* Desktop styles for larger screens */
         @media (min-width: 769px) {
+
             .status-badge,
             .delay-badge {
                 top: 1rem;
@@ -555,11 +859,11 @@
                 border-radius: 20px;
                 font-size: 0.875rem;
             }
-            
+
             .status-badge {
                 right: 1rem;
             }
-            
+
             .delay-badge {
                 left: 1rem;
             }
@@ -579,36 +883,39 @@
             width: 100%;
             max-width: 100%;
         }
-        
+
         /* Delayed kitchen item styling */
         .kitchen-item.delayed {
-            background: linear-gradient(to right, rgba(220, 53, 69, 0.3), rgba(220, 53, 69, 0.15)) !important; /* Stronger red gradient */
+            background: linear-gradient(to right, rgba(220, 53, 69, 0.3), rgba(220, 53, 69, 0.15)) !important;
+            /* Stronger red gradient */
             border: 1px solid var(--danger-color) !important;
-            border-left: 6px solid #ff0000 !important; /* Brighter and thicker left border */
-            box-shadow: 0 0 10px rgba(220, 53, 69, 0.4) !important; /* Red glow effect */
+            border-left: 6px solid #ff0000 !important;
+            /* Brighter and thicker left border */
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.4) !important;
+            /* Red glow effect */
         }
 
         .kitchen-item .card-body {
             padding: 0.6rem;
         }
-        
+
         .kitchen-item h5 {
             font-size: 1rem;
         }
-        
+
         .kitchen-item .badge {
             font-size: 0.8rem;
             padding: 0.3rem 0.6rem;
         }
-        
+
         .kitchen-item .mt-3 {
             margin-top: 0.6rem !important;
         }
-        
+
         .kitchen-item .mt-2 {
             margin-top: 0.4rem !important;
         }
-        
+
         /* Desktop styles for larger screens */
         @media (min-width: 769px) {
             .kitchen-item {
@@ -617,56 +924,56 @@
                 border-left: 5px solid #6c757d;
                 max-width: none;
             }
-            
+
             .kitchen-item.delayed {
                 border-left: 8px solid #ff0000 !important;
             }
-            
+
             .kitchen-item .card-body {
                 padding: 1.25rem;
             }
-            
+
             .kitchen-item h5 {
                 font-size: 1.25rem;
             }
-            
+
             .kitchen-item .badge {
                 font-size: 0.875rem;
                 padding: 0.4rem 0.8rem;
             }
-            
+
             .kitchen-item .mt-3 {
                 margin-top: 1rem !important;
             }
-            
+
             .kitchen-item .mt-2 {
                 margin-top: 0.5rem !important;
             }
-            
+
             .kitchen-item:hover {
                 transform: translateY(-4px);
                 box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
             }
-            
+
             /* Desktop legend styling */
             #kitchenList .alert.alert-dark {
                 margin-bottom: 1rem !important;
                 padding: 0.75rem !important;
             }
-            
+
             #kitchenList .alert.alert-dark h6 {
                 font-size: 1rem !important;
             }
-            
+
             #kitchenList .alert.alert-dark .mb-1 {
                 margin-bottom: 0.5rem !important;
             }
-            
+
             #kitchenList .alert.alert-dark .d-flex.flex-wrap {
                 gap: 0.5rem !important;
                 font-size: 0.9rem !important;
             }
-            
+
             #kitchenList .alert.alert-dark .badge {
                 padding: 0.4rem 0.8rem;
             }
@@ -679,12 +986,12 @@
             font-weight: 500;
             transition: all 0.3s ease;
         }
-        
+
         .store-selector:focus {
             box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.4);
             border-color: var(--primary-color);
         }
-        
+
         .store-name {
             color: var(--primary-color);
             font-weight: 700;
@@ -696,7 +1003,7 @@
             background-clip: text;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Status Colors */
         .bg-pending {
             border-left-color: var(--warning-color);
@@ -756,53 +1063,55 @@
                 touch-action: manipulation;
                 -webkit-tap-highlight-color: transparent;
             }
-            
+
             .container-fluid {
                 padding: 0.5rem;
                 max-width: 100%;
                 overflow-x: hidden;
             }
-            
+
             /* Increase touch targets for better mobile usability */
-            button, 
-            .btn, 
-            select, 
-            input, 
+            button,
+            .btn,
+            select,
+            input,
             a {
                 min-height: 44px;
                 min-width: 44px;
             }
-            
+
             /* Adjust card styles for mobile */
             .card {
                 margin-bottom: 0.75rem;
                 border-radius: 10px;
             }
-            
+
             .card:hover {
-                transform: none; /* Remove hover effects on mobile */
+                transform: none;
+                /* Remove hover effects on mobile */
             }
-            
+
             .card-header {
                 padding: 0.75rem;
             }
-            
+
             .card-body {
                 padding: 0.75rem;
             }
-            
+
             /* Order card specific styles */
             .order-card {
                 margin-bottom: 0.5rem;
                 padding: 0.75rem;
                 border-radius: 8px;
             }
-            
+
             .order-card:hover {
-                transform: none; /* Remove hover effects on mobile */
+                transform: none;
+                /* Remove hover effects on mobile */
                 box-shadow: var(--card-shadow);
             }
-            
+
             /* Make buttons more touch-friendly */
             .order-actions {
                 flex-direction: column;
@@ -810,7 +1119,7 @@
                 gap: 0.5rem;
                 margin-top: 0.75rem;
             }
-            
+
             .order-actions button {
                 width: 100%;
                 padding: 0.75rem;
@@ -818,7 +1127,7 @@
                 margin: 0.25rem 0;
                 border-radius: 8px;
             }
-            
+
             /* Adjust badges for mobile */
             .status-badge,
             .delay-badge {
@@ -827,7 +1136,7 @@
                 font-size: 0.85rem;
                 border-radius: 15px;
             }
-            
+
             /* Form controls for better touch */
             .form-select,
             .form-control {
@@ -836,87 +1145,89 @@
                 border-radius: 8px;
                 height: auto;
             }
-            
+
             /* Summary cards */
             .summary-card {
                 margin-bottom: 0.75rem;
                 padding: 0.75rem;
             }
-            
+
             .summary-card:hover {
-                transform: none; /* Remove hover effects on mobile */
+                transform: none;
+                /* Remove hover effects on mobile */
             }
-            
+
             .summary-card h3 {
                 font-size: 1.5rem;
             }
-            
+
             /* Modal adjustments */
             .modal-content {
                 border-radius: 12px;
                 margin: 0.5rem;
             }
-            
+
             .modal-header {
                 padding: 0.75rem;
                 border-bottom: 2px solid var(--light-color);
             }
-            
+
             .modal-body {
                 padding: 0.75rem;
             }
-            
+
             .modal-footer {
                 padding: 0.75rem;
                 border-top: 2px solid var(--light-color);
             }
-            
+
             /* Kitchen badge adjustments */
             .kitchen-badge {
                 padding: 0.4rem 0.6rem;
                 margin: 0.25rem;
                 font-size: 0.85rem;
             }
-            
+
             /* Dish status indicator */
             .dish-status-indicator {
                 width: 32px;
                 height: 32px;
             }
         }
-        
+
         /* Medium devices (tablets, 768px and down) */
         @media (min-width: 577px) and (max-width: 768px) {
             .container-fluid {
                 padding: 0.75rem;
             }
-            
+
             .card {
                 margin-bottom: 1rem;
             }
-            
+
             .order-card {
                 margin-bottom: 0.75rem;
                 padding: 1rem;
             }
-            
+
             .order-actions {
                 flex-direction: column;
                 align-items: stretch;
             }
-            
+
             .order-actions button {
                 width: 100%;
                 margin: 0.25rem 0;
             }
-            
+
             .summary-card h3 {
                 font-size: 1.75rem;
             }
         }
-        
+
         /* Disable hover effects on touch devices */
         @media (hover: none) {
+
             .card:hover,
             .order-card:hover,
             .kitchen-item:hover,
@@ -1000,7 +1311,7 @@
             position: relative;
             background: white;
         }
-        
+
         .summary-card::before {
             content: '';
             position: absolute;
@@ -1011,19 +1322,19 @@
             background: var(--primary-color);
             opacity: 0.8;
         }
-        
+
         .summary-card.total-card::before {
             background: linear-gradient(to right, #6610f2, #0d6efd);
         }
-        
+
         .summary-card.pending-card::before {
             background: linear-gradient(to right, #fd7e14, #ffc107);
         }
-        
+
         .summary-card.paid-card::before {
             background: linear-gradient(to right, #20c997, #198754);
         }
-        
+
         .summary-card.delivered-card::before {
             background: linear-gradient(to right, #0dcaf0, #0d6efd);
         }
@@ -1057,7 +1368,7 @@
             justify-content: center;
             gap: 0.5rem;
         }
-        
+
         .summary-card .card-title i {
             font-size: 1.25rem;
         }
@@ -1071,83 +1382,85 @@
             margin: 0.25rem;
             transition: all 0.2s ease;
         }
-        
+
         .summary-card .badge:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        
+
         /* Desktop styles for larger screens */
         @media (min-width: 769px) {
             .summary-card {
                 border-radius: 24px;
                 margin-bottom: 1.5rem;
             }
-            
+
             .summary-card:hover {
                 transform: translateY(-8px);
                 box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
             }
-            
+
             .summary-card h3 {
                 font-size: 2.5rem;
             }
-            
+
             .summary-card .card-body {
                 padding: 1.75rem;
                 border-radius: 24px;
                 min-height: 180px;
             }
-            
+
             .summary-card .card-title {
                 margin-bottom: 1.25rem;
                 font-size: 1.2rem;
             }
-            
+
             .summary-card .badge {
                 border-radius: 16px;
                 padding: 0.6rem 1rem;
                 font-size: 1rem;
             }
         }
-        
+
         /* Mobile-specific summary card styles */
         @media (max-width: 768px) {
             .summary-card {
                 margin-bottom: 1rem;
             }
-            
+
             .summary-card .card-body {
                 padding: 1rem;
                 min-height: 130px;
             }
-            
+
             .summary-card h3 {
                 font-size: 1.75rem;
             }
-            
+
             /* Swipe effect for summary cards on mobile */
             .summary-cards-container {
                 display: flex;
                 overflow-x: auto;
                 scroll-snap-type: x mandatory;
                 -webkit-overflow-scrolling: touch;
-                scrollbar-width: none; /* Firefox */
+                scrollbar-width: none;
+                /* Firefox */
                 padding: 0.5rem 0;
                 margin: 0 -0.75rem;
                 padding: 0 0.75rem;
             }
-            
+
             .summary-cards-container::-webkit-scrollbar {
-                display: none; /* Chrome, Safari, Opera */
+                display: none;
+                /* Chrome, Safari, Opera */
             }
-            
+
             .summary-cards-container .col-md-3 {
                 min-width: 85%;
                 scroll-snap-align: center;
                 padding: 0 0.5rem;
             }
-            
+
             /* Scroll indicator dots */
             .scroll-indicator {
                 display: flex;
@@ -1155,7 +1468,7 @@
                 gap: 0.5rem;
                 margin: 1rem 0;
             }
-            
+
             .scroll-dot {
                 width: 8px;
                 height: 8px;
@@ -1163,7 +1476,7 @@
                 background-color: #ddd;
                 transition: all 0.3s ease;
             }
-            
+
             .scroll-dot.active {
                 background-color: var(--primary-color);
                 transform: scale(1.3);
@@ -1206,36 +1519,36 @@
             font-size: 0.85rem;
             display: inline-block;
         }
-        
+
         /* Desktop styles for larger screens */
         @media (min-width: 769px) {
             .dish-status-indicator {
                 width: 24px;
                 height: 24px;
             }
-            
+
             .dish-status-indicator:hover {
                 transform: scale(1.2);
                 background-color: rgba(0, 0, 0, 0.1);
             }
-            
+
             .dish-status-indicator .bi-check-all,
             .dish-status-indicator .bi-circle {
                 font-size: 1rem;
             }
-            
+
             .kitchen-badge {
                 padding: 0.5rem 0.8rem;
                 border-radius: 20px;
                 font-size: 0.9rem;
             }
-            
+
             /* Hide mobile bottom nav on desktop */
             .mobile-bottom-nav {
                 display: none;
             }
         }
-        
+
         /* Mobile Bottom Navigation - Modern Design */
         .mobile-bottom-nav {
             position: fixed;
@@ -1248,12 +1561,13 @@
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 1000; /* Higher than sticky elements but lower than FAB */
+            z-index: 1000;
+            /* Higher than sticky elements but lower than FAB */
             padding: 0.25rem;
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
         }
-        
+
         .mobile-bottom-nav .nav-item {
             display: flex;
             flex-direction: column;
@@ -1269,13 +1583,13 @@
             border-radius: 12px;
             margin: 0 2px;
         }
-        
+
         .mobile-bottom-nav .nav-item.active {
             color: var(--primary-color);
             background-color: rgba(13, 110, 253, 0.08);
             transform: translateY(-4px);
         }
-        
+
         .mobile-bottom-nav .nav-item.active::after {
             content: '';
             position: absolute;
@@ -1286,34 +1600,43 @@
             background-color: var(--primary-color);
             border-radius: 3px;
         }
-        
+
         .mobile-bottom-nav .nav-item i {
             font-size: 1.5rem;
             margin-bottom: 0.25rem;
             transition: transform 0.2s ease;
         }
-        
+
         .mobile-bottom-nav .nav-item.active i {
             transform: scale(1.1);
         }
-        
+
         .mobile-bottom-nav .nav-item span {
             font-size: 0.75rem;
             font-weight: 600;
             transition: all 0.2s ease;
         }
-        
+
         /* Tab content containers */
-        #home-content, #summary-content, #completed-content {
+        #home-content,
+        #summary-content,
+        #completed-content {
             display: none;
             animation: fadeIn 0.3s ease-in-out;
         }
-        
+
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         /* Global body styles */
         body {
             background-color: var(--background-color);
@@ -1325,14 +1648,14 @@
             -moz-osx-font-smoothing: grayscale;
             touch-action: manipulation;
         }
-        
+
         /* Add padding to the bottom of the page to account for the fixed nav */
         @media (max-width: 768px) {
             body {
                 padding-bottom: calc(var(--bottom-nav-height) + 1rem);
                 background-color: var(--background-color);
             }
-            
+
             /* Floating action button for mobile - Modern Design */
             .mobile-fab {
                 position: fixed;
@@ -1348,27 +1671,28 @@
                 align-items: center;
                 justify-content: center;
                 box-shadow: 0 4px 20px rgba(13, 110, 253, 0.4);
-                z-index: 9999; /* Increased z-index to ensure it stays on top */
+                z-index: 9999;
+                /* Increased z-index to ensure it stays on top */
                 border: none;
                 font-size: 1.5rem;
                 transition: all 0.3s var(--ease-out);
             }
-            
+
             .mobile-fab:active {
                 transform: scale(0.92);
                 box-shadow: 0 2px 10px rgba(13, 110, 253, 0.3);
             }
-            
+
             .mobile-fab i {
                 filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
             }
-            
+
             /* Improved container spacing for mobile */
             .container-fluid {
                 padding: 0.75rem;
                 padding-bottom: calc(var(--bottom-nav-height) + 1.5rem);
             }
-            
+
             /* Improved card styles for mobile */
             .card {
                 border-radius: var(--card-border-radius);
@@ -1377,7 +1701,7 @@
                 overflow: hidden;
                 margin-bottom: 1rem;
             }
-            
+
             /* Improved section headers for mobile */
             .section-header {
                 font-size: 1.5rem;
@@ -1388,7 +1712,7 @@
                 align-items: center;
                 gap: 0.5rem;
             }
-            
+
             .section-header i {
                 color: var(--primary-color);
             }
@@ -1402,34 +1726,54 @@
         <!-- HOME TAB: Pending Orders -->
         <div id="home-content">
             <!-- Mobile Search Bar Removed - Now using unified search bar above pending orders list -->
-            
+
             <!-- Store Selection Dropdown - Mobile -->
             <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
                 <h2 class="section-header mb-0">
                     <i class="bi bi-shop"></i> <span id="storeName-mobile" class="store-name"></span>
                 </h2>
                 <div class="d-flex gap-2">
-                    <select class="form-select store-selector" style="width: auto;" id="storeSelector-mobile" onchange="changeStore(this.value, 'storeSelector-mobile')">
+                    <select class="form-select store-selector" style="width: auto;" id="storeSelector-mobile"
+                        onchange="changeStore(this.value, 'storeSelector-mobile')">
                         <option value="">Select Store</option>
                         <option value="samriddhi">Samriddhi</option>
                         <option value="eros">Eros</option>
                     </select>
                 </div>
             </div>
-            
+
+            <!-- Mobile Date Picker -->
+            <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
+                <div class="input-group" style="max-width: 200px;">
+                    <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                    <input type="date" class="form-control" id="orderDatePicker-mobile" value=""
+                        onchange="handleDateChange(this.value)">
+                </div>
+                <button class="btn btn-outline-secondary btn-sm" onclick="resetDate()">
+                    <i class="bi bi-arrow-counterclockwise"></i> Today
+                </button>
+            </div>
+
             <!-- Mobile Quick Stats -->
             <div class="d-flex justify-content-between align-items-center mb-3 d-md-none">
                 <h2 class="section-header mb-0"><i class="bi bi-hourglass-split"></i> Pending</h2>
                 <div class="d-flex gap-2">
-                    <button class="btn btn-primary btn-sm rounded-circle" style="width: 38px; height: 38px;" onclick="loadOrders()">
+                    <button class="btn btn-primary btn-sm rounded-circle" style="width: 38px; height: 38px;"
+                        onclick="loadOrders()">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>
-                    <button class="btn btn-sm rounded-circle" style="width: 38px; height: 38px; background: var(--warning-gradient); color: white;">
+                    <button class="btn btn-sm rounded-circle"
+                        style="width: 38px; height: 38px; background: var(--warning-gradient); color: white;">
                         <span id="pendingOrdersCount-mobile">0</span>
                     </button>
                 </div>
             </div>
-            
+
+            <!-- Mobile Historical Date Indicator -->
+            <div class="alert alert-warning mb-3 historical-date-indicator d-none d-md-none">
+                <i class="bi bi-clock-history me-2"></i><span></span>
+            </div>
+
             <!-- Mobile Kitchen List (Priority) -->
             <div class="d-md-none mb-3">
                 <div class="card" style="border-radius: 12px;">
@@ -1437,10 +1781,12 @@
                         style="background: linear-gradient(135deg, #e83e8c 0%, #fd7e14 100%); border-radius: 12px 12px 0 0;">
                         <h5 class="mb-0" style="font-size: 1rem;"><i class="bi bi-fire"></i> Priority Cooking</h5>
                         <div>
-                            <button class="btn btn-sm btn-outline-light me-1 p-1" style="min-height: 30px;" onclick="speakKitchenList()" title="Narrate cooking list">
+                            <button class="btn btn-sm btn-outline-light me-1 p-1" style="min-height: 30px;"
+                                onclick="speakKitchenList()" title="Narrate cooking list">
                                 <i class="bi bi-volume-up"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-light p-1" style="min-height: 30px;" onclick="toggleSection('mobileKitchenList')">
+                            <button class="btn btn-sm btn-outline-light p-1" style="min-height: 30px;"
+                                onclick="toggleSection('mobileKitchenList')">
                                 <i class="bi bi-chevron-down" id="kitchenListToggleIcon"></i>
                             </button>
                         </div>
@@ -1450,36 +1796,54 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Desktop Header -->
             <div class="d-none d-md-flex justify-content-between align-items-center mb-4">
                 <div>
                     <div class="d-flex align-items-center gap-3 mb-2">
                         <h2><i class="bi bi-shop"></i> <span id="storeName-desktop" class="store-name"></span></h2>
-                        <select class="form-select store-selector" style="width: auto;" id="storeSelector-desktop" onchange="changeStore(this.value, 'storeSelector-desktop')">
+                        <select class="form-select store-selector" style="width: auto;" id="storeSelector-desktop"
+                            onchange="changeStore(this.value, 'storeSelector-desktop')">
                             <option value="">Select Store</option>
                             <option value="samriddhi">Samriddhi</option>
                             <option value="eros">Eros</option>
                         </select>
                     </div>
                     <h3>Pending Orders</h3>
-                    <small class="text-muted"><i class="bi bi-sort-down"></i> Orders sorted by delay level (most delayed first)</small>
+                    <small class="text-muted"><i class="bi bi-sort-down"></i> Orders sorted by delay level (most delayed
+                        first)</small>
+                    <div class="alert alert-warning mt-2 historical-date-indicator d-none">
+                        <i class="bi bi-clock-history me-2"></i><span></span>
+                    </div>
                 </div>
                 <div>
-                    <a href="analytics.html" class="btn btn-info me-2" target="_blank">
-                        <i class="bi bi-calculator"></i> Analytics
-                    </a>
-                    <button id="newOrderBtn" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#addOrderModal">
-                        <i class="bi bi-plus-circle"></i> Add Order
-                    </button>
-                    <button class="btn btn-primary me-2" onclick="loadOrders()">
-                        <i class="bi bi-arrow-clockwise"></i> Refresh
-                    </button>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="input-group me-2" style="width: auto;">
+                            <span class="input-group-text"><i class="bi bi-calendar-date"></i></span>
+                            <input type="date" class="form-control" id="orderDatePicker" value=""
+                                onchange="handleDateChange(this.value)">
+                        </div>
+                        <button class="btn btn-outline-secondary me-2" id="resetDateBtn" onclick="resetDate()">
+                            <i class="bi bi-arrow-counterclockwise"></i> Today
+                        </button>
+                    </div>
+                    <div>
+                        <a href="analytics.html" class="btn btn-info me-2" target="_blank">
+                            <i class="bi bi-calculator"></i> Analytics
+                        </a>
+                        <button id="newOrderBtn" class="btn btn-success me-2" data-bs-toggle="modal"
+                            data-bs-target="#addOrderModal">
+                            <i class="bi bi-plus-circle"></i> Add Order
+                        </button>
+                        <button class="btn btn-primary me-2" onclick="loadOrders()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
                 </div>
             </div>
-            
+
             <!-- Desktop Search Bar Removed - Now using unified search bar above pending orders list -->
-            
+
             <div class="row">
                 <!-- Main Content Column -->
                 <div class="col-md-8">
@@ -1500,7 +1864,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Search Bar Above Pending Orders (visible on both mobile and desktop) -->
                     <div class="card mb-3">
                         <div class="card-body p-2">
@@ -1508,10 +1872,12 @@
                                 <span class="input-group-text"><i class="bi bi-search"></i></span>
                                 <input type="text" class="form-control" id="pendingOrdersSearchInput"
                                     placeholder="Search pending orders by phone or comments...">
-                                <button class="btn btn-outline-secondary d-none d-md-block" type="button" id="clearPendingSearchBtn">
+                                <button class="btn btn-outline-secondary d-none d-md-block" type="button"
+                                    id="clearPendingSearchBtn">
                                     <i class="bi bi-x-circle"></i> Clear
                                 </button>
-                                <button class="btn btn-outline-secondary d-md-none" type="button" id="clearPendingSearchBtn-mobile">
+                                <button class="btn btn-outline-secondary d-md-none" type="button"
+                                    id="clearPendingSearchBtn-mobile">
                                     <i class="bi bi-x-circle"></i>
                                 </button>
                             </div>
@@ -1520,7 +1886,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Pending Orders List -->
                     <div id="pendingOrdersList" class="row"></div>
                 </div>
@@ -1532,7 +1898,8 @@
                             style="background: linear-gradient(135deg, #e83e8c 0%, #fd7e14 100%);">
                             <div>
                                 <h5 class="mb-0"><i class="bi bi-fire"></i> Priority Cooking List</h5>
-                                <small class="text-light"><i class="bi bi-sort-down"></i> Sorted by delay level (most delayed first)</small>
+                                <small class="text-light"><i class="bi bi-sort-down"></i> Sorted by delay level (most
+                                    delayed first)</small>
                             </div>
                             <div>
                                 <button class="btn btn-sm btn-outline-light me-1" onclick="speakKitchenList()"
@@ -1549,14 +1916,15 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Mobile Kitchen List moved to top -->
         </div>
-        
+
         <!-- SUMMARY TAB: Dashboard and Analytics -->
         <div id="summary-content">
-            <h2 class="section-header mb-3"><i class="bi bi-graph-up"></i> <span id="cartNameHeader">Orders Summary</span></h2>
-            
+            <h2 class="section-header mb-3"><i class="bi bi-graph-up"></i> <span id="cartNameHeader">Orders
+                    Summary</span></h2>
+
             <!-- Summary Cards - Swipeable on Mobile -->
             <div class="summary-cards-container row d-md-flex">
                 <div class="col-md-3 mb-3">
@@ -1576,7 +1944,8 @@
                             <h6 class="card-title text-dark"><i class="bi bi-hourglass-split"></i> Pending Orders</h6>
                             <h3 id="pendingOrdersCount" class="mb-0 text-dark">0</h3>
                             <div class="d-flex justify-content-center align-items-center mt-3">
-                                <span class="badge" style="background-color: #fd7e14;">Value: ₹<span id="pendingOrdersTotal">0</span></span>
+                                <span class="badge" style="background-color: #fd7e14;">Value: ₹<span
+                                        id="pendingOrdersTotal">0</span></span>
                             </div>
                         </div>
                     </div>
@@ -1587,8 +1956,10 @@
                             <h6 class="card-title text-dark"><i class="bi bi-cash-coin"></i> Paid Orders</h6>
                             <h3 id="paidOrdersCount" class="mb-0 text-dark">0</h3>
                             <div class="d-flex justify-content-between mt-3">
-                                <span class="badge bg-success"><i class="bi bi-cash"></i> Cash: ₹<span id="cashPaymentsTotal">0</span></span>
-                                <span class="badge bg-success"><i class="bi bi-credit-card"></i> Online: ₹<span id="onlinePaymentsTotal">0</span></span>
+                                <span class="badge bg-success"><i class="bi bi-cash"></i> Cash: ₹<span
+                                        id="cashPaymentsTotal">0</span></span>
+                                <span class="badge bg-success"><i class="bi bi-credit-card"></i> Online: ₹<span
+                                        id="onlinePaymentsTotal">0</span></span>
                             </div>
                         </div>
                     </div>
@@ -1599,13 +1970,14 @@
                             <h6 class="card-title text-dark"><i class="bi bi-truck"></i> Delivered (Unpaid)</h6>
                             <h3 id="deliveredUnpaidCount" class="mb-0 text-dark">0</h3>
                             <div class="d-flex justify-content-center align-items-center mt-3">
-                                <span class="badge bg-info text-dark">Value: ₹<span id="deliveredUnpaidTotal">0</span></span>
+                                <span class="badge bg-info text-dark">Value: ₹<span
+                                        id="deliveredUnpaidTotal">0</span></span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Scroll indicator dots for mobile -->
             <div class="scroll-indicator d-md-none">
                 <div class="scroll-dot active"></div>
@@ -1613,7 +1985,7 @@
                 <div class="scroll-dot"></div>
                 <div class="scroll-dot"></div>
             </div>
-            
+
             <!-- Order Delay Comparison (Mobile) -->
             <div class="card mb-4 mt-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center"
@@ -1632,7 +2004,7 @@
                     <div id="delayComparisonTableMobile"></div>
                 </div>
             </div>
-            
+
             <!-- Refresh Button -->
             <div class="d-grid gap-2 mb-4">
                 <button class="btn btn-primary" onclick="loadOrders()">
@@ -1640,11 +2012,11 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- COMPLETED TAB: Paid and Delivered Orders -->
         <div id="completed-content">
             <h2 class="section-header mb-3"><i class="bi bi-check-circle"></i> Completed Orders</h2>
-            
+
             <!-- Paid Orders Section -->
             <div class="card mb-4">
                 <div class="card-header text-white d-flex justify-content-between align-items-center"
@@ -1682,7 +2054,7 @@
                     <div id="deliveredOrdersList" class="row"></div>
                 </div>
             </div>
-            
+
             <!-- Refresh Button -->
             <div class="d-grid gap-2 mb-4">
                 <button class="btn btn-primary" onclick="loadOrders()">
@@ -1690,7 +2062,7 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- Desktop Layout (Original) -->
         <div class="d-none d-md-block">
             <!-- Order Summary Section -->
@@ -1712,10 +2084,12 @@
                                 <div class="col-md-3 mb-3">
                                     <div class="card summary-card h-100 total-card">
                                         <div class="card-body text-center">
-                                            <h6 class="card-title"><i class="bi bi-calendar-check"></i> Total Orders</h6>
+                                            <h6 class="card-title"><i class="bi bi-calendar-check"></i> Total Orders
+                                            </h6>
                                             <h3 id="totalOrdersCount-desktop" class="mb-0">0</h3>
                                             <div class="d-flex justify-content-center align-items-center mt-3">
-                                                <span class="badge bg-primary">Total Sale: ₹<span id="totalSalesAmount-desktop">0</span></span>
+                                                <span class="badge bg-primary">Total Sale: ₹<span
+                                                        id="totalSalesAmount-desktop">0</span></span>
                                             </div>
                                         </div>
                                     </div>
@@ -1723,10 +2097,12 @@
                                 <div class="col-md-3 mb-3">
                                     <div class="card summary-card h-100 pending-card">
                                         <div class="card-body text-center">
-                                            <h6 class="card-title text-dark"><i class="bi bi-hourglass-split"></i> Pending Orders</h6>
+                                            <h6 class="card-title text-dark"><i class="bi bi-hourglass-split"></i>
+                                                Pending Orders</h6>
                                             <h3 id="pendingOrdersCount-desktop" class="mb-0 text-dark">0</h3>
                                             <div class="d-flex justify-content-center align-items-center mt-3">
-                                                <span class="badge" style="background-color: #fd7e14;">Value: ₹<span id="pendingOrdersTotal-desktop">0</span></span>
+                                                <span class="badge" style="background-color: #fd7e14;">Value: ₹<span
+                                                        id="pendingOrdersTotal-desktop">0</span></span>
                                             </div>
                                         </div>
                                     </div>
@@ -1734,11 +2110,14 @@
                                 <div class="col-md-3 mb-3">
                                     <div class="card summary-card h-100 paid-card">
                                         <div class="card-body text-center">
-                                            <h6 class="card-title text-dark"><i class="bi bi-cash-coin"></i> Paid Orders</h6>
+                                            <h6 class="card-title text-dark"><i class="bi bi-cash-coin"></i> Paid Orders
+                                            </h6>
                                             <h3 id="paidOrdersCount-desktop" class="mb-0 text-dark">0</h3>
                                             <div class="d-flex justify-content-between mt-3">
-                                                <span class="badge bg-success"><i class="bi bi-cash"></i> Cash: ₹<span id="cashPaymentsTotal-desktop">0</span></span>
-                                                <span class="badge bg-success"><i class="bi bi-credit-card"></i> Online: ₹<span id="onlinePaymentsTotal-desktop">0</span></span>
+                                                <span class="badge bg-success"><i class="bi bi-cash"></i> Cash: ₹<span
+                                                        id="cashPaymentsTotal-desktop">0</span></span>
+                                                <span class="badge bg-success"><i class="bi bi-credit-card"></i> Online:
+                                                    ₹<span id="onlinePaymentsTotal-desktop">0</span></span>
                                             </div>
                                         </div>
                                     </div>
@@ -1746,10 +2125,12 @@
                                 <div class="col-md-3 mb-3">
                                     <div class="card summary-card h-100 delivered-card">
                                         <div class="card-body text-center">
-                                            <h6 class="card-title text-dark"><i class="bi bi-truck"></i> Delivered (Unpaid)</h6>
+                                            <h6 class="card-title text-dark"><i class="bi bi-truck"></i> Delivered
+                                                (Unpaid)</h6>
                                             <h3 id="deliveredUnpaidCount-desktop" class="mb-0 text-dark">0</h3>
                                             <div class="d-flex justify-content-center align-items-center mt-3">
-                                                <span class="badge bg-info text-dark">Value: ₹<span id="deliveredUnpaidTotal-desktop">0</span></span>
+                                                <span class="badge bg-info text-dark">Value: ₹<span
+                                                        id="deliveredUnpaidTotal-desktop">0</span></span>
                                             </div>
                                         </div>
                                     </div>
@@ -1765,9 +2146,11 @@
                 <!-- Paid Orders Section -->
                 <div class="col-md-6">
                     <div class="card">
-                        <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <div
+                            class="card-header bg-success text-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="bi bi-cash-coin"></i> Paid Orders</h5>
-                            <button class="btn btn-sm btn-outline-light" onclick="toggleSection('paidOrdersSection-desktop')">
+                            <button class="btn btn-sm btn-outline-light"
+                                onclick="toggleSection('paidOrdersSection-desktop')">
                                 <i class="bi bi-chevron-down" id="paidOrdersToggleIcon-desktop"></i>
                             </button>
                         </div>
@@ -1783,7 +2166,8 @@
                         <div class="card-header text-white d-flex justify-content-between align-items-center"
                             style="background: linear-gradient(135deg, #20c997 0%, #0dcaf0 100%);">
                             <h5 class="mb-0"><i class="bi bi-truck"></i> Delivered Orders</h5>
-                            <button class="btn btn-sm btn-outline-light" onclick="toggleSection('deliveredOrdersSection-desktop')">
+                            <button class="btn btn-sm btn-outline-light"
+                                onclick="toggleSection('deliveredOrdersSection-desktop')">
                                 <i class="bi bi-chevron-down" id="deliveredOrdersToggleIcon-desktop"></i>
                             </button>
                         </div>
@@ -1819,7 +2203,11 @@
                         <div id="orderItemsContainer">
                             <!-- Order items will be added here -->
                         </div>
-                        <button type="button" class="btn btn-secondary mb-3" id="addOrderItemBtn">Add Item</button>
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" class="btn btn-secondary" id="addOrderItemBtn">Add Menu Item</button>
+                            <button type="button" class="btn btn-info" id="addCustomOrderItemBtn">Add Custom
+                                Item</button>
+                        </div>
                         <div class="mb-3">
                             <strong>Total: ₹<span id="orderTotal">0</span></strong>
                         </div>
@@ -1856,7 +2244,12 @@
                         <div id="editOrderItemsContainer">
                             <!-- Edit order items will be added here -->
                         </div>
-                        <button type="button" class="btn btn-secondary mb-3" id="editAddOrderItemBtn">Add Item</button>
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" class="btn btn-secondary" id="editAddOrderItemBtn">Add Menu
+                                Item</button>
+                            <button type="button" class="btn btn-info" id="editAddCustomOrderItemBtn">Add Custom
+                                Item</button>
+                        </div>
                         <div class="mb-3">
                             <strong>Total: ₹<span id="editOrderTotal">0</span></strong>
                         </div>
@@ -2046,7 +2439,44 @@
             initModals();
             initEventListeners();
             initSectionToggles();
-            loadOrders();
+            initDatePickers(); // Initialize date pickers
+
+            // Check URL for date parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const dateParam = urlParams.get('date');
+
+            if (dateParam) {
+                // If date parameter exists in URL, use it
+                try {
+                    const dateFromUrl = new Date(dateParam);
+                    if (!isNaN(dateFromUrl.getTime())) {
+                        // Valid date, set it in the date pickers
+                        const formattedDate = dateFromUrl.toISOString().split('T')[0];
+                        document.getElementById('orderDatePicker').value = formattedDate;
+                        document.getElementById('orderDatePicker-mobile').value = formattedDate;
+
+                        // Load orders for this date
+                        selectedDate = dateFromUrl;
+                        loadOrders(dateFromUrl);
+
+                        // Show historical date indicator
+                        document.querySelectorAll('.historical-date-indicator').forEach(el => {
+                            el.textContent = `Orders for ${dateFromUrl.toLocaleDateString()}`;
+                            el.classList.remove('d-none');
+                        });
+                    } else {
+                        // Invalid date, load today's orders
+                        loadOrders();
+                    }
+                } catch (e) {
+                    console.error("Error parsing date from URL:", e);
+                    loadOrders();
+                }
+            } else {
+                // No date parameter, load today's orders
+                loadOrders();
+            }
+
             setInterval(checkDelayedOrders, 300000); // 5 minute checks
 
             // Update elapsed times every minute
@@ -2059,18 +2489,18 @@
                 showDelayComparison();
                 // Setup delay comparison
             }, 2000); // Longer delay to ensure orders are fully loaded
-            
+
             // Initialize mobile-specific features
             if (window.innerWidth < 768) {
                 // Set up summary cards swipe
                 const container = document.querySelector('.summary-cards-container');
                 if (container) {
                     // Initialize scroll position indicator
-                    container.addEventListener('scroll', function() {
+                    container.addEventListener('scroll', function () {
                         const scrollPosition = this.scrollLeft;
                         const cardWidth = this.querySelector('.col-md-3').offsetWidth;
                         const activeIndex = Math.round(scrollPosition / cardWidth);
-                        
+
                         document.querySelectorAll('.scroll-dot').forEach((dot, index) => {
                             if (index === activeIndex) {
                                 dot.classList.add('active');
@@ -2080,7 +2510,7 @@
                         });
                     });
                 }
-                
+
                 // Set home tab as active by default
                 switchTab('home');
             }
@@ -2090,7 +2520,7 @@
             // Initialize section toggle icons for mobile
             document.getElementById('paidOrdersToggleIcon').classList.add('bi-chevron-down');
             document.getElementById('deliveredOrdersToggleIcon').classList.add('bi-chevron-down');
-            
+
             // Initialize section toggle icons for desktop
             if (document.getElementById('paidOrdersToggleIcon-desktop')) {
                 document.getElementById('paidOrdersToggleIcon-desktop').classList.add('bi-chevron-down');
@@ -2098,12 +2528,12 @@
             if (document.getElementById('deliveredOrdersToggleIcon-desktop')) {
                 document.getElementById('deliveredOrdersToggleIcon-desktop').classList.add('bi-chevron-down');
             }
-            
+
             // Initialize kitchen list toggle icon for mobile - set to up since it's expanded by default
             if (document.getElementById('kitchenListToggleIcon')) {
                 document.getElementById('kitchenListToggleIcon').classList.add('bi-chevron-up');
             }
-            
+
             // Initialize delay section toggle icon for mobile
             if (document.getElementById('delayToggleIcon')) {
                 document.getElementById('delayToggleIcon').classList.add('bi-chevron-down');
@@ -2113,7 +2543,7 @@
             // Set the paid and delivered sections to be collapsed by default
             document.getElementById('paidOrdersSection').style.display = 'none';
             document.getElementById('deliveredOrdersSection').style.display = 'none';
-            
+
             // Also collapse desktop versions if they exist
             if (document.getElementById('paidOrdersSection-desktop')) {
                 document.getElementById('paidOrdersSection-desktop').style.display = 'none';
@@ -2121,29 +2551,29 @@
             if (document.getElementById('deliveredOrdersSection-desktop')) {
                 document.getElementById('deliveredOrdersSection-desktop').style.display = 'none';
             }
-            
+
             // The kitchen list is now expanded by default
             // The delay section is already collapsed by default with style="display: none;"
-            
+
             // Initialize scroll indicator for summary cards
             initSummaryCardSwipe();
         }
-        
+
         function initSummaryCardSwipe() {
             // Only run on mobile
             if (window.innerWidth >= 768) return;
-            
+
             const container = document.querySelector('.summary-cards-container');
             if (!container) return;
-            
+
             const dots = document.querySelectorAll('.scroll-dot');
-            
+
             // Update active dot based on scroll position
             container.addEventListener('scroll', () => {
                 const scrollPosition = container.scrollLeft;
                 const cardWidth = container.querySelector('.col-md-3').offsetWidth;
                 const activeIndex = Math.round(scrollPosition / cardWidth);
-                
+
                 // Update active dot
                 dots.forEach((dot, index) => {
                     if (index === activeIndex) {
@@ -2153,7 +2583,7 @@
                     }
                 });
             });
-            
+
             // Make dots clickable
             dots.forEach((dot, index) => {
                 dot.addEventListener('click', () => {
@@ -2216,6 +2646,11 @@
                 document.getElementById('editOrderItemsContainer').appendChild(row);
             });
 
+            document.getElementById('editAddCustomOrderItemBtn').addEventListener('click', () => {
+                const row = createEditOrderItemRow(null, true);
+                document.getElementById('editOrderItemsContainer').appendChild(row);
+            });
+
             // Add a global click handler for document to clear highlights when clicking elsewhere
             document.addEventListener('click', function (event) {
                 if (!event.target.closest('.kitchen-badge') &&
@@ -2226,38 +2661,187 @@
             });
         }
 
-        async function loadOrders() {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+        // Global variable to store the selected date
+        let selectedDate = null;
 
-            // Modified approach to avoid composite index requirement
-            // Option 1: Query by cartName only and filter client-side
-            db.collection('bot_orders')
-                .where('cartName', '==', state.cartName)
-                .onSnapshot((snapshot) => {
-                    // Filter documents client-side for today's date
-                    const filteredDocs = snapshot.docs.filter(doc => {
-                        const data = doc.data();
-                        const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
-                        return createdAt >= today;
-                    });
+        // Function to handle date change from date picker
+        function handleDateChange(dateValue) {
+            if (dateValue) {
+                selectedDate = new Date(dateValue);
+                // Sync both date pickers
+                document.getElementById('orderDatePicker').value = dateValue;
+                document.getElementById('orderDatePicker-mobile').value = dateValue;
 
-                    // Sort by createdAt in descending order
-                    filteredDocs.sort((a, b) => {
-                        const aDate = a.data().createdAt?.toDate ? a.data().createdAt.toDate() : new Date(a.data().createdAt);
-                        const bDate = b.data().createdAt?.toDate ? b.data().createdAt.toDate() : new Date(b.data().createdAt);
-                        return bDate - aDate; // descending order
-                    });
+                // Update URL with the selected date without reloading the page
+                const url = new URL(window.location.href);
+                url.searchParams.set('date', dateValue);
+                window.history.pushState({}, '', url);
 
-                    // Create a modified snapshot with the filtered and sorted docs
-                    const filteredSnapshot = {
-                        docs: filteredDocs,
-                        size: filteredDocs.length,
-                        empty: filteredDocs.length === 0
-                    };
-
-                    handleOrderSnapshot(filteredSnapshot);
+                // Update UI to show we're viewing historical data
+                document.querySelectorAll('.historical-date-indicator').forEach(el => {
+                    const dateText = `Orders for ${selectedDate.toLocaleDateString()}`;
+                    el.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-clock-history me-2"></i>${dateText}</span>
+                            <button class="btn btn-sm btn-outline-dark" onclick="shareDate('${dateValue}')">
+                                <i class="bi bi-share"></i> Share
+                            </button>
+                        </div>
+                    `;
+                    el.classList.remove('d-none');
                 });
+
+                // Load orders for the selected date
+                loadOrders(selectedDate);
+            }
+        }
+
+        // Function to share a link to a specific date
+        function shareDate(dateValue) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('date', dateValue);
+
+            // Try to use the clipboard API if available
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url.toString())
+                    .then(() => {
+                        alert('Link copied to clipboard! You can share it to view orders for this date.');
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text: ', err);
+                        // Fallback - prompt user to copy manually
+                        prompt('Copy this link to share orders for this date:', url.toString());
+                    });
+            } else {
+                // Fallback for browsers that don't support clipboard API
+                prompt('Copy this link to share orders for this date:', url.toString());
+            }
+        }
+
+        // Function to reset date to today
+        function resetDate() {
+            selectedDate = null;
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+
+            // Reset date pickers
+            document.getElementById('orderDatePicker').value = formattedDate;
+            document.getElementById('orderDatePicker-mobile').value = formattedDate;
+
+            // Update URL by removing the date parameter
+            const url = new URL(window.location.href);
+            url.searchParams.delete('date');
+            window.history.pushState({}, '', url);
+
+            // Hide historical data indicators
+            document.querySelectorAll('.historical-date-indicator').forEach(el => {
+                el.classList.add('d-none');
+            });
+
+            // Load today's orders
+            loadOrders();
+        }
+
+        // Initialize date pickers with today's date
+        function initDatePickers() {
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('orderDatePicker').value = formattedDate;
+            document.getElementById('orderDatePicker-mobile').value = formattedDate;
+        }
+
+        async function loadOrders(date = null) {
+            // If date is provided, use it; otherwise use today
+            const startDate = date || new Date();
+            startDate.setHours(0, 0, 0, 0);
+
+            // Calculate end date (end of the selected day)
+            const endDate = new Date(startDate);
+            endDate.setHours(23, 59, 59, 999);
+
+            // Show loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.id = 'loadingIndicator';
+            loadingIndicator.className = 'alert alert-info text-center';
+            loadingIndicator.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Loading orders...';
+
+            const pendingOrdersList = document.getElementById('pendingOrdersList');
+            if (pendingOrdersList) {
+                pendingOrdersList.innerHTML = '';
+                pendingOrdersList.appendChild(loadingIndicator);
+            }
+
+            try {
+                // Modified approach to avoid composite index requirement
+                // Query by cartName only and filter client-side by date
+                db.collection('bot_orders')
+                    .where('cartName', '==', state.cartName)
+                    .get()
+                    .then((snapshot) => {
+                        // Filter documents client-side for the selected date
+                        const filteredDocs = snapshot.docs.filter(doc => {
+                            const data = doc.data();
+
+                            // If createdAt is null or undefined, include the order
+                            // This handles newly added orders where the server timestamp might not be set yet
+                            if (!data.createdAt) {
+                                console.log(`Including order ${doc.id} with no timestamp`);
+                                return true;
+                            }
+
+                            const createdAt = data.createdAt?.toDate ? data.createdAt.toDate() : new Date(data.createdAt);
+                            return createdAt >= startDate && createdAt <= endDate;
+                        });
+
+                        // Sort by createdAt in descending order
+                        filteredDocs.sort((a, b) => {
+                            const aData = a.data();
+                            const bData = b.data();
+
+                            // Handle cases where createdAt might be null or undefined
+                            if (!aData.createdAt) return -1; // Place orders with no timestamp at the top
+                            if (!bData.createdAt) return 1;
+
+                            const aDate = aData.createdAt?.toDate ? aData.createdAt.toDate() : new Date(aData.createdAt);
+                            const bDate = bData.createdAt?.toDate ? bData.createdAt.toDate() : new Date(bData.createdAt);
+                            return bDate - aDate; // descending order
+                        });
+
+                        // Create a modified snapshot with the filtered and sorted docs
+                        const filteredSnapshot = {
+                            docs: filteredDocs,
+                            size: filteredDocs.length,
+                            empty: filteredDocs.length === 0
+                        };
+
+                        // Remove loading indicator
+                        const loadingIndicator = document.getElementById('loadingIndicator');
+                        if (loadingIndicator) {
+                            loadingIndicator.remove();
+                        }
+
+                        handleOrderSnapshot(filteredSnapshot);
+                    })
+                    .catch(error => {
+                        console.error("Error loading orders:", error);
+                        alert("Error loading orders: " + error.message);
+
+                        // Remove loading indicator even on error
+                        const loadingIndicator = document.getElementById('loadingIndicator');
+                        if (loadingIndicator) {
+                            loadingIndicator.remove();
+                        }
+                    });
+            } catch (error) {
+                console.error("Error in loadOrders function:", error);
+                alert("Error in loadOrders function: " + error.message);
+
+                // Remove loading indicator even on error
+                const loadingIndicator = document.getElementById('loadingIndicator');
+                if (loadingIndicator) {
+                    loadingIndicator.remove();
+                }
+            }
         }
 
         function handleOrderSnapshot(snapshot) {
@@ -2285,6 +2869,10 @@
                     } else if (data.createdAt instanceof Date) {
                         createdAtDate = data.createdAt;
                     }
+                } else {
+                    // If createdAt is missing, use current time
+                    console.log(`Order ${doc.id} has no createdAt timestamp, using current time`);
+                    createdAtDate = new Date();
                 }
 
                 const order = {
@@ -2310,7 +2898,7 @@
                 // Only apply special sorting to pending/preparing orders
                 const aIsPending = a.status === 'preparing' || a.status === 'pending';
                 const bIsPending = b.status === 'preparing' || b.status === 'pending';
-                
+
                 // If both are pending/preparing, sort by delay level
                 if (aIsPending && bIsPending) {
                     if (b.delayLevel !== a.delayLevel) {
@@ -2319,11 +2907,11 @@
                     // If delay levels are equal, sort by creation time (oldest first)
                     return a.createdAt - b.createdAt;
                 }
-                
+
                 // If only one is pending/preparing, prioritize it
                 if (aIsPending && !bIsPending) return -1;
                 if (!aIsPending && bIsPending) return 1;
-                
+
                 // Otherwise, sort by status and then by creation time
                 return a.createdAt - b.createdAt;
             });
@@ -2360,44 +2948,52 @@
         }
 
         function updateUI() {
-            // Render the orders and kitchen list
-            renderOrders();
-            renderKitchenList();
+            try {
+                // Render the orders and kitchen list
+                renderOrders();
+                renderKitchenList();
 
-            // Always update delay comparison since it's now always visible
-            showDelayComparison();
-            
-            // Update mobile-specific elements
-            if (window.innerWidth < 768) {
-                // Update mobile kitchen list if visible
-                if (document.getElementById('kitchenListMobile')) {
-                    const kitchenListContent = document.getElementById('kitchenList').innerHTML;
-                    document.getElementById('kitchenListMobile').innerHTML = kitchenListContent;
-                    
-                    // Ensure event listeners are reattached for mobile kitchen badges
-                    setTimeout(() => {
-                        document.querySelectorAll('#kitchenListMobile .kitchen-badge').forEach(badge => {
-                            badge.addEventListener('click', handleKitchenBadgeClick);
-                        });
-                    }, 100);
+                // Always update delay comparison since it's now always visible
+                showDelayComparison();
+
+                // Update mobile-specific elements
+                if (window.innerWidth < 768) {
+                    // Update mobile kitchen list if visible
+                    if (document.getElementById('kitchenListMobile')) {
+                        const kitchenListContent = document.getElementById('kitchenList').innerHTML;
+                        document.getElementById('kitchenListMobile').innerHTML = kitchenListContent;
+
+                        // Ensure event listeners are reattached for mobile kitchen badges
+                        setTimeout(() => {
+                            document.querySelectorAll('#kitchenListMobile .kitchen-badge').forEach(badge => {
+                                badge.addEventListener('click', handleKitchenBadgeClick);
+                            });
+                        }, 100);
+                    }
+
+                    // Update mobile delay comparison if in summary tab
+                    if (document.getElementById('summary-content') && document.getElementById('summary-content').style.display === 'block') {
+                        if (document.getElementById('delayComparisonTable') && document.getElementById('delayComparisonTableMobile')) {
+                            const delayComparisonContent = document.getElementById('delayComparisonTable').innerHTML;
+                            document.getElementById('delayComparisonTableMobile').innerHTML = delayComparisonContent;
+                        }
+                    }
+
+                    // Update mobile badges - check if elements exist before updating
+                    if (document.getElementById('pendingOrdersCount-mobile') && document.getElementById('pendingOrdersCount')) {
+                        document.getElementById('pendingOrdersCount-mobile').textContent = document.getElementById('pendingOrdersCount').textContent;
+                    }
+                    if (document.getElementById('paidOrdersCount-badge') && document.getElementById('paidOrdersCount')) {
+                        document.getElementById('paidOrdersCount-badge').textContent = document.getElementById('paidOrdersCount').textContent;
+                    }
+                    if (document.getElementById('deliveredOrdersCount-badge') && document.getElementById('deliveredUnpaidCount')) {
+                        document.getElementById('deliveredOrdersCount-badge').textContent = document.getElementById('deliveredUnpaidCount').textContent;
+                    }
                 }
-                
-                // Update mobile delay comparison if in summary tab
-                if (document.getElementById('summary-content').style.display === 'block') {
-                    const delayComparisonContent = document.getElementById('delayComparisonTable').innerHTML;
-                    document.getElementById('delayComparisonTableMobile').innerHTML = delayComparisonContent;
-                }
-                
-                // Update mobile badges
-                if (document.getElementById('pendingOrdersCount-mobile')) {
-                    document.getElementById('pendingOrdersCount-mobile').textContent = document.getElementById('pendingOrdersCount').textContent;
-                }
-                if (document.getElementById('paidOrdersCount-badge')) {
-                    document.getElementById('paidOrdersCount-badge').textContent = document.getElementById('paidOrdersCount').textContent;
-                }
-                if (document.getElementById('deliveredOrdersCount-badge')) {
-                    document.getElementById('deliveredOrdersCount-badge').textContent = document.getElementById('deliveredUnpaidCount').textContent;
-                }
+
+                console.log("UI updated successfully");
+            } catch (error) {
+                console.error("Error updating UI:", error);
             }
         }
 
@@ -2463,17 +3059,17 @@
             // Function to generate order card HTML with modern mobile-first design
             const generateOrderCard = (order, isCompact = false) => {
                 // Determine status class for styling
-                const statusClass = order.status === 'preparing' || order.status === 'pending' 
-                    ? 'bg-pending' 
-                    : order.status === 'delivered' 
-                        ? 'bg-delivered' 
+                const statusClass = order.status === 'preparing' || order.status === 'pending'
+                    ? 'bg-pending'
+                    : order.status === 'delivered'
+                        ? 'bg-delivered'
                         : 'bg-paid';
-                
+
                 // Create a more modern card layout
                 // Add 'delayed' class if the order is delayed and in pending/preparing status
                 const isDelayed = order.delayLevel > 0 && (order.status === 'preparing' || order.status === 'pending');
                 const delayedClass = isDelayed ? 'delayed' : '';
-                
+
                 return `
                 <div class="${isCompact ? 'col-md-6' : 'col-12 col-md-6 col-lg-4'}">
                     <div id="order-${order.docId}" class="card order-card ${statusClass} ${delayedClass}">
@@ -2485,8 +3081,8 @@
                                 </div>
                                 <div class="order-time">
                                     <i class="bi bi-clock"></i> ${formatElapsedTime(order.createdAt)}
-                                    ${isDelayed ? 
-                                        `<span class="badge bg-danger ms-2">Delayed ${order.delayLevel}x</span>` : ''}
+                                    ${isDelayed ?
+                        `<span class="badge bg-danger ms-2">Delayed ${order.delayLevel}x</span>` : ''}
                                 </div>
                             </div>
                             
@@ -2515,8 +3111,8 @@
                                             <div class="d-flex align-items-center">
                                                 <span class="dish-status-indicator me-1" onclick="toggleDishCookedStatus('${order.docId}', ${index}, ${!item.cooked})">
                                                     ${item.cooked ?
-                                                    '<i class="bi bi-check-all text-success" style="font-size: 1rem;"></i>' :
-                                                    '<i class="bi bi-circle" style="font-size: 1rem;"></i>'}
+                                '<i class="bi bi-check-all text-success" style="font-size: 1rem;"></i>' :
+                                '<i class="bi bi-circle" style="font-size: 1rem;"></i>'}
                                                 </span>
                                                 <span class="${item.cooked ? 'text-success fw-bold' : ''}">${item.name} (${item.portion}) ×${item.quantity}</span>
                                             </div>
@@ -2576,13 +3172,13 @@
 
             // Update the DOM for both mobile and desktop views
             document.getElementById('pendingOrdersList').innerHTML = pendingOrdersHTML;
-            
+
             // Update mobile and desktop paid orders lists
             document.getElementById('paidOrdersList').innerHTML = paidOrdersHTML;
             if (document.getElementById('paidOrdersList-desktop')) {
                 document.getElementById('paidOrdersList-desktop').innerHTML = paidOrdersHTML;
             }
-            
+
             // Update mobile and desktop delivered orders lists
             document.getElementById('deliveredOrdersList').innerHTML = deliveredOrdersHTML;
             if (document.getElementById('deliveredOrdersList-desktop')) {
@@ -2650,7 +3246,7 @@
             document.getElementById('onlinePaymentsTotal').textContent = onlinePaymentsTotal.toFixed(2);
             document.getElementById('deliveredUnpaidCount').textContent = deliveredCount;
             document.getElementById('deliveredUnpaidTotal').textContent = deliveredUnpaidTotal.toFixed(2);
-            
+
             // Update the desktop summary section
             if (document.getElementById('totalOrdersCount-desktop')) {
                 document.getElementById('totalOrdersCount-desktop').textContent = totalCount;
@@ -2671,9 +3267,9 @@
                 console.error(`Section with ID ${sectionId} not found`);
                 return;
             }
-            
+
             let iconId;
-            
+
             // Determine which icon to toggle based on the section
             // Handle both mobile and desktop versions
             if (sectionId === 'paidOrdersSection' || sectionId === 'paidOrdersSection-desktop') {
@@ -2685,7 +3281,7 @@
             } else if (sectionId === 'mobileDelaySection') {
                 iconId = 'delayToggleIcon';
             }
-            
+
             const icon = document.getElementById(iconId);
             if (!icon) {
                 console.error(`Icon with ID ${iconId} not found`);
@@ -2712,41 +3308,41 @@
                 const isMobile = window.innerWidth < 768;
                 const kitchenListId = isMobile ? 'kitchenListMobile' : 'kitchenList';
                 const kitchenItems = document.querySelectorAll(`#${kitchenListId} .kitchen-item`);
-                
+
                 // Get available voices
                 let voices = window.speechSynthesis.getVoices();
-                
+
                 // If voices aren't loaded yet, wait for them
                 if (voices.length === 0) {
-                    window.speechSynthesis.onvoiceschanged = function() {
+                    window.speechSynthesis.onvoiceschanged = function () {
                         voices = window.speechSynthesis.getVoices();
                         speakWithIndianVoice();
                     };
                 } else {
                     speakWithIndianVoice();
                 }
-                
+
                 function speakWithIndianVoice() {
                     // Find an Indian English voice or Hindi voice
                     let selectedVoice = null;
-                    
+
                     // First try to find a Hindi voice
                     selectedVoice = voices.find(voice => voice.lang === 'hi-IN');
-                    
+
                     // If no Hindi voice, try to find an Indian English voice
                     if (!selectedVoice) {
-                        selectedVoice = voices.find(voice => 
-                            voice.lang === 'en-IN' || 
-                            voice.name.includes('Indian') || 
+                        selectedVoice = voices.find(voice =>
+                            voice.lang === 'en-IN' ||
+                            voice.name.includes('Indian') ||
                             voice.name.includes('Hindi')
                         );
                     }
-                    
+
                     // If still no voice found, use any available voice
                     if (!selectedVoice && voices.length > 0) {
                         console.log("No Indian voice found, using default voice");
                     }
-                    
+
                     if (kitchenItems.length === 0) {
                         // If no items, speak a simple message
                         const noItemsMsg = new SpeechSynthesisUtterance("कोई आइटम नहीं"); // Hindi: "No items"
@@ -2755,10 +3351,10 @@
                         window.speechSynthesis.speak(noItemsMsg);
                         return;
                     }
-                    
+
                     // Cancel any ongoing speech
                     window.speechSynthesis.cancel();
-                    
+
                     // Create a visual indicator that speech is active
                     const speakerButtons = document.querySelectorAll('button[onclick="speakKitchenList()"]');
                     speakerButtons.forEach(btn => {
@@ -2766,7 +3362,7 @@
                         btn.innerHTML = '<i class="bi bi-volume-up-fill"></i>';
                         btn.classList.add('btn-light');
                         btn.classList.remove('btn-outline-light');
-                        
+
                         // Reset the button after speech is done
                         setTimeout(() => {
                             btn.innerHTML = originalIcon;
@@ -2774,40 +3370,40 @@
                             btn.classList.add('btn-outline-light');
                         }, kitchenItems.length * 2000); // Estimate speech duration based on number of items
                     });
-                    
+
                     // No introduction message - we'll only narrate the items directly
-                    
+
                     // Create a queue of utterances for each kitchen item
                     kitchenItems.forEach((item, index) => {
                         // Get the dish name
                         const dishName = item.querySelector('h5').textContent;
-                        
+
                         // Get the quantities
                         const halfBadge = item.querySelector('.kitchen-badge[data-portion="half"]');
                         const fullBadge = item.querySelector('.kitchen-badge[data-portion="full"]');
-                        
+
                         let halfQty = 0;
                         let fullQty = 0;
-                        
+
                         if (halfBadge) {
                             halfQty = parseInt(halfBadge.textContent.replace('Half: ', '')) || 0;
                         }
-                        
+
                         if (fullBadge) {
                             fullQty = parseInt(fullBadge.textContent.replace('Full: ', '')) || 0;
                         }
-                        
+
                         // Create the speech text - just dish name and quantities, nothing extra
                         let speechText = `${dishName}`;
-                        
+
                         if (halfQty > 0) {
                             speechText += `, ${halfQty} हाफ`; // "half" in Hindi
                         }
-                        
+
                         if (fullQty > 0) {
                             speechText += `, ${fullQty} फुल`; // "full" in Hindi
                         }
-                        
+
                         // Create and queue the utterance with a slight delay between items
                         setTimeout(() => {
                             const utterance = new SpeechSynthesisUtterance(speechText);
@@ -2816,23 +3412,23 @@
                             utterance.rate = 0.9; // Slightly slower for better clarity
                             utterance.pitch = 1.0;
                             utterance.volume = 1.0;
-                            
+
                             // Highlight the current item being spoken
                             const originalBackground = item.style.background;
                             item.style.background = 'rgba(255, 193, 7, 0.2)';
-                            
+
                             utterance.onend = () => {
                                 // Reset the highlight after this item is spoken
                                 item.style.background = originalBackground;
                             };
-                            
+
                             window.speechSynthesis.speak(utterance);
                         }, index * 1800); // Adequate delay between items for clear separation
                     });
-                    
+
                     // Add a stop button functionality
                     document.addEventListener('click', stopSpeech);
-                    
+
                     // Remove the event listener after speech is likely done
                     setTimeout(() => {
                         document.removeEventListener('click', stopSpeech);
@@ -2842,12 +3438,12 @@
                 alert("Sorry, your browser does not support speech synthesis. Please try using a modern browser like Chrome, Edge, or Safari.");
             }
         }
-        
+
         // Function to stop ongoing speech
         function stopSpeech() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
-                
+
                 // Reset all speaker buttons
                 const speakerButtons = document.querySelectorAll('button[onclick="speakKitchenList()"]');
                 speakerButtons.forEach(btn => {
@@ -2855,7 +3451,7 @@
                     btn.classList.remove('btn-light');
                     btn.classList.add('btn-outline-light');
                 });
-                
+
                 // Remove the click event listener
                 document.removeEventListener('click', stopSpeech);
             }
@@ -3006,7 +3602,7 @@
                     // Add 'delayed' class for critical priority items (maxDelay >= 3)
                     const isDelayed = maxDelay >= 3;
                     const delayedClass = isDelayed ? 'delayed' : '';
-                    
+
                     return `
                     <div class="kitchen-item mb-2 p-2 rounded position-relative ${priorityClass} ${delayedClass}" style="${borderStyle}">
                         <div class="d-flex justify-content-between align-items-center">
@@ -3313,7 +3909,7 @@
                 }
                 return '#6c757d'; // default gray
             }
-            
+
             // Clamp delayLevel between 0 and 5 for color mapping
             const delayLevel = Math.min(Math.max(order.delayLevel || 0, 0), 5);
             // Map delayLevel 0 (green) to 5 (dark red)
@@ -3480,9 +4076,9 @@
                     </div>
                 </div>
                 `;
-                
+
                 desktopTableHTML += summaryHTML;
-                
+
                 // Simplified summary for mobile
                 const mobileSummaryHTML = `
                 <div class="alert ${criticalOrders.length > 0 ? 'alert-danger' : delayedOrders.length > 0 ? 'alert-warning' : 'alert-success'} mt-2 p-2">
@@ -3493,7 +4089,7 @@
                     </div>
                 </div>
                 `;
-                
+
                 mobileTableHTML += mobileSummaryHTML;
             }
 
@@ -3552,89 +4148,176 @@
         }
 
         // Order Modification Functions
-        function createEditOrderItemRow(item) {
+        function createEditOrderItemRow(item, isCustom = false) {
             const editOrderItemsContainer = document.getElementById('editOrderItemsContainer');
             const row = document.createElement('div');
             row.className = 'd-flex gap-2 mb-2 align-items-center';
 
-            const itemSelect = document.createElement('select');
-            itemSelect.className = 'form-select flex-grow-1';
-            itemSelect.required = true;
+            // Check if this is a custom item
+            isCustom = isCustom || (item && item.isCustom);
 
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.textContent = 'Select Item';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            itemSelect.appendChild(defaultOption);
+            if (isCustom) {
+                // Add a data attribute to identify custom items
+                row.dataset.customItem = 'true';
 
-            for (const [id, menuItem] of Object.entries(state.menuItems)) {
-                const option = document.createElement('option');
-                option.value = id;
-                option.textContent = menuItem.name;
-                if (item && item.id == id) {
-                    option.selected = true;
+                // Create custom item row
+                const nameInput = document.createElement('input');
+                nameInput.type = 'text';
+                nameInput.className = 'form-control flex-grow-1';
+                nameInput.placeholder = 'Custom Item Name';
+                nameInput.required = true;
+                nameInput.value = item ? item.name : ''; // Use item name if provided
+
+                const priceInput = document.createElement('input');
+                priceInput.type = 'number';
+                priceInput.min = '0';
+                priceInput.className = 'form-control';
+                priceInput.placeholder = 'Price';
+                priceInput.style.width = '120px';
+                priceInput.required = true;
+                priceInput.value = item ? item.price : '';
+
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.min = '1';
+                quantityInput.value = item ? item.quantity : 1;
+                quantityInput.className = 'form-control';
+                quantityInput.style.width = '80px';
+                quantityInput.required = true;
+
+                const priceDisplay = document.createElement('div');
+                priceDisplay.style.minWidth = '80px';
+                priceDisplay.textContent = item ? `₹${item.price * item.quantity}` : '₹0';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.textContent = 'Remove';
+
+                row.appendChild(nameInput);
+                row.appendChild(priceInput);
+                row.appendChild(quantityInput);
+                row.appendChild(priceDisplay);
+                row.appendChild(removeBtn);
+
+                function updateCustomItemPrice() {
+                    const price = parseInt(priceInput.value) || 0;
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    const totalPrice = price * quantity;
+                    priceDisplay.textContent = `₹${totalPrice}`;
+                    updateOrderTotal('orderItemsContainer', 'orderTotal');
                 }
-                itemSelect.appendChild(option);
-            }
 
-            const portionSelect = document.createElement('select');
-            portionSelect.className = 'form-select';
-            portionSelect.required = true;
-            portionSelect.style.width = '120px';
+                priceInput.addEventListener('input', updateCustomItemPrice);
+                quantityInput.addEventListener('input', updateCustomItemPrice);
 
-            const quantityInput = document.createElement('input');
-            quantityInput.type = 'number';
-            quantityInput.min = '1';
-            quantityInput.value = item ? item.quantity : 1;
-            quantityInput.className = 'form-control';
-            quantityInput.style.width = '80px';
-            quantityInput.required = true;
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    updateTotal();
+                });
 
-            const priceDisplay = document.createElement('div');
-            priceDisplay.style.minWidth = '80px';
-            priceDisplay.textContent = '₹0';
+                // Initialize price display
+                updateCustomItemPrice();
+            } else {
+                // Regular menu item
+                const itemSelect = document.createElement('select');
+                itemSelect.className = 'form-select flex-grow-1';
+                itemSelect.required = true;
 
-            const removeBtn = document.createElement('button');
-            removeBtn.type = 'button';
-            removeBtn.className = 'btn btn-danger btn-sm';
-            removeBtn.textContent = 'Remove';
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select Item';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                itemSelect.appendChild(defaultOption);
 
-            row.appendChild(itemSelect);
-            row.appendChild(portionSelect);
-            row.appendChild(quantityInput);
-            row.appendChild(priceDisplay);
-            row.appendChild(removeBtn);
-
-            function updatePortions() {
-                const itemId = itemSelect.value;
-                portionSelect.innerHTML = '';
-                if (itemId && state.menuItems[itemId]) {
-                    const portions = state.menuItems[itemId].portions;
-                    for (const [key, portion] of Object.entries(portions)) {
-                        const option = document.createElement('option');
-                        option.value = key;
-                        option.textContent = `${portion.name} - ₹${portion.price}`;
-                        if (item && item.portion === portion.name) {
-                            option.selected = true;
-                        }
-                        portionSelect.appendChild(option);
+                for (const [id, menuItem] of Object.entries(state.menuItems)) {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = menuItem.name;
+                    if (item && item.id == id) {
+                        option.selected = true;
                     }
+                    itemSelect.appendChild(option);
                 }
-                updatePrice();
-            }
 
-            function updatePrice() {
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value) || 0;
-                if (itemId && portionKey && state.menuItems[itemId]) {
-                    const price = state.menuItems[itemId].portions[portionKey].price * quantity;
-                    priceDisplay.textContent = `₹${price}`;
-                } else {
-                    priceDisplay.textContent = '₹0';
+                const portionSelect = document.createElement('select');
+                portionSelect.className = 'form-select';
+                portionSelect.required = true;
+                portionSelect.style.width = '120px';
+
+                const quantityInput = document.createElement('input');
+                quantityInput.type = 'number';
+                quantityInput.min = '1';
+                quantityInput.value = item ? item.quantity : 1;
+                quantityInput.className = 'form-control';
+                quantityInput.style.width = '80px';
+                quantityInput.required = true;
+
+                const priceDisplay = document.createElement('div');
+                priceDisplay.style.minWidth = '80px';
+                priceDisplay.textContent = '₹0';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-danger btn-sm';
+                removeBtn.textContent = 'Remove';
+
+                row.appendChild(itemSelect);
+                row.appendChild(portionSelect);
+                row.appendChild(quantityInput);
+                row.appendChild(priceDisplay);
+                row.appendChild(removeBtn);
+
+                function updatePortions() {
+                    const itemId = itemSelect.value;
+                    portionSelect.innerHTML = '';
+                    if (itemId && state.menuItems[itemId]) {
+                        const portions = state.menuItems[itemId].portions;
+                        for (const [key, portion] of Object.entries(portions)) {
+                            const option = document.createElement('option');
+                            option.value = key;
+                            option.textContent = `${portion.name} - ₹${portion.price}`;
+                            if (item && item.portion === portion.name) {
+                                option.selected = true;
+                            }
+                            portionSelect.appendChild(option);
+                        }
+                    }
+                    updatePrice();
                 }
-                updateTotal();
+
+                function updatePrice() {
+                    const itemId = itemSelect.value;
+                    const portionKey = portionSelect.value;
+                    const quantity = parseInt(quantityInput.value) || 0;
+                    if (itemId && portionKey && state.menuItems[itemId]) {
+                        const price = state.menuItems[itemId].portions[portionKey].price * quantity;
+                        priceDisplay.textContent = `₹${price}`;
+                    } else {
+                        priceDisplay.textContent = '₹0';
+                    }
+                    updateTotal();
+                }
+
+                itemSelect.addEventListener('change', () => {
+                    updatePortions();
+                });
+
+                portionSelect.addEventListener('change', () => {
+                    updatePrice();
+                });
+
+                quantityInput.addEventListener('input', () => {
+                    updatePrice();
+                });
+
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                    updateTotal();
+                });
+
+                updatePortions();
             }
 
             function updateTotal() {
@@ -3647,25 +4330,6 @@
                 });
                 document.getElementById('editOrderTotal').textContent = total;
             }
-
-            itemSelect.addEventListener('change', () => {
-                updatePortions();
-            });
-
-            portionSelect.addEventListener('change', () => {
-                updatePrice();
-            });
-
-            quantityInput.addEventListener('input', () => {
-                updatePrice();
-            });
-
-            removeBtn.addEventListener('click', () => {
-                row.remove();
-                updateTotal();
-            });
-
-            updatePortions();
 
             return row;
         }
@@ -3683,7 +4347,9 @@
 
             if (order.items && order.items.length > 0) {
                 order.items.forEach(item => {
-                    const row = createEditOrderItemRow(item);
+                    // Check if this is a custom item
+                    const isCustomItem = item.isCustom === true;
+                    const row = createEditOrderItemRow(item, isCustomItem);
                     editOrderItemsContainer.appendChild(row);
                 });
             } else {
@@ -3714,42 +4380,97 @@
             }
 
             for (const row of rows) {
-                const itemSelect = row.querySelector('select.form-select');
-                const portionSelect = row.querySelectorAll('select.form-select')[1];
-                const quantityInput = row.querySelector('input[type="number"]');
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value);
+                // Check if this is a custom item
+                const isCustomItem = row.dataset.customItem === 'true';
 
-                if (!itemId || !portionKey || !quantity || quantity <= 0) {
-                    alert('Please fill all item details correctly.');
-                    return;
+                if (isCustomItem) {
+                    // Process custom item
+                    const nameInput = row.querySelector('input[type="text"]');
+                    const priceInput = row.querySelector('input[type="number"]:not([min="1"])'); // Price input has min="0"
+                    const quantityInput = row.querySelector('input[type="number"][min="1"]'); // Quantity input has min="1"
+
+                    const name = nameInput.value.trim();
+                    const pricePerUnit = parseInt(priceInput.value) || 0;
+                    const quantity = parseInt(quantityInput.value) || 1;
+
+                    // Validate custom item details
+                    if (!name || pricePerUnit <= 0) {
+                        alert('Please fill all custom item details correctly.');
+                        return;
+                    }
+
+                    // Create the item object with explicit property names
+                    const customItem = {
+                        isCustom: true,
+                        name: name,
+                        quantity: quantity,
+                        price: pricePerUnit,
+                        portion: 'Custom'
+                    };
+
+                    items.push(customItem);
+                } else {
+                    // Process regular menu item
+                    const itemSelect = row.querySelector('select.form-select');
+                    const portionSelect = row.querySelectorAll('select.form-select')[1];
+                    const quantityInput = row.querySelector('input[type="number"]');
+                    const itemId = itemSelect.value;
+                    const portionKey = portionSelect.value;
+                    const quantity = parseInt(quantityInput.value);
+
+                    if (!itemId || !portionKey || !quantity || quantity <= 0) {
+                        alert('Please fill all item details correctly.');
+                        return;
+                    }
+
+                    const itemData = state.menuItems[itemId];
+                    const portionData = itemData.portions[portionKey];
+
+                    items.push({
+                        id: itemId,
+                        name: itemData.name,
+                        portion: portionData.name,
+                        quantity,
+                        price: portionData.price
+                    });
                 }
-
-                const itemData = state.menuItems[itemId];
-                const portionData = itemData.portions[portionKey];
-
-                items.push({
-                    id: itemId,
-                    name: itemData.name,
-                    portion: portionData.name,
-                    quantity,
-                    price: portionData.price
-                });
             }
 
             const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
             try {
-                await db.collection('bot_orders').doc(state.editingOrderId).update({
+                // Prepare update data
+                const updateData = {
                     customerDetails: { phone, comments },
                     items,
                     total,
                     cartName: state.cartName, // Ensure cartName is included
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                };
+
+                // If we're viewing a historical date, allow updating the createdAt timestamp
+                if (selectedDate) {
+                    // Confirm if user wants to change the order date
+                    const changeDate = confirm('Do you want to update this order\'s date to match the currently selected date?');
+
+                    if (changeDate) {
+                        // Use the selected date but keep current time
+                        const now = new Date();
+                        const historicalDate = new Date(selectedDate);
+                        historicalDate.setHours(now.getHours());
+                        historicalDate.setMinutes(now.getMinutes());
+                        historicalDate.setSeconds(now.getSeconds());
+
+                        updateData.createdAt = historicalDate;
+                    }
+                }
+
+                await db.collection('bot_orders').doc(state.editingOrderId).update(updateData);
                 alert('Order updated successfully.');
                 state.modals.editOrder.hide();
+
+                // Refresh the entire page to ensure all data loads properly
+                window.location.reload();
             } catch (error) {
                 alert('Error updating order: ' + error.message);
             }
@@ -3758,7 +4479,15 @@
         // Existing Functions with Optimizations
         async function deleteOrder(docId) {
             if (confirm('Confirm deletion?')) {
-                await db.collection('bot_orders').doc(docId).delete();
+                try {
+                    await db.collection('bot_orders').doc(docId).delete();
+                    alert('Order deleted successfully.');
+
+                    // Refresh the entire page to ensure all data loads properly
+                    window.location.reload();
+                } catch (error) {
+                    alert('Error deleting order: ' + error.message);
+                }
             }
         }
 
@@ -3790,8 +4519,8 @@
                     }
                 }
 
-                // Refresh UI and check delays after status update
-                loadOrders();
+                // Refresh the entire page to ensure all data loads properly
+                window.location.reload();
             } catch (error) {
                 alert('Error updating order status: ' + error.message);
             }
@@ -3821,6 +4550,18 @@
         function calculateNewETA(order) {
             const buffer = (order.delayLevel * 5) + 10;
             return new Date(Date.now() + buffer * 60000).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Helper function to safely parse integers with a minimum value of 1
+        function safeParseInt(value) {
+            const parsed = parseInt(value);
+            return isNaN(parsed) ? 1 : Math.max(1, parsed);
+        }
+
+        // Helper function to safely parse floats with a minimum value of 0
+        function safeParseFloat(value) {
+            const parsed = parseFloat(value);
+            return isNaN(parsed) ? 0 : Math.max(0, parsed);
         }
 
         // Add remaining functions from previous versions with similar optimizations
@@ -3882,28 +4623,60 @@
 
             // Process each item
             for (const row of rows) {
-                const itemSelect = row.querySelector('select.form-select');
-                const portionSelect = row.querySelectorAll('select.form-select')[1];
-                const quantityInput = row.querySelector('input[type="number"]');
-                const itemId = itemSelect.value;
-                const portionKey = portionSelect.value;
-                const quantity = parseInt(quantityInput.value);
+                // Check if this is a custom item
+                const isCustomItem = row.dataset.customItem === 'true';
 
-                // Validate item details
-                if (!itemId || !portionKey || !quantity || quantity <= 0) {
-                    alert('Please fill all item details correctly.');
-                    return;
+                if (isCustomItem) {
+                    // Process custom item
+                    const nameInput = row.querySelector('input[type="text"]');
+                    const priceInput = row.querySelector('input[type="number"]:not([min="1"])'); // Price input has min="0"
+                    const quantityInput = row.querySelector('input[type="number"][min="1"]'); // Quantity input has min="1"
+
+                    const name = nameInput.value.trim();
+                    const pricePerUnit = parseInt(priceInput.value) || 0;
+                    const quantity = parseInt(quantityInput.value) || 1;
+
+                    // Validate custom item details
+                    if (!name || pricePerUnit <= 0) {
+                        alert('Please fill all custom item details correctly.');
+                        return;
+                    }
+
+                    // Create the item object with explicit property names
+                    const customItem = {
+                        isCustom: true,
+                        name: name,
+                        quantity: quantity,
+                        price: pricePerUnit,
+                        portion: 'Custom'
+                    };
+
+                    items.push(customItem);
+                } else {
+                    // Process regular menu item
+                    const itemSelect = row.querySelector('select.form-select');
+                    const portionSelect = row.querySelectorAll('select.form-select')[1];
+                    const quantityInput = row.querySelector('input[type="number"]');
+                    const itemId = itemSelect.value;
+                    const portionKey = portionSelect.value;
+                    const quantity = parseInt(quantityInput.value);
+
+                    // Validate item details
+                    if (!itemId || !portionKey || !quantity || quantity <= 0) {
+                        alert('Please fill all item details correctly.');
+                        return;
+                    }
+
+                    const itemData = state.menuItems[itemId];
+                    const portionData = itemData.portions[portionKey];
+                    items.push({
+                        id: itemId,
+                        name: itemData.name,
+                        portion: portionData.name,
+                        quantity,
+                        price: portionData.price
+                    });
                 }
-
-                const itemData = state.menuItems[itemId];
-                const portionData = itemData.portions[portionKey];
-                items.push({
-                    id: itemId,
-                    name: itemData.name,
-                    portion: portionData.name,
-                    quantity,
-                    price: portionData.price
-                });
             }
 
             // Calculate total
@@ -3926,16 +4699,46 @@
                 document.body.style.removeProperty('padding-right');
                 document.body.style.removeProperty('overflow');
 
-                // Add order to database
-                await db.collection('bot_orders').add({
+                // Add order to database with selected date if viewing historical data
+                const orderData = {
                     customerDetails: { phone, comments },
                     items,
                     total,
                     cartName: state.cartName, // Add cartName field
                     status: 'pending',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+                };
+
+                // Create a local timestamp to ensure immediate display
+                const now = new Date();
+
+                // If we're viewing a historical date, use that date for createdAt
+                if (selectedDate) {
+                    // Use the selected date but keep current time
+                    const historicalDate = new Date(selectedDate);
+                    historicalDate.setHours(now.getHours());
+                    historicalDate.setMinutes(now.getMinutes());
+                    historicalDate.setSeconds(now.getSeconds());
+
+                    orderData.createdAt = historicalDate;
+                } else {
+                    // Use local timestamp to ensure immediate display
+                    orderData.createdAt = now;
+                }
+
+                // Add the order to the database
+                const newOrderRef = await db.collection('bot_orders').add(orderData);
+
+                // Update with server timestamp in the background
+                // This ensures data consistency on the server
+                if (!selectedDate) {
+                    db.collection('bot_orders').doc(newOrderRef.id).update({
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }).catch(error => {
+                        console.warn('Error updating timestamps:', error);
+                    });
+                }
 
                 // Reset form
                 e.target.reset();
@@ -3945,8 +4748,8 @@
                 // Show success message
                 alert('Order added successfully.');
 
-                // Refresh orders list
-                loadOrders();
+                // Refresh the entire page to ensure all data loads properly
+                window.location.reload();
 
             } catch (error) {
                 alert('Error adding order: ' + error.message);
@@ -3956,6 +4759,23 @@
         // handleOrderEdit function is already defined above
 
         // Add order form handling
+        // Global function to update order totals
+        function updateOrderTotal(containerId, totalElementId) {
+            const container = document.getElementById(containerId);
+            const totalElement = document.getElementById(totalElementId);
+            let total = 0;
+
+            if (container && totalElement) {
+                const rows = container.querySelectorAll('div.d-flex');
+                rows.forEach(r => {
+                    const priceText = r.querySelector('div').textContent;
+                    const price = parseInt(priceText.replace('₹', '')) || 0;
+                    total += price;
+                });
+                totalElement.textContent = total;
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const addOrderItemBtn = document.getElementById('addOrderItemBtn');
             const orderItemsContainer = document.getElementById('orderItemsContainer');
@@ -3982,7 +4802,7 @@
                 searchOrders('');
                 renderOrders();
             });
-            
+
             // Add event listener for mobile clear button
             clearPendingSearchBtnMobile.addEventListener('click', () => {
                 pendingSearchInput.value = '';
@@ -4001,117 +4821,196 @@
                 }
             });
 
-            function createOrderItemRow() {
+            function createOrderItemRow(item, isCustom = false) {
                 const row = document.createElement('div');
                 row.className = 'd-flex gap-2 mb-2 align-items-center';
 
-                const itemSelect = document.createElement('select');
-                itemSelect.className = 'form-select flex-grow-1';
-                itemSelect.required = true;
+                // Check if this is a custom item
+                isCustom = isCustom || (item && item.isCustom);
 
-                const defaultOption = document.createElement('option');
-                defaultOption.value = '';
-                defaultOption.textContent = 'Select Item';
-                defaultOption.disabled = true;
-                defaultOption.selected = true;
-                itemSelect.appendChild(defaultOption);
+                if (isCustom) {
+                    // Add a data attribute to identify custom items
+                    row.dataset.customItem = 'true';
 
-                for (const [id, item] of Object.entries(state.menuItems)) {
-                    const option = document.createElement('option');
-                    option.value = id;
-                    option.textContent = item.name;
-                    itemSelect.appendChild(option);
-                }
+                    // Create custom item row
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'text';
+                    nameInput.className = 'form-control flex-grow-1';
+                    nameInput.placeholder = 'Custom Item Name';
+                    nameInput.required = true;
+                    nameInput.value = item ? item.name : ''; // Use item name if provided
 
-                const portionSelect = document.createElement('select');
-                portionSelect.className = 'form-select';
-                portionSelect.required = true;
-                portionSelect.style.width = '120px';
+                    const priceInput = document.createElement('input');
+                    priceInput.type = 'number';
+                    priceInput.min = '0';
+                    priceInput.className = 'form-control';
+                    priceInput.placeholder = 'Price';
+                    priceInput.style.width = '120px';
+                    priceInput.required = true;
+                    priceInput.value = item ? item.price : '';
 
-                const quantityInput = document.createElement('input');
-                quantityInput.type = 'number';
-                quantityInput.min = '1';
-                quantityInput.value = '1';
-                quantityInput.className = 'form-control';
-                quantityInput.style.width = '80px';
-                quantityInput.required = true;
+                    const quantityInput = document.createElement('input');
+                    quantityInput.type = 'number';
+                    quantityInput.min = '1';
+                    quantityInput.value = item ? item.quantity : 1;
+                    quantityInput.className = 'form-control';
+                    quantityInput.style.width = '80px';
+                    quantityInput.required = true;
 
-                const priceDisplay = document.createElement('div');
-                priceDisplay.style.minWidth = '80px';
-                priceDisplay.textContent = '₹0';
+                    const priceDisplay = document.createElement('div');
+                    priceDisplay.style.minWidth = '80px';
+                    priceDisplay.textContent = item ? `₹${item.price * item.quantity}` : '₹0';
 
-                const removeBtn = document.createElement('button');
-                removeBtn.type = 'button';
-                removeBtn.className = 'btn btn-danger btn-sm';
-                removeBtn.textContent = 'Remove';
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'btn btn-danger btn-sm';
+                    removeBtn.textContent = 'Remove';
 
-                row.appendChild(itemSelect);
-                row.appendChild(portionSelect);
-                row.appendChild(quantityInput);
-                row.appendChild(priceDisplay);
-                row.appendChild(removeBtn);
+                    row.appendChild(nameInput);
+                    row.appendChild(priceInput);
+                    row.appendChild(quantityInput);
+                    row.appendChild(priceDisplay);
+                    row.appendChild(removeBtn);
 
-                function updatePortions() {
-                    const itemId = itemSelect.value;
-                    portionSelect.innerHTML = '';
-                    if (itemId && state.menuItems[itemId]) {
-                        const portions = state.menuItems[itemId].portions;
-                        for (const [key, portion] of Object.entries(portions)) {
-                            const option = document.createElement('option');
-                            option.value = key;
-                            option.textContent = `${portion.name} - ₹${portion.price}`;
-                            portionSelect.appendChild(option);
-                        }
+                    function updateCustomItemPrice() {
+                        const price = parseInt(priceInput.value) || 0;
+                        const quantity = parseInt(quantityInput.value) || 0;
+                        const totalPrice = price * quantity;
+                        priceDisplay.textContent = `₹${totalPrice}`;
+                        updateOrderTotal('orderItemsContainer', 'orderTotal');
                     }
-                    updateOrderItemPrice();
-                }
 
-                function updateOrderItemPrice() {
-                    const itemId = itemSelect.value;
-                    const portionKey = portionSelect.value;
-                    const quantity = parseInt(quantityInput.value) || 0;
-                    if (itemId && portionKey && state.menuItems[itemId]) {
-                        const price = state.menuItems[itemId].portions[portionKey].price * quantity;
-                        priceDisplay.textContent = `₹${price}`;
-                    } else {
-                        priceDisplay.textContent = '₹0';
-                    }
-                    updateTotal();
-                }
+                    priceInput.addEventListener('input', updateCustomItemPrice);
+                    quantityInput.addEventListener('input', updateCustomItemPrice);
 
-                function updateTotal() {
-                    let total = 0;
-                    const rows = orderItemsContainer.querySelectorAll('div.d-flex');
-                    rows.forEach(r => {
-                        const priceText = r.querySelector('div').textContent;
-                        const price = parseInt(priceText.replace('₹', '')) || 0;
-                        total += price;
+                    removeBtn.addEventListener('click', () => {
+                        row.remove();
+                        updateOrderTotal('orderItemsContainer', 'orderTotal');
                     });
-                    orderTotalElem.textContent = total;
-                }
 
-                itemSelect.addEventListener('change', () => {
+                    // Initialize price display
+                    updateCustomItemPrice();
+                } else {
+                    // Regular menu item
+                    const itemSelect = document.createElement('select');
+                    itemSelect.className = 'form-select flex-grow-1';
+                    itemSelect.required = true;
+
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select Item';
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    itemSelect.appendChild(defaultOption);
+
+                    for (const [id, menuItem] of Object.entries(state.menuItems)) {
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = menuItem.name;
+                        if (item && item.id == id) {
+                            option.selected = true;
+                        }
+                        itemSelect.appendChild(option);
+                    }
+
+                    const portionSelect = document.createElement('select');
+                    portionSelect.className = 'form-select';
+                    portionSelect.required = true;
+                    portionSelect.style.width = '120px';
+
+                    const quantityInput = document.createElement('input');
+                    quantityInput.type = 'number';
+                    quantityInput.min = '1';
+                    quantityInput.value = item ? item.quantity : 1;
+                    quantityInput.className = 'form-control';
+                    quantityInput.style.width = '80px';
+                    quantityInput.required = true;
+
+                    const priceDisplay = document.createElement('div');
+                    priceDisplay.style.minWidth = '80px';
+                    priceDisplay.textContent = '₹0';
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'btn btn-danger btn-sm';
+                    removeBtn.textContent = 'Remove';
+
+                    row.appendChild(itemSelect);
+                    row.appendChild(portionSelect);
+                    row.appendChild(quantityInput);
+                    row.appendChild(priceDisplay);
+                    row.appendChild(removeBtn);
+
+                    function updatePortions() {
+                        const itemId = itemSelect.value;
+                        portionSelect.innerHTML = '';
+                        if (itemId && state.menuItems[itemId]) {
+                            const portions = state.menuItems[itemId].portions;
+                            for (const [key, portion] of Object.entries(portions)) {
+                                const option = document.createElement('option');
+                                option.value = key;
+                                option.textContent = `${portion.name} - ₹${portion.price}`;
+                                portionSelect.appendChild(option);
+                            }
+                        }
+                        updateOrderItemPrice();
+                    }
+
+                    function updateOrderItemPrice() {
+                        const itemId = itemSelect.value;
+                        const portionKey = portionSelect.value;
+                        const quantity = parseInt(quantityInput.value) || 0;
+                        if (itemId && portionKey && state.menuItems[itemId]) {
+                            const price = state.menuItems[itemId].portions[portionKey].price * quantity;
+                            priceDisplay.textContent = `₹${price}`;
+                        } else {
+                            priceDisplay.textContent = '₹0';
+                        }
+                        updateOrderTotal('orderItemsContainer', 'orderTotal');
+                    }
+
+                    function updateTotal() {
+                        let total = 0;
+                        const rows = orderItemsContainer.querySelectorAll('div.d-flex');
+                        rows.forEach(r => {
+                            const priceText = r.querySelector('div').textContent;
+                            const price = parseInt(priceText.replace('₹', '')) || 0;
+                            total += price;
+                        });
+                        orderTotalElem.textContent = total;
+                    }
+
+                    itemSelect.addEventListener('change', () => {
+                        updatePortions();
+                    });
+
+                    portionSelect.addEventListener('change', () => {
+                        updateOrderItemPrice();
+                    });
+
+                    quantityInput.addEventListener('input', () => {
+                        updateOrderItemPrice();
+                    });
+
+                    removeBtn.addEventListener('click', () => {
+                        row.remove();
+                        updateOrderTotal('orderItemsContainer', 'orderTotal');
+                    });
+
                     updatePortions();
-                });
-
-                portionSelect.addEventListener('change', () => {
-                    updateOrderItemPrice();
-                });
-
-                quantityInput.addEventListener('input', () => {
-                    updateOrderItemPrice();
-                });
-
-                removeBtn.addEventListener('click', () => {
-                    row.remove();
-                    updateTotal();
-                });
+                }
 
                 return row;
             }
 
             addOrderItemBtn.addEventListener('click', () => {
                 const row = createOrderItemRow();
+                orderItemsContainer.appendChild(row);
+            });
+
+            // Add custom item button
+            document.getElementById('addCustomOrderItemBtn').addEventListener('click', () => {
+                const row = createOrderItemRow(null, true);
                 orderItemsContainer.appendChild(row);
             });
 
@@ -4159,7 +5058,8 @@
 
                     console.log(`Dish cooked status updated for order ${orderId}, item index ${itemIndex}`);
 
-                    // No need to refresh the UI as the real-time listener will update it
+                    // Refresh the entire page to ensure all data loads properly
+                    window.location.reload();
                 } catch (error) {
                     console.error(`Error updating dish cooked status:`, error);
                     alert(`Error updating dish status: ${error.message}`);
@@ -4168,7 +5068,7 @@
         });
 
         // Initialize store selector and update store name in header
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Set the current store in the dropdown and enhance the selected option
             const storeSelectors = ['storeSelector-mobile', 'storeSelector-desktop'];
             storeSelectors.forEach(selectorId => {
@@ -4176,7 +5076,7 @@
                 if (selector) {
                     // Set the current value
                     selector.value = cartName;
-                    
+
                     // Enhance the dropdown options to show the current store more clearly
                     Array.from(selector.options).forEach(option => {
                         if (option.value === cartName) {
@@ -4185,12 +5085,12 @@
                             option.style.backgroundColor = 'rgba(13, 110, 253, 0.1)';
                         }
                     });
-                    
+
                     // Add a title attribute for better UX
                     selector.title = `Currently viewing: ${getStoreName(cartName)}`;
                 }
             });
-            
+
             // Update store name in the header with enhanced styling
             const storeDisplayName = getStoreName(cartName);
             const storeNameElements = ['storeName-mobile', 'storeName-desktop'];
@@ -4198,12 +5098,12 @@
                 const element = document.getElementById(elementId);
                 if (element) {
                     element.textContent = storeDisplayName;
-                    
+
                     // Add a tooltip for clarity
                     element.title = `Currently viewing orders for ${storeDisplayName}`;
                 }
             });
-            
+
             // Add a visual indicator of current store in the page
             const currentStoreIndicator = document.createElement('div');
             currentStoreIndicator.className = 'alert alert-info alert-dismissible fade show mb-3';
@@ -4212,12 +5112,12 @@
                 <span class="badge bg-primary ms-2 p-2">${storeDisplayName}</span>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             `;
-            
+
             // Insert the indicator at the top of the content area
             const contentArea = document.querySelector('.container-fluid');
             if (contentArea) {
                 contentArea.insertBefore(currentStoreIndicator, contentArea.firstChild);
-                
+
                 // Auto-dismiss after 5 seconds
                 setTimeout(() => {
                     const bsAlert = new bootstrap.Alert(currentStoreIndicator);
@@ -4250,12 +5150,12 @@
             <span>New</span>
         </a>
     </div>
-    
+
     <!-- Mobile Floating Action Button -->
     <button class="mobile-fab d-md-none" onclick="document.getElementById('newOrderBtn').click();">
         <i class="bi bi-plus-lg"></i>
     </button>
-    
+
     <script>
         // Tab switching functionality for mobile
         function switchTab(tabName) {
@@ -4263,28 +5163,28 @@
             document.getElementById('home-content').style.display = 'none';
             document.getElementById('summary-content').style.display = 'none';
             document.getElementById('completed-content').style.display = 'none';
-            
+
             // Remove active class from all nav items
             document.querySelectorAll('.mobile-bottom-nav .nav-item').forEach(item => {
                 item.classList.remove('active');
             });
-            
+
             // Show the selected content and mark nav item as active
             document.getElementById(`${tabName}-content`).style.display = 'block';
             document.getElementById(`nav-${tabName}`).classList.add('active');
-            
+
             // Refresh data if needed
             if (tabName === 'summary') {
                 // Update the delay comparison data
                 showDelayComparison();
-                
+
                 // Keep the delay section collapsed by default on mobile
                 if (window.innerWidth < 768) {
                     const mobileDelaySection = document.getElementById('mobileDelaySection');
                     if (mobileDelaySection) {
                         mobileDelaySection.style.display = 'none';
                     }
-                    
+
                     const delayToggleIcon = document.getElementById('delayToggleIcon');
                     if (delayToggleIcon) {
                         delayToggleIcon.classList.remove('bi-chevron-up');
@@ -4295,20 +5195,20 @@
                 // Keep completed orders sections collapsed by default
                 document.getElementById('paidOrdersSection').style.display = 'none';
                 document.getElementById('deliveredOrdersSection').style.display = 'none';
-                
+
                 // Update toggle icons to show collapsed state
                 document.getElementById('paidOrdersToggleIcon').classList.remove('bi-chevron-up');
                 document.getElementById('paidOrdersToggleIcon').classList.add('bi-chevron-down');
                 document.getElementById('deliveredOrdersToggleIcon').classList.remove('bi-chevron-up');
                 document.getElementById('deliveredOrdersToggleIcon').classList.add('bi-chevron-down');
             }
-            
+
             // Scroll to top for better UX
             window.scrollTo(0, 0);
         }
-        
+
         // Initialize the tabs on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Set home tab as active by default
             setTimeout(() => {
                 switchTab('home');
