@@ -83,10 +83,19 @@
             background-color: #c0392b;
         }
 
+        /* Table wrapper for horizontal scrolling */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            min-width: 650px; /* Ensures table doesn't shrink too much on mobile */
         }
 
         th,
@@ -94,6 +103,7 @@
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
+            white-space: nowrap; /* Prevents text wrapping in cells */
         }
 
         th {
@@ -357,19 +367,21 @@
             </div>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Employer</th>
-                    <th>Worker</th>
-                    <th>Amount</th>
-                    <th>Purpose</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="paymentsList"></tbody>
-        </table>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Employer</th>
+                        <th>Worker</th>
+                        <th>Amount</th>
+                        <th>Purpose</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="paymentsList"></tbody>
+            </table>
+        </div>
 
         <div class="pagination-controls">
             <button id="prevPage" class="secondary" onclick="changePage(-1)">Previous</button>
@@ -394,52 +406,58 @@
             <div class="summary-section">
                 <h3>Employer Payments</h3>
                 <p>Total amount paid by each employer:</p>
-                <table class="summary-table">
-                    <thead>
-                        <tr>
-                            <th>Employer</th>
-                            <th>Total Paid</th>
-                        </tr>
-                    </thead>
-                    <tbody id="employerSummaryBody">
-                        <!-- Employer summary rows will be added here -->
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Employer</th>
+                                <th>Total Paid</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employerSummaryBody">
+                            <!-- Employer summary rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="summary-section">
                 <h3>Vendor and Salary Payments</h3>
                 <p>Total amount received by each vendor/worker:</p>
-                <table class="summary-table">
-                    <thead>
-                        <tr>
-                            <th>Vendor/Worker</th>
-                            <th>Total Received</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="workerSummaryBody">
-                        <!-- Worker summary rows will be added here -->
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Vendor/Worker</th>
+                                <th>Total Received</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workerSummaryBody">
+                            <!-- Worker summary rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
             
             <div class="summary-section" id="workerDetailSection" style="display: none;">
                 <h3 id="workerDetailTitle">Expense Breakup</h3>
                 <button class="secondary" onclick="hideWorkerDetail()">Back to Summary</button>
-                <table class="summary-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Employer</th>
-                            <th>Amount</th>
-                            <th>Purpose</th>
-                        </tr>
-                    </thead>
-                    <tbody id="workerDetailBody">
-                        <!-- Worker detail rows will be added here -->
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="summary-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Employer</th>
+                                <th>Amount</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workerDetailBody">
+                            <!-- Worker detail rows will be added here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -706,16 +724,16 @@
                         updateQuickSummary();
                         updateSummaryTables();
                         
-                        showStatusMessage('Data loaded successfully from Firebase', 'success');
+                        showStatusMessage('Data loaded successfully', 'success');
                     } else {
-                        console.log('No salary payments found in Firebase');
+                        console.log('No salary payments found');
                         salaryPayments = [];
                         filterAndDisplayPayments();
                         updateQuickSummary();
                         updateSummaryTables();
                     }
                 } catch (error) {
-                    console.error('Error loading data from Firebase:', error);
+                    console.error('Error loading data:', error);
                     showStatusMessage('Error loading data: ' + error.message, 'error');
                     salaryPayments = [];
                     filterAndDisplayPayments();
