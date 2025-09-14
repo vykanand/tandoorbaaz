@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Image Processing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .image-upload-container {
+            border: 2px dashed #cbd5e0;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .image-upload-container:hover, .image-upload-container.dragover {
+            border-color: #4f46e5;
+            background-color: rgba(79, 70, 229, 0.05);
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #4f46e5;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-2">Advanced Image Processing</h1>
+            <p class="text-center text-gray-600 mb-8">Extract text and analyze images with AI</p>
+            
+            <!-- Tabs -->
+            <div class="mb-6 flex justify-center">
+                <div class="border-b border-gray-200 flex space-x-8">
+                    <button class="tab-btn py-2 px-4 border-b-2 border-indigo-500 text-indigo-600 font-medium" data-tab="ocr">
+                        <i class="fas fa-font mr-2"></i>OCR Text Extraction
+                    </button>
+                    <button class="tab-btn py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium" data-tab="upi">
+                        <i class="fas fa-receipt mr-2"></i>UPI Payment Analysis
+                    </button>
+                </div>
+            </div>
+            
+            <!-- OCR Tab Content -->
+            <div id="ocr-tab" class="tab-content active bg-white rounded-lg shadow-md p-6">
+                <div class="image-upload-container" id="ocr-upload-container">
+                    <input type="file" id="ocr-file-input" class="hidden" accept="image/*">
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Upload an image for OCR</h3>
+                        <p class="text-sm text-gray-500 mb-4">Drag and drop an image or click to browse</p>
+                        <button id="ocr-browse-btn" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                            Browse Files
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="ocr-preview-container" class="mt-6 hidden">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-1/3">
+                            <div class="relative">
+                                <img id="ocr-preview-image" class="w-full h-auto rounded-lg border border-gray-200">
+                                <button id="ocr-remove-btn" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition duration-300">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <button id="ocr-process-btn" class="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                                Extract Text
+                            </button>
+                        </div>
+                        <div class="w-2/3 bg-gray-50 rounded-lg p-4 min-h-[200px]">
+                            <div id="ocr-loading" class="hidden flex items-center justify-center h-full">
+                                <div class="flex flex-col items-center">
+                                    <div class="spinner mb-4"></div>
+                                    <p class="text-gray-600">Processing image...</p>
+                                </div>
+                            </div>
+                            <div id="ocr-result" class="hidden">
+                                <h3 class="text-lg font-medium text-gray-700 mb-2">Extracted Text:</h3>
+                                <div id="ocr-text" class="bg-white p-4 rounded border border-gray-200 text-gray-700 whitespace-pre-wrap text-sm max-h-[300px] overflow-y-auto"></div>
+                                <div class="mt-4">
+                                    <h4 class="font-medium text-gray-700 mb-2">Image URL:</h4>
+                                    <a id="ocr-image-url" href="#" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm break-all"></a>
+                                </div>
+                            </div>
+                            <div id="ocr-error" class="hidden">
+                                <div class="bg-red-50 p-4 rounded-lg">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-sm font-medium text-red-800">Error processing image</h3>
+                                            <div class="mt-2 text-sm text-red-700">
+                                                <p id="ocr-error-message"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- UPI Tab Content -->
+            <div id="upi-tab" class="tab-content bg-white rounded-lg shadow-md p-6">
+                <div class="image-upload-container" id="upi-upload-container">
+                    <input type="file" id="upi-file-input" class="hidden" accept="image/*">
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-receipt text-4xl text-gray-400 mb-4"></i>
+                        <h3 class="text-lg font-medium text-gray-700 mb-2">Upload a UPI payment screenshot</h3>
+                        <p class="text-sm text-gray-500 mb-4">Drag and drop an image or click to browse</p>
+                        <button id="upi-browse-btn" class="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                            Browse Files
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="upi-preview-container" class="mt-6 hidden">
+                    <div class="flex items-start space-x-4">
+                        <div class="w-1/3">
+                            <div class="relative">
+                                <img id="upi-preview-image" class="w-full h-auto rounded-lg border border-gray-200">
+                                <button id="upi-remove-btn" class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 transition duration-300">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <button id="upi-process-btn" class="mt-4 w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-300">
+                                Analyze Payment
+                            </button>
+                        </div>
+                        <div class="w-2/3 bg-gray-50 rounded-lg p-4 min-h-[200px]">
+                            <div id="upi-loading" class="hidden flex items-center justify-center h-full">
+                                <div class="flex flex-col items-center">
+                                    <div class="spinner mb-4"></div>
+                                    <p class="text-gray-600">Analyzing payment details...</p>
+                                </div>
+                            </div>
+                            <div id="upi-result" class="hidden">
+                                <h3 class="text-lg font-medium text-gray-700 mb-2">Payment Details:</h3>
+                                <div id="upi-details" class="bg-white p-4 rounded border border-gray-200 text-gray-700">
+                                    <!-- UPI details will be inserted here -->
+                                </div>
+                                <div class="mt-4">
+                                    <h4 class="font-medium text-gray-700 mb-2">Image URL:</h4>
+                                    <a id="upi-image-url" href="#" target="_blank" class="text-indigo-600 hover:text-indigo-800 text-sm break-all"></a>
+                                </div>
+                            </div>
+                            <div id="upi-error" class="hidden">
+                                <div class="bg-red-50 p-4 rounded-lg">
+                                    <div class="flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                                        </div>
+                                        <div class="ml-3">
+                                            <h3 class="text-sm font-medium text-red-800">Error processing payment image</h3>
+                                            <div class="mt-2 text-sm text-red-700">
+                                                <p id="upi-error-message"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // API endpoints
+        const OCR_API_URL = 'https://file-image-uploader-production.up.railway.app/ocr';
+        const UPI_API_URL = 'https://file-image-uploader-production.up.railway.app/upi-ocr';
+        
+        // Tab functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('border-indigo-500', 'text-indigo-600');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+                tabContents.forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                // Add active class to clicked button and corresponding content
+                button.classList.add('border-indigo-500', 'text-indigo-600');
+                button.classList.remove('border-transparent', 'text-gray-500');
+                document.getElementById(`${button.dataset.tab}-tab`).classList.add('active');
+            });
+        });
+        
+        // OCR functionality
+        const ocrFileInput = document.getElementById('ocr-file-input');
+        const ocrBrowseBtn = document.getElementById('ocr-browse-btn');
+        const ocrUploadContainer = document.getElementById('ocr-upload-container');
+        const ocrPreviewContainer = document.getElementById('ocr-preview-container');
+        const ocrPreviewImage = document.getElementById('ocr-preview-image');
+        const ocrRemoveBtn = document.getElementById('ocr-remove-btn');
+        const ocrProcessBtn = document.getElementById('ocr-process-btn');
+        const ocrLoading = document.getElementById('ocr-loading');
+        const ocrResult = document.getElementById('ocr-result');
+        const ocrText = document.getElementById('ocr-text');
+        const ocrImageUrl = document.getElementById('ocr-image-url');
+        const ocrError = document.getElementById('ocr-error');
+        const ocrErrorMessage = document.getElementById('ocr-error-message');
+        
+        // UPI functionality
+        const upiFileInput = document.getElementById('upi-file-input');
+        const upiBrowseBtn = document.getElementById('upi-browse-btn');
+        const upiUploadContainer = document.getElementById('upi-upload-container');
+        const upiPreviewContainer = document.getElementById('upi-preview-container');
+        const upiPreviewImage = document.getElementById('upi-preview-image');
+        const upiRemoveBtn = document.getElementById('upi-remove-btn');
+        const upiProcessBtn = document.getElementById('upi-process-btn');
+        const upiLoading = document.getElementById('upi-loading');
+        const upiResult = document.getElementById('upi-result');
+        const upiDetails = document.getElementById('upi-details');
+        const upiImageUrl = document.getElementById('upi-image-url');
+        const upiError = document.getElementById('upi-error');
+        const upiErrorMessage = document.getElementById('upi-error-message');
+        
+        // OCR event listeners
+        ocrBrowseBtn.addEventListener('click', () => ocrFileInput.click());
+        ocrFileInput.addEventListener('change', handleOcrFileSelect);
+        ocrRemoveBtn.addEventListener('click', resetOcr);
+        ocrProcessBtn.addEventListener('click', processOcrImage);
+        
+        // UPI event listeners
+        upiBrowseBtn.addEventListener('click', () => upiFileInput.click());
+        upiFileInput.addEventListener('change', handleUpiFileSelect);
+        upiRemoveBtn.addEventListener('click', resetUpi);
+        upiProcessBtn.addEventListener('click', processUpiImage);
+        
+        // Drag and drop for OCR
+        setupDragAndDrop(ocrUploadContainer, ocrFileInput, handleOcrFileSelect);
+        
+        // Drag and drop for UPI
+        setupDragAndDrop(upiUploadContainer, upiFileInput, handleUpiFileSelect);
+        
+        function setupDragAndDrop(container, fileInput, handleFunction) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                container.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                container.addEventListener(eventName, () => {
+                    container.classList.add('dragover');
+                });
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                container.addEventListener(eventName, () => {
+                    container.classList.remove('dragover');
+                });
+            });
+            
+            container.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFunction();
+                }
+            });
+        }
+        
+        function handleOcrFileSelect() {
+            if (ocrFileInput.files.length > 0) {
+                const file = ocrFileInput.files[0];
+                
+                // Check if it's an image
+                if (!file.type.startsWith('image/')) {
+                    showOcrError('Please select an image file.');
+                    return;
+                }
+                
+                // Display preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    ocrPreviewImage.src = e.target.result;
+                    ocrUploadContainer.classList.add('hidden');
+                    ocrPreviewContainer.classList.remove('hidden');
+                    hideOcrError();
+                    hideOcrResult();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function handleUpiFileSelect() {
+            if (upiFileInput.files.length > 0) {
+                const file = upiFileInput.files[0];
+                
+                // Check if it's an image
+                if (!file.type.startsWith('image/')) {
+                    showUpiError('Please select an image file.');
+                    return;
+                }
+                
+                // Display preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    upiPreviewImage.src = e.target.result;
+                    upiUploadContainer.classList.add('hidden');
+                    upiPreviewContainer.classList.remove('hidden');
+                    hideUpiError();
+                    hideUpiResult();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function resetOcr() {
+            ocrFileInput.value = '';
+            ocrUploadContainer.classList.remove('hidden');
+            ocrPreviewContainer.classList.add('hidden');
+            hideOcrResult();
+            hideOcrError();
+        }
+        
+        function resetUpi() {
+            upiFileInput.value = '';
+            upiUploadContainer.classList.remove('hidden');
+            upiPreviewContainer.classList.add('hidden');
+            hideUpiResult();
+            hideUpiError();
+        }
+        
+        async function processOcrImage() {
+            if (ocrFileInput.files.length === 0) return;
+            
+            showOcrLoading();
+            hideOcrResult();
+            hideOcrError();
+            
+            const formData = new FormData();
+            formData.append('file', ocrFileInput.files[0]);
+            
+            try {
+                const response = await fetch(OCR_API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Display results
+                ocrText.textContent = data.ocrText;
+                ocrImageUrl.textContent = data.imageUrl;
+                ocrImageUrl.href = data.imageUrl;
+                showOcrResult();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showOcrError(`Error processing image: ${error.message}`);
+            } finally {
+                hideOcrLoading();
+            }
+        }
+        
+        async function processUpiImage() {
+            if (upiFileInput.files.length === 0) return;
+            
+            showUpiLoading();
+            hideUpiResult();
+            hideUpiError();
+            
+            const formData = new FormData();
+            formData.append('file', upiFileInput.files[0]);
+            
+            try {
+                const response = await fetch(UPI_API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Parse the OCR text as JSON if it's a string
+                let jsonData;
+                try {
+                    jsonData = typeof data.ocrText === 'string' ? JSON.parse(data.ocrText) : data.ocrText;
+                } catch (e) {
+                    jsonData = { error: "Could not parse JSON data" };
+                }
+                
+                // Format the JSON data for display
+                const formattedHtml = Object.entries(jsonData).map(([key, value]) => {
+                    return `<div class="mb-3">
+                        <div class="text-sm font-medium text-gray-500">${key}</div>
+                        <div class="text-base text-gray-800">${value || '-'}</div>
+                    </div>`;
+                }).join('');
+                
+                // Display results
+                upiDetails.innerHTML = formattedHtml;
+                upiImageUrl.textContent = data.imageUrl;
+                upiImageUrl.href = data.imageUrl;
+                showUpiResult();
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showUpiError(`Error processing UPI image: ${error.message}`);
+            } finally {
+                hideUpiLoading();
+            }
+        }
+        
+        // OCR UI helpers
+        function showOcrLoading() {
+            ocrLoading.classList.remove('hidden');
+            ocrProcessBtn.disabled = true;
+        }
+        
+        function hideOcrLoading() {
+            ocrLoading.classList.add('hidden');
+            ocrProcessBtn.disabled = false;
+        }
+        
+        function showOcrResult() {
+            ocrResult.classList.remove('hidden');
+        }
+        
+        function hideOcrResult() {
+            ocrResult.classList.add('hidden');
+        }
+        
+        function showOcrError(message) {
+            ocrErrorMessage.textContent = message;
+            ocrError.classList.remove('hidden');
+        }
+        
+        function hideOcrError() {
+            ocrError.classList.add('hidden');
+        }
+        
+        // UPI UI helpers
+        function showUpiLoading() {
+            upiLoading.classList.remove('hidden');
+            upiProcessBtn.disabled = true;
+        }
+        
+        function hideUpiLoading() {
+            upiLoading.classList.add('hidden');
+            upiProcessBtn.disabled = false;
+        }
+        
+        function showUpiResult() {
+            upiResult.classList.remove('hidden');
+        }
+        
+        function hideUpiResult() {
+            upiResult.classList.add('hidden');
+        }
+        
+        function showUpiError(message) {
+            upiErrorMessage.textContent = message;
+            upiError.classList.remove('hidden');
+        }
+        
+        function hideUpiError() {
+            upiError.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

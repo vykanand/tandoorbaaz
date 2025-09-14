@@ -960,6 +960,51 @@
                 </div>
             </div>
         </div>
+
+        <!-- Menu Item Profitability Analysis Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-bar-chart-line"></i> Menu Item Profitability Analysis</h5>
+                        <div class="d-flex gap-2">
+                            <select id="menuItemSortBy" class="form-select form-select-sm" style="width: auto;">
+                                <option value="quantity">Sort by Quantity</option>
+                                <option value="revenue" selected>Sort by Revenue</option>
+                                <option value="name">Sort by Name</option>
+                            </select>
+                            <select id="menuItemLimit" class="form-select form-select-sm" style="width: auto;">
+                                <option value="10">Top 10</option>
+                                <option value="20" selected>Top 20</option>
+                                <option value="50">Top 50</option>
+                                <option value="0">All Items</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Item Name</th>
+                                        <th>Quantity Sold</th>
+                                        <th>Revenue</th>
+                                        <th>% of Total Revenue</th>
+                                        <th>Trend</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="menuItemsTableBody">
+                                    <!-- Menu items will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="chart-container mt-4">
+                            <canvas id="menuItemsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Mobile Navigation Bar -->
@@ -1132,7 +1177,8 @@
             retryCount: 0,
             cartStats: {},
             paymentChartInstance: null,
-            cartChartInstance: null
+            cartChartInstance: null,
+            menuItemsChartInstance: null
         };
         
         // Network status monitoring
@@ -1176,6 +1222,19 @@
 
             // Set default date range to today
             resetDateFilter();
+            
+            // Add event listeners for menu item analysis controls
+            document.getElementById('menuItemSortBy').addEventListener('change', function() {
+                if (state.filteredOrders.length > 0) {
+                    updateMenuItemsAnalysis();
+                }
+            });
+            
+            document.getElementById('menuItemLimit').addEventListener('change', function() {
+                if (state.filteredOrders.length > 0) {
+                    updateMenuItemsAnalysis();
+                }
+            });
 
             // Load orders
             loadOrders();
@@ -1709,6 +1768,245 @@
         function updateCharts() {
             updatePaymentDistributionChart();
             updateCartPerformanceChart();
+            updateMenuItemsAnalysis();
+        }
+        
+        // Analyze menu items profitability
+        function updateMenuItemsAnalysis() {
+            // Initialize menu items stats
+            const menuItemsStats = {};
+            let totalRevenue = 0;
+            
+            // Process all filtered orders
+            state.filteredOrders.forEach(order => {
+                // Skip orders without items
+                if (!order.items || !Array.isArray(order.items)) return;
+                
+                // Process each item in the order
+                order.items.forEach(item => {
+                    // Skip if item name or price is missing
+                    if (!item.name || !item.price) return;
+                    
+                    const itemName = item.name.split(' - ')[0]; // Remove size/variant info
+                    const quantity = item.quantity || 1;
+                    const price = parseFloat(item.price) || 0;
+                    const itemTotal = price * quantity;
+                    
+                    // Add to total revenue
+                    totalRevenue += itemTotal;
+                    
+                    // Update or create item stats
+                    if (!menuItemsStats[itemName]) {
+                        menuItemsStats[itemName] = {
+                            name: itemName,
+                            quantity: 0,
+                            revenue: 0,
+                            orderDates: []
+                        };
+                    }
+                    
+                    menuItemsStats[itemName].quantity += quantity;
+                    menuItemsStats[itemName].revenue += itemTotal;
+                    
+                    // Track order date for trend analysis
+                    if (order.createdAt) {
+                        const orderDate = typeof order.createdAt.toDate === 'function' 
+                            ? order.createdAt.toDate() 
+                            : new Date(order.createdAt);
+                        
+                        menuItemsStats[itemName].orderDates.push({
+                            date: orderDate,
+                            quantity: quantity,
+                            revenue: itemTotal
+                        });
+                    }
+                });
+            });
+            
+            // Calculate trends (comparing first half to second half of the period)
+            Object.values(menuItemsStats).forEach(item => {
+                if (item.orderDates.length > 0) {
+                    // Sort dates
+                    item.orderDates.sort((a, b) => a.date - b.date);
+                    
+                    // Split into two periods
+                    const midpoint = Math.floor(item.orderDates.length / 2);
+                    const firstHalf = item.orderDates.slice(0, midpoint);
+                    const secondHalf = item.orderDates.slice(midpoint);
+                    
+                    // Calculate revenue for each half
+                    const firstHalfRevenue = firstHalf.reduce((sum, order) => sum + order.revenue, 0);
+                    const secondHalfRevenue = secondHalf.reduce((sum, order) => sum + order.revenue, 0);
+                    
+                    // Calculate trend percentage (avoid division by zero)
+                    if (firstHalfRevenue > 0) {
+                        item.trend = ((secondHalfRevenue - firstHalfRevenue) / firstHalfRevenue) * 100;
+                    } else if (secondHalfRevenue > 0) {
+                        item.trend = 100; // If first half was zero and second half has sales, that's a 100% increase
+                    } else {
+                        item.trend = 0; // No sales in either period
+                    }
+                } else {
+                    item.trend = 0;
+                }
+            });
+            
+            // Calculate percentage of total revenue
+            Object.values(menuItemsStats).forEach(item => {
+                item.percentageOfTotal = totalRevenue > 0 ? (item.revenue / totalRevenue) * 100 : 0;
+            });
+            
+            // Display the menu items analysis
+            displayMenuItemsAnalysis(menuItemsStats, totalRevenue);
+        }
+        
+        // Display menu items profitability analysis
+        function displayMenuItemsAnalysis(menuItemsStats, totalRevenue) {
+            const tableBody = document.getElementById('menuItemsTableBody');
+            const sortBy = document.getElementById('menuItemSortBy').value;
+            const limit = parseInt(document.getElementById('menuItemLimit').value);
+            
+            // Convert to array for sorting
+            let menuItems = Object.values(menuItemsStats);
+            
+            // Sort items based on selected criteria
+            switch (sortBy) {
+                case 'quantity':
+                    menuItems.sort((a, b) => b.quantity - a.quantity);
+                    break;
+                case 'revenue':
+                    menuItems.sort((a, b) => b.revenue - a.revenue);
+                    break;
+                case 'name':
+                    menuItems.sort((a, b) => a.name.localeCompare(b.name));
+                    break;
+            }
+            
+            // Apply limit if not 0 (all items)
+            if (limit > 0) {
+                menuItems = menuItems.slice(0, limit);
+            }
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Populate table
+            if (menuItems.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No menu items data available</td></tr>';
+                return;
+            }
+            
+            menuItems.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Determine trend icon and color
+                let trendIcon, trendColor;
+                if (item.trend > 5) {
+                    trendIcon = 'bi-arrow-up-circle-fill';
+                    trendColor = 'text-success';
+                } else if (item.trend < -5) {
+                    trendIcon = 'bi-arrow-down-circle-fill';
+                    trendColor = 'text-danger';
+                } else {
+                    trendIcon = 'bi-dash-circle-fill';
+                    trendColor = 'text-secondary';
+                }
+                
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.revenue.toFixed(2)}</td>
+                    <td>${item.percentageOfTotal.toFixed(1)}%</td>
+                    <td>
+                        <span class="${trendColor}">
+                            <i class="bi ${trendIcon}"></i>
+                            ${item.trend.toFixed(1)}%
+                        </span>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Update chart
+            updateMenuItemsChart(menuItems);
+        }
+        
+        // Update menu items chart
+        function updateMenuItemsChart(menuItems) {
+            const ctx = document.getElementById('menuItemsChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (state.menuItemsChartInstance) {
+                state.menuItemsChartInstance.destroy();
+            }
+            
+            // Prepare data for chart (top 10 items by revenue)
+            const chartItems = [...menuItems].sort((a, b) => b.revenue - a.revenue).slice(0, 10);
+            
+            // Create chart
+            state.menuItemsChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartItems.map(item => item.name),
+                    datasets: [
+                        {
+                            label: 'Revenue (₹)',
+                            data: chartItems.map(item => item.revenue),
+                            backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Quantity Sold',
+                            data: chartItems.map(item => item.quantity),
+                            backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            borderWidth: 1,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Revenue (₹)'
+                            }
+                        },
+                        y1: {
+                            beginAtZero: true,
+                            position: 'right',
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Quantity Sold'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top 10 Menu Items by Revenue'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.dataset.label || '';
+                                    const value = context.raw;
+                                    return `${label}: ${context.datasetIndex === 0 ? '₹' + value.toFixed(2) : value}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // Update payment distribution chart

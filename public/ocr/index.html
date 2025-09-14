@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OCR Image Processing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #FFF;
+            border-bottom-color: #FF3D00;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div id="loadingOverlay" class="loading-overlay">
+        <span class="loader"></span>
+    </div>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-4">OCR Image Processing</h1>
+        <div class="text-center mb-8">
+            <a href="advanced.html" class="text-indigo-600 hover:text-indigo-800 font-medium">
+                Try Advanced Interface <span class="ml-1">→</span>
+            </a>
+        </div>
+        
+        <div class="grid md:grid-cols-1 gap-8 max-w-2xl mx-auto">
+            <!-- OCR Section -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">OCR Processing</h2>
+                <div class="space-y-4">
+                    <input type="file" id="ocrInput" accept="image/*" 
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
+                           file:rounded-full file:border-0 file:text-sm file:font-semibold
+                           file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"/>
+                    <div id="ocrPreview" class="mt-4"></div>
+                    <button onclick="processOCR()" 
+                            class="w-full bg-violet-600 text-white py-2 px-4 rounded-lg 
+                            hover:bg-violet-700 transition duration-300">
+                        Extract Text
+                    </button>
+                    <div id="ocrResult" class="mt-4 p-4 bg-gray-50 rounded-lg min-h-[100px] hidden"></div>
+                </div>
+            </div>
+
+            <!-- UPI Image Processing Section -->
+            <div class="bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold text-gray-700 mb-4">UPI Payment Analysis</h2>
+                <div class="space-y-4">
+                    <input type="file" id="upiInput" accept="image/*" 
+                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 
+                           file:rounded-full file:border-0 file:text-sm file:font-semibold
+                           file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100"/>
+                    <div id="upiPreview" class="mt-4"></div>
+                    <button onclick="processUPIImage()" 
+                            class="w-full bg-amber-600 text-white py-2 px-4 rounded-lg 
+                            hover:bg-amber-700 transition duration-300">
+                        Analyze UPI Payment
+                    </button>
+                    <div id="upiResult" class="mt-4 p-4 bg-gray-50 rounded-lg min-h-[100px] hidden">
+                        <div class="grid md:grid-cols-2 gap-4">
+                            <div id="upiJsonResult" class="text-sm"></div>
+                            <div id="upiImageResult" class="text-center"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define API base URL for the remote service
+        const apiBaseUrl = "https://file-image-uploader-production.up.railway.app";
+        
+        // Preview functionality for OCR and UPI inputs
+        function showLoader() {
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoader() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        ['ocrInput', 'upiInput'].forEach(id => {
+            document.getElementById(id).addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const previewDiv = document.getElementById(id.replace('Input', 'Preview'));
+                        previewDiv.innerHTML = `<img src="${e.target.result}" class="max-w-full h-auto rounded-lg">`;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
+
+        async function processOCR() {
+            showLoader();
+            const file = document.getElementById('ocrInput').files[0];
+            if (!file) {
+                hideLoader();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);  // Use 'file' as the field name to match the server expectation
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/ocr`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                const resultDiv = document.getElementById('ocrResult');
+                resultDiv.innerHTML = `
+                    <div class="flex flex-col space-y-4">
+                        <div>
+                            <h3 class="font-medium text-gray-700 mb-2">Extracted Text:</h3>
+                            <p class="text-gray-700 whitespace-pre-wrap">${data.ocrText}</p>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="font-medium text-gray-700 mb-2">Processed Image:</h3>
+                            <a href="${data.imageUrl}" target="_blank">
+                                <img src="${data.imageUrl}" class="max-h-48 mx-auto rounded-lg border border-gray-200">
+                            </a>
+                        </div>
+                    </div>
+                `;
+                resultDiv.classList.remove('hidden');
+                hideLoader();
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('ocrResult').innerHTML = `
+                    <p class="text-red-500">Error processing image: ${error.message}</p>
+                    <p class="text-sm text-gray-600 mt-2">Please make sure the image is valid and try again.</p>
+                `;
+                document.getElementById('ocrResult').classList.remove('hidden');
+                hideLoader();
+            }
+        }
+
+        async function processUPIImage() {
+            showLoader();
+            const file = document.getElementById('upiInput').files[0];
+            if (!file) {
+                hideLoader();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);  // Use 'file' as the field name to match the server expectation
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/upi-ocr`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Parse the OCR text as JSON if it's a string
+                let jsonData;
+                try {
+                    jsonData = typeof data.ocrText === 'string' ? JSON.parse(data.ocrText) : data.ocrText;
+                } catch (e) {
+                    jsonData = { error: "Could not parse JSON data" };
+                }
+                
+                // Format the JSON data for display
+                const formattedJson = Object.entries(jsonData).map(([key, value]) => {
+                    return `<div class="mb-2">
+                        <span class="font-medium text-gray-700">${key}:</span> 
+                        <span class="text-gray-600">${value}</span>
+                    </div>`;
+                }).join('');
+                
+                // Display the results
+                const resultDiv = document.getElementById('upiResult');
+                document.getElementById('upiJsonResult').innerHTML = formattedJson;
+                document.getElementById('upiImageResult').innerHTML = `
+                    <p class="text-gray-700 mb-2">Image processed successfully!</p>
+                    <a href="${data.imageUrl}" target="_blank" class="inline-block">
+                        <img src="${data.imageUrl}" class="max-w-full h-auto max-h-48 rounded-lg border border-gray-200">
+                    </a>
+                `;
+                resultDiv.classList.remove('hidden');
+                hideLoader();
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('upiResult').innerHTML = `
+                    <p class="text-red-500">Error processing UPI image: ${error.message}</p>
+                    <p class="text-sm text-gray-600 mt-2">Please make sure the image is valid and try again.</p>
+                `;
+                document.getElementById('upiResult').classList.remove('hidden');
+                hideLoader();
+            }
+        }
+    </script>
+</body>
+</html>

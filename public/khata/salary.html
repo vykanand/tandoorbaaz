@@ -96,6 +96,7 @@
             border-collapse: collapse;
             margin-top: 20px;
             min-width: 650px; /* Ensures table doesn't shrink too much on mobile */
+            table-layout: auto; /* Make columns size according to content */
         }
 
         th,
@@ -103,7 +104,8 @@
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
-            white-space: nowrap; /* Prevents text wrapping in cells */
+            white-space: normal; /* Allow text wrapping in cells */
+            width: auto; /* Let the content determine the width */
         }
 
         th {
@@ -269,6 +271,7 @@
         .summary-table {
             width: 100%;
             margin-top: 15px;
+            table-layout: auto; /* Make columns size according to content */
         }
 
         .summary-table th, 
@@ -279,12 +282,21 @@
         .summary-table th:first-child,
         .summary-table td:first-child {
             text-align: left;
+            width: auto; /* Allow width to be determined by content */
         }
 
         .summary-section h3 {
             margin-top: 25px;
             border-bottom: 1px solid #eee;
             padding-bottom: 5px;
+        }
+        
+        /* Specific style for employer column to prevent it from being too wide */
+        #employerSummaryBody td:first-child,
+        #employerSummaryBody th:first-child {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         /* Worker detail styles */

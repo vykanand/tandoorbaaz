@@ -98,7 +98,7 @@
             // Handle confirm button click
             document.getElementById('confirmStoreChangeBtn').addEventListener('click', function () {
                 if (document.getElementById('confirmStoreChange').checked) {
-                    window.location.href = `showorders.html?cart=${storeId}`;
+                    window.location.href = `orders.html?cart=${storeId}`;
                 }
             });
 
@@ -2316,7 +2316,7 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // Application State
+        // Application State 
         let state = {
             currentOrders: [],
             filteredOrders: [],
@@ -2331,93 +2331,119 @@
                 1: {
                     name: "Seekh Kebab",
                     portions: {
-                        half: { name: "HALF", price: 109 },
-                        full: { name: "FULL", price: 209 },
+                        half: { name: "HALF", price: 109, pieces: 2 },
+                        full: { name: "FULL", price: 209, pieces: 4 },
                     },
+                    rawMaterial: "keema",
+                    gramsPerPiece: 50
                 },
                 2: {
                     name: "Chicken Tikka",
                     portions: {
-                        half: { name: "HALF", price: 149 },
-                        full: { name: "FULL", price: 289 },
+                        half: { name: "HALF", price: 149, pieces: 4 },
+                        full: { name: "FULL", price: 289, pieces: 8 },
                     },
+                    rawMaterial: "tikka",
+                    gramsPerPiece: 23.25 // 1kg = 43 pieces, so ~23.25g per piece
                 },
                 3: {
                     name: "Afghani Chicken Tikka",
                     portions: {
-                        half: { name: "HALF", price: 169 },
-                        full: { name: "FULL", price: 329 },
+                        half: { name: "HALF", price: 169, pieces: 4 },
+                        full: { name: "FULL", price: 329, pieces: 8 },
                     },
+                    rawMaterial: "tikka",
+                    gramsPerPiece: 23.25
                 },
                 4: {
                     name: "Tandoori Chicken",
                     portions: {
-                        half: { name: "HALF", price: 169 },
-                        full: { name: "FULL", price: 329 },
+                        half: { name: "HALF", price: 169, pieces: 4 },
+                        full: { name: "FULL", price: 329, pieces: 8 },
                     },
+                    rawMaterial: "baccha",
+                    gramsPerPiece: 125 // 1kg = 8 pieces, so 125g per piece
                 },
                 5: {
                     name: "Afghani Chicken",
                     portions: {
-                        half: { name: "HALF", price: 199 },
-                        full: { name: "FULL", price: 389 },
+                        half: { name: "HALF", price: 199, pieces: 4 },
+                        full: { name: "FULL", price: 389, pieces: 8 },
                     },
+                    rawMaterial: "baccha",
+                    gramsPerPiece: 125
                 },
                 6: {
                     name: "Chicken Wings",
                     portions: {
-                        half: { name: "HALF", price: 129 },
-                        full: { name: "FULL", price: 249 },
+                        half: { name: "HALF", price: 129, pieces: 8 },
+                        full: { name: "FULL", price: 249, pieces: 16 },
                     },
+                    rawMaterial: "wings",
+                    gramsPerPiece: 62.5 // 1kg = 16 pieces, so 62.5g per piece
                 },
                 7: {
                     name: "Chicken Tangdi",
                     portions: {
-                        half: { name: "HALF", price: 99 },
-                        full: { name: "FULL", price: 189 },
+                        half: { name: "HALF", price: 99, pieces: 2 },
+                        full: { name: "FULL", price: 189, pieces: 4 },
                     },
+                    rawMaterial: "tangdi",
+                    gramsPerPiece: 100 // 1kg = 10 pieces, so 100g per piece
                 },
                 8: {
                     name: "Afghani Tangdi",
                     portions: {
-                        half: { name: "HALF", price: 119 },
-                        full: { name: "FULL", price: 229 },
+                        half: { name: "HALF", price: 119, pieces: 2 },
+                        full: { name: "FULL", price: 229, pieces: 4 },
                     },
+                    rawMaterial: "tangdi",
+                    gramsPerPiece: 100
                 },
                 9: {
                     name: "Masala Chaap",
                     portions: {
-                        half: { name: "HALF", price: 69 },
-                        full: { name: "FULL", price: 129 },
+                        half: { name: "HALF", price: 69, pieces: 3 },
+                        full: { name: "FULL", price: 129, pieces: 6 },
                     },
+                    rawMaterial: "chaap",
+                    gramsPerPiece: 62.5 // 1kg = 16 pieces, so 62.5g per piece
                 },
                 10: {
                     name: "Malai Chaap",
                     portions: {
-                        half: { name: "HALF", price: 79 },
-                        full: { name: "FULL", price: 149 },
+                        half: { name: "HALF", price: 79, pieces: 3 },
+                        full: { name: "FULL", price: 149, pieces: 6 },
                     },
+                    rawMaterial: "chaap",
+                    gramsPerPiece: 62.5
                 },
                 11: {
                     name: "Afghani Chaap",
                     portions: {
-                        half: { name: "HALF", price: 89 },
-                        full: { name: "FULL", price: 169 },
+                        half: { name: "HALF", price: 89, pieces: 3 },
+                        full: { name: "FULL", price: 169, pieces: 6 },
                     },
+                    rawMaterial: "chaap",
+                    gramsPerPiece: 62.5
                 },
                 12: {
                     name: "Paneer Tikka",
                     portions: {
-                        half: { name: "HALF", price: 79 },
-                        full: { name: "FULL", price: 149 },
+                        half: { name: "HALF", price: 79, pieces: 4 },
+                        full: { name: "FULL", price: 149, pieces: 8 },
                     },
+                    rawMaterial: "paneer",
+                    gramsPerPiece: 31.25 // 1kg = 32 pieces, so 31.25g per piece
                 },
                 13: {
                     name: "Romali Roti",
                     portions: {
-                        piece: { name: "PER PIECE", price: 10 },
+                        piece: { name: "PER PIECE", price: 10, pieces: 1 },
                     },
-                },
+                    rawMaterial: "other",
+                    gramsPerPiece: 0 // Not calculating for roti
+                }
             }
         };
 
@@ -3114,7 +3140,10 @@
                                 '<i class="bi bi-check-all text-success" style="font-size: 1rem;"></i>' :
                                 '<i class="bi bi-circle" style="font-size: 1rem;"></i>'}
                                                 </span>
-                                                <span class="${item.cooked ? 'text-success fw-bold' : ''}">${item.name} (${item.portion}) ×${item.quantity}</span>
+                                                <span class="${item.cooked ? 'text-success fw-bold' : ''}">
+                                                    ${item.name} (${item.portion}) ×${item.quantity}
+                                                    ${item.pieces ? `<small class="text-muted">(${item.pieces * item.quantity} pcs)</small>` : ''}
+                                                </span>
                                             </div>
                                             <div>
                                                 <span class="fw-bold">₹${item.price * item.quantity}</span>
@@ -4277,7 +4306,9 @@
                         for (const [key, portion] of Object.entries(portions)) {
                             const option = document.createElement('option');
                             option.value = key;
-                            option.textContent = `${portion.name} - ₹${portion.price}`;
+                            // Add pieces information if available
+                            const piecesInfo = portion.pieces ? ` (${portion.pieces} pcs)` : '';
+                            option.textContent = `${portion.name}${piecesInfo} - ₹${portion.price}`;
                             if (item && item.portion === portion.name) {
                                 option.selected = true;
                             }
@@ -4292,8 +4323,16 @@
                     const portionKey = portionSelect.value;
                     const quantity = parseInt(quantityInput.value) || 0;
                     if (itemId && portionKey && state.menuItems[itemId]) {
-                        const price = state.menuItems[itemId].portions[portionKey].price * quantity;
-                        priceDisplay.textContent = `₹${price}`;
+                        const portionData = state.menuItems[itemId].portions[portionKey];
+                        const price = portionData.price * quantity;
+                        
+                        // Add pieces information to the price display if available
+                        if (portionData.pieces) {
+                            const totalPieces = portionData.pieces * quantity;
+                            priceDisplay.textContent = `₹${price} (${totalPieces} pcs)`;
+                        } else {
+                            priceDisplay.textContent = `₹${price}`;
+                        }
                     } else {
                         priceDisplay.textContent = '₹0';
                     }
@@ -4325,7 +4364,9 @@
                 const rows = editOrderItemsContainer.querySelectorAll('div.d-flex');
                 rows.forEach(r => {
                     const priceText = r.querySelector('div').textContent;
-                    const price = parseInt(priceText.replace('₹', '')) || 0;
+                    // Extract just the price part, ignoring any pieces information
+                    const priceMatch = priceText.match(/₹(\d+)/);
+                    const price = priceMatch ? parseInt(priceMatch[1]) : 0;
                     total += price;
                 });
                 document.getElementById('editOrderTotal').textContent = total;
@@ -4431,7 +4472,8 @@
                         name: itemData.name,
                         portion: portionData.name,
                         quantity,
-                        price: portionData.price
+                        price: portionData.price,
+                        pieces: portionData.pieces || null
                     });
                 }
             }
@@ -4674,7 +4716,8 @@
                         name: itemData.name,
                         portion: portionData.name,
                         quantity,
-                        price: portionData.price
+                        price: portionData.price,
+                        pieces: portionData.pieces || null
                     });
                 }
             }
@@ -4769,7 +4812,9 @@
                 const rows = container.querySelectorAll('div.d-flex');
                 rows.forEach(r => {
                     const priceText = r.querySelector('div').textContent;
-                    const price = parseInt(priceText.replace('₹', '')) || 0;
+                    // Extract just the price part, ignoring any pieces information
+                    const priceMatch = priceText.match(/₹(\d+)/);
+                    const price = priceMatch ? parseInt(priceMatch[1]) : 0;
                     total += price;
                 });
                 totalElement.textContent = total;
@@ -4949,7 +4994,9 @@
                             for (const [key, portion] of Object.entries(portions)) {
                                 const option = document.createElement('option');
                                 option.value = key;
-                                option.textContent = `${portion.name} - ₹${portion.price}`;
+                                // Add pieces information if available
+                                const piecesInfo = portion.pieces ? ` (${portion.pieces} pcs)` : '';
+                                option.textContent = `${portion.name}${piecesInfo} - ₹${portion.price}`;
                                 portionSelect.appendChild(option);
                             }
                         }
@@ -4961,8 +5008,16 @@
                         const portionKey = portionSelect.value;
                         const quantity = parseInt(quantityInput.value) || 0;
                         if (itemId && portionKey && state.menuItems[itemId]) {
-                            const price = state.menuItems[itemId].portions[portionKey].price * quantity;
-                            priceDisplay.textContent = `₹${price}`;
+                            const portionData = state.menuItems[itemId].portions[portionKey];
+                            const price = portionData.price * quantity;
+                            
+                            // Add pieces information to the price display if available
+                            if (portionData.pieces) {
+                                const totalPieces = portionData.pieces * quantity;
+                                priceDisplay.textContent = `₹${price} (${totalPieces} pcs)`;
+                            } else {
+                                priceDisplay.textContent = `₹${price}`;
+                            }
                         } else {
                             priceDisplay.textContent = '₹0';
                         }
@@ -4974,7 +5029,9 @@
                         const rows = orderItemsContainer.querySelectorAll('div.d-flex');
                         rows.forEach(r => {
                             const priceText = r.querySelector('div').textContent;
-                            const price = parseInt(priceText.replace('₹', '')) || 0;
+                            // Extract just the price part, ignoring any pieces information
+                            const priceMatch = priceText.match(/₹(\d+)/);
+                            const price = priceMatch ? parseInt(priceMatch[1]) : 0;
                             total += price;
                         });
                         orderTotalElem.textContent = total;
