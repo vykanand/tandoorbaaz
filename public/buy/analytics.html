@@ -357,6 +357,68 @@
             border-left: 4px solid var(--primary-color);
         }
 
+        /* Responsive Table Styles */
+        .table-responsive {
+            border-radius: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Mobile table scrolling */
+        @media (max-width: 768px) {
+            .table-responsive {
+                overflow-x: scroll;
+                scrollbar-width: thin;
+                scrollbar-color: #6c757d #f8f9fa;
+            }
+            
+            .table-responsive::-webkit-scrollbar {
+                height: 6px;
+            }
+            
+            .table-responsive::-webkit-scrollbar-track {
+                background: #f8f9fa;
+                border-radius: 3px;
+            }
+            
+            .table-responsive::-webkit-scrollbar-thumb {
+                background: #6c757d;
+                border-radius: 3px;
+            }
+            
+            .table-responsive::-webkit-scrollbar-thumb:hover {
+                background: #495057;
+            }
+
+            /* Ensure table maintains minimum width for readability */
+            .table {
+                min-width: 600px;
+            }
+
+            /* Table cell adjustments for mobile */
+            .table th,
+            .table td {
+                white-space: nowrap;
+                min-width: 80px;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.9rem;
+            }
+            
+            /* Action buttons column minimum width */
+            .table th:last-child,
+            .table td:last-child {
+                min-width: 120px;
+            }
+            
+            /* Comments column adjustments */
+            .table td:nth-child(7) {
+                max-width: 200px;
+                white-space: normal;
+                word-wrap: break-word;
+            }
+        }
+
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
             .container-fluid {
@@ -416,16 +478,28 @@
                     padding: 0.5rem 0.75rem;
                     font-size: 0.9rem;
                 }
+                
+                /* Smaller table elements for very small screens */
+                .table {
+                    min-width: 550px;
+                }
+                
+                .table th,
+                .table td {
+                    padding: 0.4rem 0.6rem;
+                    font-size: 0.85rem;
+                    min-width: 70px;
+                }
+                
+                .table th:last-child,
+                .table td:last-child {
+                    min-width: 100px;
+                }
             }
 
             .filter-controls {
                 flex-direction: column;
                 gap: 0.5rem;
-            }
-
-            .table-responsive {
-                border-radius: 10px;
-                overflow: hidden;
             }
 
             .nav-tabs .nav-link {
@@ -828,7 +902,13 @@
                                             <!-- Orders will be populated here -->
                                         </tbody>
                                     </table>
-                                </div>
+                                    </div>
+                                        <!-- Pagination for All Orders -->
+                                <nav aria-label="All Orders Pagination">
+                                    <ul class="pagination pagination-sm justify-content-center" id="allOrdersPagination">
+                                        <!-- Pagination buttons will be generated here -->
+                                    </ul>
+                                </nav>
                             </div>
 
                             <!-- Cash Payments Tab -->
@@ -855,7 +935,13 @@
                                             <!-- Cash orders will be populated here -->
                                         </tbody>
                                     </table>
-                                </div>
+                                    </div>
+                                        <!-- Pagination for Cash Orders -->
+                                <nav aria-label="Cash Orders Pagination">
+                                            <ul class="pagination pagination-sm justify-content-center" id="cashOrdersPagination">
+                                        <!-- Pagination buttons will be generated here -->
+                                    </ul>
+                                </nav>
                             </div>
 
                             <!-- Online Payments Tab -->
@@ -882,7 +968,13 @@
                                             <!-- Online orders will be populated here -->
                                         </tbody>
                                     </table>
-                                </div>
+                                    </div>
+                                        <!-- Pagination for Online Orders -->
+                                <nav aria-label="Online Orders Pagination">
+                                            <ul class="pagination pagination-sm justify-content-center" id="onlineOrdersPagination">
+                                        <!-- Pagination buttons will be generated here -->
+                                    </ul>
+                                </nav>
                             </div>
 
                             <!-- Pending Orders Tab -->
@@ -909,7 +1001,13 @@
                                             <!-- Pending orders will be populated here -->
                                         </tbody>
                                     </table>
-                                </div>
+                                    </div>
+                                        <!-- Pagination for Pending Orders -->
+                                <nav aria-label="Pending Orders Pagination">
+                                            <ul class="pagination pagination-sm justify-content-center" id="pendingOrdersPagination">
+                                        <!-- Pagination buttons will be generated here -->
+                                    </ul>
+                                </nav>
                             </div>
 
                             <!-- Delivered Orders Tab -->
@@ -937,7 +1035,13 @@
                                             <!-- Delivered orders will be populated here -->
                                         </tbody>
                                     </table>
-                                </div>
+                                    </div>
+                                        <!-- Pagination for Delivered Orders -->
+                                            <nav aria-label="Delivered Orders Pagination">
+                                    <ul class="pagination pagination-sm justify-content-center" id="deliveredOrdersPagination">
+                                        <!-- Pagination buttons will be generated here -->
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>
@@ -998,9 +1102,15 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="chart-container mt-4">
-                            <canvas id="menuItemsChart"></canvas>
-                        </div>
+                        <!-- Pagination for Menu Items -->
+                        <nav aria-label="Menu Items Pagination">
+                            <ul class="pagination pagination-sm justify-content-center" id="menuItemsPagination">
+                                     <!-- Pagination buttons will be generated here -->
+                             </ul>
+                         </nav>
+                         <div class="chart-container mt-4">
+                             <canvas id="menuItemsChart"></canvas>
+                         </div>
                     </div>
                 </div>
             </div>
@@ -1178,7 +1288,18 @@
             cartStats: {},
             paymentChartInstance: null,
             cartChartInstance: null,
-            menuItemsChartInstance: null
+            menuItemsChartInstance: null,
+            // Pagination state
+            pagination: {
+                allOrders: { currentPage: 1, itemsPerPage: 10 },
+                cashOrders: { currentPage: 1, itemsPerPage: 10 },
+                onlineOrders: { currentPage: 1, itemsPerPage: 10 },
+                pendingOrders: { currentPage: 1, itemsPerPage: 10 },
+                deliveredOrders: { currentPage: 1, itemsPerPage: 10 },
+                menuItems: { currentPage: 1, itemsPerPage: 15 }
+            },
+            // Store current menu items for pagination
+            currentMenuItems: []
         };
         
         // Network status monitoring
@@ -1210,6 +1331,195 @@
         let currentOrderId = null;
         let editOrderModal = null;
         let orderDetailsModal = null;
+
+        // Simple Pagination Logic
+        const Paginator = {
+            // Get paginated data
+            paginate(data, tableType) {
+                const paginationState = state.pagination[tableType];
+                const startIndex = (paginationState.currentPage - 1) * paginationState.itemsPerPage;
+                const endIndex = startIndex + paginationState.itemsPerPage;
+                return data.slice(startIndex, endIndex);
+            },
+
+            // Get total pages
+            getTotalPages(data, tableType) {
+                const itemsPerPage = state.pagination[tableType].itemsPerPage;
+                return Math.ceil(data.length / itemsPerPage);
+            },
+
+            // Go to specific page
+            goToPage(tableType, page) {
+                const totalPages = this.getTotalPages(this.getDataForTable(tableType), tableType);
+                if (page >= 1 && page <= totalPages) {
+                    state.pagination[tableType].currentPage = page;
+                    this.renderTable(tableType);
+                    this.renderPagination(tableType);
+                }
+            },
+
+            // Go to next page
+            nextPage(tableType) {
+                const totalPages = this.getTotalPages(this.getDataForTable(tableType), tableType);
+                if (state.pagination[tableType].currentPage < totalPages) {
+                    state.pagination[tableType].currentPage++;
+                    this.renderTable(tableType);
+                    this.renderPagination(tableType);
+                }
+            },
+
+            // Go to previous page
+            prevPage(tableType) {
+                if (state.pagination[tableType].currentPage > 1) {
+                    state.pagination[tableType].currentPage--;
+                    this.renderTable(tableType);
+                    this.renderPagination(tableType);
+                }
+            },
+
+            // Get data for specific table type
+            getDataForTable(tableType) {
+                switch (tableType) {
+                    case 'allOrders':
+                        return state.filteredOrders;
+                    case 'cashOrders':
+                        return state.filteredOrders.filter(order => order.status === 'paid (cash)');
+                    case 'onlineOrders':
+                        return state.filteredOrders.filter(order => order.status === 'paid(online)');
+                    case 'pendingOrders':
+                        return state.filteredOrders.filter(order => order.status === 'pending' || order.status === 'preparing');
+                    case 'deliveredOrders':
+                        return state.filteredOrders.filter(order => order.status === 'delivered');
+                    case 'menuItems':
+                        return state.currentMenuItems || []; // Will store current menu items data
+                    default:
+                        return [];
+                }
+            },
+
+            // Render pagination controls
+            renderPagination(tableType) {
+                const paginationContainer = document.getElementById(`${tableType}Pagination`);
+                if (!paginationContainer) return;
+
+                const data = this.getDataForTable(tableType);
+                const totalPages = this.getTotalPages(data, tableType);
+                const currentPage = state.pagination[tableType].currentPage;
+                
+                if (totalPages <= 1) {
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                let paginationHTML = '';
+
+                // Previous button
+                paginationHTML += `
+                    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="Paginator.prevPage('${tableType}'); return false;" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                `;
+
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    // Show first page, last page, current page, and pages around current
+                    if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                        paginationHTML += `
+                            <li class="page-item ${currentPage === i ? 'active' : ''}">
+                                <a class="page-link" href="#" onclick="Paginator.goToPage('${tableType}', ${i}); return false;">${i}</a>
+                            </li>
+                        `;
+                    } else if (i === currentPage - 3 || i === currentPage + 3) {
+                        // Show ellipsis
+                        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                    }
+                }
+
+                // Next button
+                paginationHTML += `
+                    <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="#" onclick="Paginator.nextPage('${tableType}'); return false;" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                `;
+
+                paginationContainer.innerHTML = paginationHTML;
+            },
+
+            // Render specific table with pagination
+            renderTable(tableType) {
+                switch (tableType) {
+                    case 'allOrders':
+                        renderAllOrdersTable();
+                        break;
+                    case 'cashOrders':
+                        renderCashOrdersTable();
+                        break;
+                    case 'onlineOrders':
+                        renderOnlineOrdersTable();
+                        break;
+                    case 'pendingOrders':
+                        renderPendingOrdersTable();
+                        break;
+                    case 'deliveredOrders':
+                        renderDeliveredOrdersTable();
+                        break;
+                    case 'menuItems':
+                        renderMenuItemsTable();
+                        break;
+                }
+            }
+        };
+
+        // Render just the menu items table (for pagination)
+        function renderMenuItemsTable() {
+            const tableBody = document.getElementById('menuItemsTableBody');
+            const paginatedItems = Paginator.paginate(state.currentMenuItems, 'menuItems');
+            
+            // Clear table
+            tableBody.innerHTML = '';
+            
+            // Populate table
+            if (paginatedItems.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No menu items data available</td></tr>';
+                return;
+            }
+            
+            paginatedItems.forEach(item => {
+                const row = document.createElement('tr');
+                
+                // Determine trend icon and color
+                let trendIcon, trendColor;
+                if (item.trend > 5) {
+                    trendIcon = 'bi-arrow-up-circle-fill';
+                    trendColor = 'text-success';
+                } else if (item.trend < -5) {
+                    trendIcon = 'bi-arrow-down-circle-fill';
+                    trendColor = 'text-danger';
+                } else {
+                    trendIcon = 'bi-dash-circle-fill';
+                    trendColor = 'text-secondary';
+                }
+                
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>₹${item.revenue.toFixed(2)}</td>
+                    <td>${item.percentageOfTotal.toFixed(1)}%</td>
+                    <td>
+                        <span class="${trendColor}">
+                            <i class="bi ${trendIcon}"></i>
+                            ${item.trend.toFixed(1)}%
+                        </span>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
 
         // Initialize the page
         document.addEventListener('DOMContentLoaded', function () {
@@ -1429,6 +1739,11 @@
             // Sort orders
             sortOrders();
 
+            // Reset pagination on filter change
+            Object.keys(state.pagination).forEach(tableType => {
+                state.pagination[tableType].currentPage = 1;
+            });
+
             // Update UI
             updateSummaryStats();
             renderOrdersTable();
@@ -1502,71 +1817,45 @@
             renderOrdersTable();
         }
 
-        // Render orders table
+        // Render orders table (now calls all individual table renderers)
         function renderOrdersTable() {
-            // Clear all table bodies
-            const tableBody = document.getElementById('ordersTableBody');
-            const cashTableBody = document.getElementById('cashOrdersTableBody');
-            const onlineTableBody = document.getElementById('onlineOrdersTableBody');
-            const pendingTableBody = document.getElementById('pendingOrdersTableBody');
-            const deliveredTableBody = document.getElementById('deliveredOrdersTableBody');
+            // Populate cart filter if not already populated
+            populateCartFilter();
             
-            tableBody.innerHTML = '';
-            cashTableBody.innerHTML = '';
-            onlineTableBody.innerHTML = '';
-            pendingTableBody.innerHTML = '';
-            deliveredTableBody.innerHTML = '';
+            // Render all tables with pagination
+            renderAllOrdersTable();
+            renderCashOrdersTable();
+            renderOnlineOrdersTable();
+            renderPendingOrdersTable();
+            renderDeliveredOrdersTable();
+            
+            // Render pagination for all tables
+            Paginator.renderPagination('allOrders');
+            Paginator.renderPagination('cashOrders');
+            Paginator.renderPagination('onlineOrders');
+            Paginator.renderPagination('pendingOrders');
+            Paginator.renderPagination('deliveredOrders');
+        }
 
-            if (state.filteredOrders.length === 0) {
+        // Render All Orders Table with pagination
+        function renderAllOrdersTable() {
+            const tableBody = document.getElementById('ordersTableBody');
+            tableBody.innerHTML = '';
+            
+            const paginatedData = Paginator.paginate(state.filteredOrders, 'allOrders');
+            
+            if (paginatedData.length === 0) {
                 const row = document.createElement('tr');
                 row.innerHTML = `<td colspan="8" class="text-center">No orders found</td>`;
                 tableBody.appendChild(row);
-                
-                // Add no data rows to other tables
-                cashTableBody.innerHTML = `<tr><td colspan="6" class="text-center">No cash payment orders found</td></tr>`;
-                onlineTableBody.innerHTML = `<tr><td colspan="6" class="text-center">No online payment orders found</td></tr>`;
-                pendingTableBody.innerHTML = `<tr><td colspan="6" class="text-center">No pending orders found</td></tr>`;
-                deliveredTableBody.innerHTML = `<tr><td colspan="7" class="text-center">No delivered orders found</td></tr>`;
                 return;
             }
-
-            // Populate cart filter if not already populated
-            populateCartFilter();
-
-            // Process each order
-            state.filteredOrders.forEach(order => {
-                // Format date
+            
+            paginatedData.forEach(order => {
                 const orderDate = order.createdAt ? formatDate(order.createdAt) : 'N/A';
+                let statusBadgeClass = getStatusBadgeClass(order.status);
+                let itemsDisplay = getItemsDisplay(order.items);
                 
-                // Format status badge
-                let statusBadgeClass = '';
-                switch (order.status) {
-                    case 'paid (cash)':
-                        statusBadgeClass = 'badge-paid-cash';
-                        break;
-                    case 'paid(online)':
-                        statusBadgeClass = 'badge-paid-online';
-                        break;
-                    case 'pending':
-                        statusBadgeClass = 'badge-pending';
-                        break;
-                    case 'preparing':
-                        statusBadgeClass = 'badge-preparing';
-                        break;
-                    case 'delivered':
-                        statusBadgeClass = 'badge-delivered';
-                        break;
-                    default:
-                        statusBadgeClass = 'bg-secondary';
-                }
-
-                // Get the items display for the table
-                let itemsDisplay = 'No items';
-                if (Array.isArray(order.items) && order.items.length > 0) {
-                    itemsDisplay = order.items.map(item => `${item.name} (${item.quantity})`).join(', ');
-                }
-                
-                // Create row for main table
                 const mainRow = document.createElement('tr');
                 mainRow.innerHTML = `
                     <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
@@ -1579,98 +1868,173 @@
                         <div>${order.customerDetails && order.customerDetails.comments ? order.customerDetails.comments : 'N/A'}</div>
                         <small class="text-muted">${itemsDisplay}</small>
                     </td>
-                    <td>
-                        <div class="btn-group">
-                            <button class="btn btn-sm btn-info" onclick="showOrderDetails('${order.docId}')">
-                                <i class="bi bi-eye"></i>
-                            </button>
-                            <button class="btn btn-sm btn-primary" onclick="openEditModal('${order.docId}')">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="confirmDeleteOrder('${order.docId}')">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+                    <td>${getFullActionButtons(order.docId)}</td>
                 `;
                 tableBody.appendChild(mainRow);
-                
-                // Create simplified rows for specific tables
-                const actionButtons = `
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-info" onclick="showOrderDetails('${order.docId}')">
-                            <i class="bi bi-eye"></i>
-                        </button>
-                        <button class="btn btn-sm btn-primary" onclick="openEditModal('${order.docId}')">
-                            <i class="bi bi-pencil"></i>
-                        </button>
-                    </div>
-                `;
-                
-                // Add to specific tables based on status
-                if (order.status === 'paid (cash)') {
-                    const cashRow = document.createElement('tr');
-                    cashRow.innerHTML = `
-                        <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
-                        <td>${orderDate}</td>
-                        <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
-                        <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
-                        <td>${order.cartName || 'N/A'}</td>
-                        <td>${actionButtons}</td>
-                    `;
-                    cashTableBody.appendChild(cashRow);
-                } else if (order.status === 'paid(online)') {
-                    const onlineRow = document.createElement('tr');
-                    onlineRow.innerHTML = `
-                        <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
-                        <td>${orderDate}</td>
-                        <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
-                        <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
-                        <td>${order.cartName || 'N/A'}</td>
-                        <td>${actionButtons}</td>
-                    `;
-                    onlineTableBody.appendChild(onlineRow);
-                } else if (order.status === 'pending' || order.status === 'preparing') {
-                    const pendingRow = document.createElement('tr');
-                    pendingRow.innerHTML = `
-                        <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
-                        <td>${orderDate}</td>
-                        <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
-                        <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
-                        <td>${order.cartName || 'N/A'}</td>
-                        <td>${actionButtons}</td>
-                    `;
-                    pendingTableBody.appendChild(pendingRow);
-                } else if (order.status === 'delivered') {
-                    const deliveredRow = document.createElement('tr');
-                    const paymentType = order.status === 'paid (cash)' ? 'Cash' : 
-                                       (order.status === 'paid(online)' ? 'Online' : 'N/A');
-                    deliveredRow.innerHTML = `
-                        <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
-                        <td>${orderDate}</td>
-                        <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
-                        <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
-                        <td>${paymentType}</td>
-                        <td>${order.cartName || 'N/A'}</td>
-                        <td>${actionButtons}</td>
-                    `;
-                    deliveredTableBody.appendChild(deliveredRow);
-                }
             });
+        }
+
+        // Render Cash Orders Table with pagination
+        function renderCashOrdersTable() {
+            const tableBody = document.getElementById('cashOrdersTableBody');
+            tableBody.innerHTML = '';
             
-            // Check if specific tables are empty and add placeholder
-            if (!cashTableBody.hasChildNodes()) {
-                cashTableBody.innerHTML = `<tr><td colspan="6" class="text-center">No cash payment orders found</td></tr>`;
+            const cashOrders = state.filteredOrders.filter(order => order.status === 'paid (cash)');
+            const paginatedData = Paginator.paginate(cashOrders, 'cashOrders');
+            
+            if (paginatedData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No cash payment orders found</td></tr>`;
+                return;
             }
-            if (!onlineTableBody.hasChildNodes()) {
-                onlineTableBody.innerHTML = `<tr><td colspan="6" class="text-center">No online payment orders found</td></tr>`;
+            
+            paginatedData.forEach(order => {
+                const orderDate = order.createdAt ? formatDate(order.createdAt) : 'N/A';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
+                    <td>${orderDate}</td>
+                    <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
+                    <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
+                    <td>${order.cartName || 'N/A'}</td>
+                    <td>${getSimpleActionButtons(order.docId)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Render Online Orders Table with pagination
+        function renderOnlineOrdersTable() {
+            const tableBody = document.getElementById('onlineOrdersTableBody');
+            tableBody.innerHTML = '';
+            
+            const onlineOrders = state.filteredOrders.filter(order => order.status === 'paid(online)');
+            const paginatedData = Paginator.paginate(onlineOrders, 'onlineOrders');
+            
+            if (paginatedData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No online payment orders found</td></tr>`;
+                return;
             }
-            if (!pendingTableBody.hasChildNodes()) {
-                pendingTableBody.innerHTML = `<tr><td colspan="6" class="text-center">No pending orders found</td></tr>`;
+            
+            paginatedData.forEach(order => {
+                const orderDate = order.createdAt ? formatDate(order.createdAt) : 'N/A';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
+                    <td>${orderDate}</td>
+                    <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
+                    <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
+                    <td>${order.cartName || 'N/A'}</td>
+                    <td>${getSimpleActionButtons(order.docId)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Render Pending Orders Table with pagination
+        function renderPendingOrdersTable() {
+            const tableBody = document.getElementById('pendingOrdersTableBody');
+            tableBody.innerHTML = '';
+            
+            const pendingOrders = state.filteredOrders.filter(order => order.status === 'pending' || order.status === 'preparing');
+            const paginatedData = Paginator.paginate(pendingOrders, 'pendingOrders');
+            
+            if (paginatedData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No pending orders found</td></tr>`;
+                return;
             }
-            if (!deliveredTableBody.hasChildNodes()) {
-                deliveredTableBody.innerHTML = `<tr><td colspan="7" class="text-center">No delivered orders found</td></tr>`;
+            
+            paginatedData.forEach(order => {
+                const orderDate = order.createdAt ? formatDate(order.createdAt) : 'N/A';
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
+                    <td>${orderDate}</td>
+                    <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
+                    <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
+                    <td>${order.cartName || 'N/A'}</td>
+                    <td>${getSimpleActionButtons(order.docId)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Render Delivered Orders Table with pagination
+        function renderDeliveredOrdersTable() {
+            const tableBody = document.getElementById('deliveredOrdersTableBody');
+            tableBody.innerHTML = '';
+            
+            const deliveredOrders = state.filteredOrders.filter(order => order.status === 'delivered');
+            const paginatedData = Paginator.paginate(deliveredOrders, 'deliveredOrders');
+            
+            if (paginatedData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No delivered orders found</td></tr>`;
+                return;
             }
+            
+            paginatedData.forEach(order => {
+                const orderDate = order.createdAt ? formatDate(order.createdAt) : 'N/A';
+                const paymentType = order.status === 'paid (cash)' ? 'Cash' : 
+                                   (order.status === 'paid(online)' ? 'Online' : 'N/A');
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
+                    <td>${orderDate}</td>
+                    <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
+                    <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
+                    <td>${paymentType}</td>
+                    <td>${order.cartName || 'N/A'}</td>
+                    <td>${getSimpleActionButtons(order.docId)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Helper functions for table rendering
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'paid (cash)': return 'badge-paid-cash';
+                case 'paid(online)': return 'badge-paid-online';
+                case 'pending': return 'badge-pending';
+                case 'preparing': return 'badge-preparing';
+                case 'delivered': return 'badge-delivered';
+                default: return 'bg-secondary';
+            }
+        }
+
+        function getItemsDisplay(items) {
+            if (Array.isArray(items) && items.length > 0) {
+                return items.map(item => `${item.name} (${item.quantity})`).join(', ');
+            }
+            return 'No items';
+        }
+
+        function getFullActionButtons(docId) {
+            return `
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-info" onclick="showOrderDetails('${docId}')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="openEditModal('${docId}')">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="confirmDeleteOrder('${docId}')">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+            `;
+        }
+
+        function getSimpleActionButtons(docId) {
+            return `
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-info" onclick="showOrderDetails('${docId}')">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-primary" onclick="openEditModal('${docId}')">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </div>
+            `;
         }
         
         // Populate cart filter dropdown
@@ -1887,16 +2251,24 @@
                 menuItems = menuItems.slice(0, limit);
             }
             
+            // Store menu items for pagination
+            state.currentMenuItems = menuItems;
+            state.pagination.menuItems.currentPage = 1; // Reset to first page when data changes
+            
+            // Get paginated data
+            const paginatedItems = Paginator.paginate(menuItems, 'menuItems');
+            
             // Clear table
             tableBody.innerHTML = '';
             
             // Populate table
-            if (menuItems.length === 0) {
+            if (paginatedItems.length === 0) {
                 tableBody.innerHTML = '<tr><td colspan="5" class="text-center">No menu items data available</td></tr>';
+                Paginator.renderPagination('menuItems');
                 return;
             }
             
-            menuItems.forEach(item => {
+            paginatedItems.forEach(item => {
                 const row = document.createElement('tr');
                 
                 // Determine trend icon and color
@@ -1928,7 +2300,10 @@
                 tableBody.appendChild(row);
             });
             
-            // Update chart
+            // Render pagination
+            Paginator.renderPagination('menuItems');
+            
+            // Update chart (use all menu items, not just paginated)
             updateMenuItemsChart(menuItems);
         }
         

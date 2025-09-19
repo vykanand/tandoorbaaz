@@ -1,0 +1,994 @@
+{
+  "version": "1.0.0",
+  "currency": "INR",
+  "defaultProfitMargin": 100,
+  "defaultPortions": {
+    "full": {
+      "name": "Full",
+      "multiplier": 1
+    },
+    "half": {
+      "name": "Half",
+      "multiplier": 0.5
+    },
+    "mini": {
+      "name": "Mini",
+      "multiplier": 0.3
+    }
+  },
+  "pagination": {
+    "dishes": {
+      "itemsPerPage": 12
+    },
+    "ingredients": {
+      "itemsPerPage": 10
+    }
+  },
+  "lastUpdated": "2025-09-19T09:53:36.833Z",
+  "categories": [
+    {
+      "id": "starters",
+      "name": "Starters",
+      "description": "Appetizers and small dishes"
+    },
+    {
+      "id": "main-course",
+      "name": "Main Course",
+      "description": "Main dishes"
+    },
+    {
+      "id": "breads",
+      "name": "Breads",
+      "description": "Various types of breads"
+    },
+    {
+      "id": "rice",
+      "name": "Rice Dishes",
+      "description": "Biryani and other rice preparations"
+    },
+    {
+      "id": "desserts",
+      "name": "Desserts",
+      "description": "Sweet dishes"
+    },
+    {
+      "id": "beverages",
+      "name": "Beverages",
+      "description": "Drinks and beverages"
+    },
+    {
+      "id": "combos",
+      "name": "Combos",
+      "description": "Meal combos"
+    }
+  ],
+  "ingredientCategories": [
+    {
+      "id": "vegetables",
+      "name": "Vegetables",
+      "description": "Fresh vegetables"
+    },
+    {
+      "id": "meat",
+      "name": "Meat",
+      "description": "Chicken, mutton, and other meats"
+    },
+    {
+      "id": "dairy",
+      "name": "Dairy",
+      "description": "Milk, cheese, and other dairy products"
+    },
+    {
+      "id": "spices",
+      "name": "Spices",
+      "description": "Herbs and spices"
+    },
+    {
+      "id": "grains",
+      "name": "Grains",
+      "description": "Rice, wheat, and other grains"
+    },
+    {
+      "id": "oils",
+      "name": "Oils & Fats",
+      "description": "Cooking oils and fats"
+    },
+    {
+      "id": "others",
+      "name": "Others",
+      "description": "Miscellaneous ingredients"
+    }
+  ],
+  "units": {
+    "weight": [
+      {
+        "name": "mg",
+        "toBase": 0.001,
+        "displayName": "Milligram (mg)"
+      },
+      {
+        "name": "g",
+        "toBase": 1,
+        "displayName": "Gram (g)"
+      },
+      {
+        "name": "kg",
+        "toBase": 1000,
+        "displayName": "Kilogram (kg)"
+      },
+      {
+        "name": "oz",
+        "toBase": 28.3495,
+        "displayName": "Ounce (oz)"
+      },
+      {
+        "name": "lb",
+        "toBase": 453.592,
+        "displayName": "Pound (lb)"
+      }
+    ],
+    "volume": [
+      {
+        "name": "ml",
+        "toBase": 1,
+        "displayName": "Milliliter (ml)"
+      },
+      {
+        "name": "l",
+        "toBase": 1000,
+        "displayName": "Liter (l)"
+      },
+      {
+        "name": "tsp",
+        "toBase": 5,
+        "displayName": "Teaspoon (tsp)"
+      },
+      {
+        "name": "tbsp",
+        "toBase": 15,
+        "displayName": "Tablespoon (tbsp)"
+      },
+      {
+        "name": "cup",
+        "toBase": 240,
+        "displayName": "Cup (cup)"
+      },
+      {
+        "name": "fl-oz",
+        "toBase": 29.5735,
+        "displayName": "Fluid Ounce (fl oz)"
+      }
+    ],
+    "piece": [
+      {
+        "name": "pc",
+        "toBase": 1,
+        "displayName": "Piece (pc)"
+      },
+      {
+        "name": "doz",
+        "toBase": 12,
+        "displayName": "Dozen (doz)"
+      },
+      {
+        "name": "pk",
+        "toBase": 24,
+        "displayName": "Pack (pk)"
+      }
+    ]
+  },
+  "ingredients": [
+    {
+      "id": "ing_001",
+      "name": "Chicken Keema (For Seekh)",
+      "description": "Minced chicken for seekh kebabs",
+      "categoryId": "meat",
+      "unitType": "weight",
+      "unit": "g",
+      "costPerUnit": 0.3,
+      "minStockLevel": 5000,
+      "currentStock": 7500,
+      "supplier": "Meat Supplier Inc.",
+      "supplierCode": "MS-001",
+      "barcode": "123456789012",
+      "active": true,
+      "createdAt": "2025-01-15T10:00:00+05:30",
+      "updatedAt": "2025-09-18T15:30:00+05:30",
+      "notes": "Keep refrigerated"
+    },
+    {
+      "id": "ing_002",
+      "name": "Chicken Tikka Pieces",
+      "category": "chicken",
+      "unitType": "weight",
+      "unit": "g",
+      "costPerUnit": 0.28,
+      "density": 1,
+      "active": true
+    },
+    {
+      "id": "ing_003",
+      "name": "Chicken Baccha (Drumsticks)",
+      "category": "chicken",
+      "unitType": "piece",
+      "unit": "pc",
+      "costPerUnit": 35,
+      "avgWeightPerPiece": 100,
+      "active": true
+    },
+    {
+      "id": "ing_004",
+      "name": "Chicken Wings",
+      "category": "chicken",
+      "unitType": "piece",
+      "unit": "pc",
+      "costPerUnit": 22,
+      "avgWeightPerPiece": 100,
+      "active": true
+    },
+    {
+      "id": "ing_005",
+      "name": "Chicken Tangdi",
+      "category": "chicken",
+      "unitType": "piece",
+      "unit": "pc",
+      "costPerUnit": 24,
+      "avgWeightPerPiece": 100,
+      "active": true
+    },
+    {
+      "id": "ing_006",
+      "name": "Soya Chaap Sticks",
+      "category": "sabzi",
+      "unitType": "piece",
+      "unit": "pc",
+      "costPerUnit": 18,
+      "avgWeightPerPiece": 100,
+      "active": true
+    },
+    {
+      "id": "ing_007",
+      "name": "Fresh Paneer",
+      "category": "paneer",
+      "unitType": "weight",
+      "unit": "g",
+      "costPerUnit": 0.32,
+      "density": 1,
+      "active": true
+    },
+    {
+      "id": "ing_008",
+      "name": "Maida Flour",
+      "category": "grocery",
+      "unitType": "weight",
+      "unit": "g",
+      "costPerUnit": 0.042,
+      "density": 0.85,
+      "active": true
+    },
+    {
+      "id": "ing_009",
+      "name": "Tandoori Masala Mix",
+      "category": "masala",
+      "unitType": "weight",
+      "unit": "g",
+      "costPerUnit": 0.68,
+      "density": 0.9,
+      "active": true
+    },
+    {
+      "id": "ing_010",
+      "name": "Afghani Marinade Base",
+      "category": "masala",
+      "unitType": "volume",
+      "unit": "ml",
+      "costPerUnit": 0.72,
+      "density": 1.2,
+      "active": true
+    },
+    {
+      "id": "ing_011",
+      "name": "Cooking Oil",
+      "category": "grocery",
+      "unitType": "volume",
+      "unit": "ml",
+      "costPerUnit": 0.15,
+      "density": 0.92,
+      "active": true
+    },
+    {
+      "id": "ing_012",
+      "name": "Coal (Tandoori)",
+      "category": "koyla",
+      "unitType": "weight",
+      "unit": "g",
+      "costPerUnit": 0.045,
+      "density": 1,
+      "active": true
+    }
+  ],
+  "dishes": [
+    {
+      "id": "dish_001",
+      "name": "Seekh Kebab",
+      "description": "Delicious minced chicken seekh kebabs grilled to perfection with aromatic spices",
+      "costPrice": 224.9,
+      "sellingPrice": 109,
+      "ingredients": [
+        {
+          "ingredientId": "ing_001",
+          "name": "Chicken Keema (For Seekh)",
+          "quantity": 500,
+          "unit": "g",
+          "costPerUnit": 0.3,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        },
+        {
+          "ingredientId": "ing_009",
+          "name": "Tandoori Masala Mix",
+          "quantity": 5,
+          "unit": "g",
+          "costPerUnit": 0.68,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 10,
+          "unit": "ml",
+          "costPerUnit": 0.15,
+          "ingredientUnit": "ml",
+          "unitType": "volume"
+        },
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 2,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "lastUpdated": "2025-09-19T09:53:36.832Z"
+    },
+    {
+      "id": "2",
+      "name": "Chicken Tikka",
+      "category": "chicken",
+      "description": "Tender chicken pieces marinated in yogurt and spices",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 149,
+          "pieces": 4
+        },
+        "full": {
+          "name": "FULL",
+          "price": 289,
+          "pieces": 8
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_002",
+          "name": "Chicken Tikka Pieces",
+          "quantity": 93,
+          "unit": "g",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.28
+        },
+        {
+          "ingredientId": "ing_009",
+          "name": "Tandoori Masala Mix",
+          "quantity": 5,
+          "unit": "g",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.68
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 10,
+          "unit": "ml",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "tikka",
+      "gramsPerPiece": 23.25,
+      "costPrice": 30,
+      "sellingPrice": 149,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "3",
+      "name": "Afghani Chicken Tikka",
+      "category": "chicken",
+      "description": "Creamy white chicken tikka with Afghan spices",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 169,
+          "pieces": 4
+        },
+        "full": {
+          "name": "FULL",
+          "price": 329,
+          "pieces": 8
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_002",
+          "name": "Chicken Tikka Pieces",
+          "quantity": 93,
+          "unit": "g",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.28
+        },
+        {
+          "ingredientId": "ing_010",
+          "name": "Afghani Marinade Base",
+          "quantity": 8,
+          "unit": "g",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.72
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 15,
+          "unit": "ml",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "tikka",
+      "gramsPerPiece": 23.25,
+      "costPrice": 35,
+      "sellingPrice": 169,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "4",
+      "name": "Tandoori Chicken",
+      "category": "chicken",
+      "description": "Classic tandoori chicken with traditional spices",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 169,
+          "pieces": 4
+        },
+        "full": {
+          "name": "FULL",
+          "price": 329,
+          "pieces": 8
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 500,
+          "unit": "g",
+          "unitType": "piece",
+          "ingredientUnit": "pc",
+          "costPerUnit": 35
+        },
+        {
+          "ingredientId": "ing_009",
+          "name": "Tandoori Masala Mix",
+          "quantity": 10,
+          "unit": "g",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.68
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 20,
+          "unit": "ml",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "baccha",
+      "gramsPerPiece": 125,
+      "costPrice": 140,
+      "sellingPrice": 169,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "5",
+      "name": "Afghani Chicken",
+      "category": "chicken",
+      "description": "Creamy white afghani chicken drumsticks",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 199,
+          "pieces": 4
+        },
+        "full": {
+          "name": "FULL",
+          "price": 389,
+          "pieces": 8
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 500,
+          "unit": "g",
+          "unitType": "piece",
+          "ingredientUnit": "pc",
+          "costPerUnit": 35
+        },
+        {
+          "ingredientId": "ing_010",
+          "name": "Afghani Marinade Base",
+          "quantity": 15,
+          "unit": "g",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.72
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 25,
+          "unit": "ml",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "baccha",
+      "gramsPerPiece": 125,
+      "costPrice": 150,
+      "sellingPrice": 199,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "6",
+      "name": "Chicken Wings",
+      "category": "chicken",
+      "description": "Spicy grilled chicken wings",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 129,
+          "pieces": 8
+        },
+        "full": {
+          "name": "FULL",
+          "price": 249,
+          "pieces": 16
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_004",
+          "name": "Chicken Wings",
+          "quantity": 500,
+          "unit": "g",
+          "unitType": "piece",
+          "ingredientUnit": "pc",
+          "costPerUnit": 22
+        },
+        {
+          "ingredientId": "ing_009",
+          "name": "Tandoori Masala Mix",
+          "quantity": 8,
+          "unit": "g",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.68
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 15,
+          "unit": "ml",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "wings",
+      "gramsPerPiece": 62.5,
+      "costPrice": 120,
+      "sellingPrice": 129,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "7",
+      "name": "Chicken Tangdi",
+      "category": "chicken",
+      "description": "Grilled chicken drumsticks with tandoori spices",
+      "portions": {
+        "full": {
+          "name": "Full",
+          "price": 250,
+          "cost": 120,
+          "serves": 2,
+          "isDefault": true
+        },
+        "half": {
+          "name": "Half",
+          "price": 140,
+          "cost": 70,
+          "serves": 1,
+          "isDefault": false
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_005",
+          "name": "Chicken Tangdi",
+          "quantity": 200,
+          "unit": "g",
+          "unitType": "piece",
+          "ingredientUnit": "pc",
+          "costPerUnit": 24
+        },
+        {
+          "ingredientId": "ing_009",
+          "name": "Tandoori Masala Mix",
+          "quantity": 5,
+          "unit": "g",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.68
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 10,
+          "unit": "ml",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "tangdi",
+      "gramsPerPiece": 100,
+      "costPrice": 55,
+      "sellingPrice": 99,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "8",
+      "name": "Afghani Tangdi",
+      "category": "chicken",
+      "description": "Creamy afghani style chicken drumsticks",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 119,
+          "pieces": 2
+        },
+        "full": {
+          "name": "FULL",
+          "price": 229,
+          "pieces": 4
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_005",
+          "name": "Chicken Tangdi",
+          "quantity": 200,
+          "unit": "g",
+          "unitType": "piece",
+          "ingredientUnit": "pc",
+          "costPerUnit": 24
+        },
+        {
+          "ingredientId": "ing_010",
+          "name": "Afghani Marinade Base",
+          "quantity": 10,
+          "unit": "g",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.72
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 12,
+          "unit": "ml",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "tangdi",
+      "gramsPerPiece": 100,
+      "costPrice": 60,
+      "sellingPrice": 119,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "9",
+      "name": "Masala Chaap",
+      "category": "vegetarian",
+      "description": "Spicy soya chaap with masala marinade",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 69,
+          "pieces": 3
+        },
+        "full": {
+          "name": "FULL",
+          "price": 129,
+          "pieces": 6
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_006",
+          "name": "Soya Chaap Sticks",
+          "quantity": 187.5,
+          "unit": "g",
+          "unitType": "piece",
+          "ingredientUnit": "pc",
+          "costPerUnit": 18
+        },
+        {
+          "ingredientId": "ing_009",
+          "name": "Tandoori Masala Mix",
+          "quantity": 5,
+          "unit": "g",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.68
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 8,
+          "unit": "ml",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "chaap",
+      "gramsPerPiece": 62.5,
+      "costPrice": 38,
+      "sellingPrice": 69,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "10",
+      "name": "Malai Chaap",
+      "category": "vegetarian",
+      "description": "Creamy malai chaap with mild spices",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 79,
+          "pieces": 3
+        },
+        "full": {
+          "name": "FULL",
+          "price": 149,
+          "pieces": 6
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_006",
+          "name": "Soya Chaap Sticks",
+          "quantity": 0.1875,
+          "unit": "kg",
+          "unitType": "piece",
+          "ingredientUnit": "pc",
+          "costPerUnit": 18
+        },
+        {
+          "ingredientId": "ing_010",
+          "name": "Afghani Marinade Base",
+          "quantity": 0.005,
+          "unit": "kg",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.72
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 0.01,
+          "unit": "l",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "chaap",
+      "gramsPerPiece": 62.5,
+      "costPrice": 40,
+      "sellingPrice": 79,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "11",
+      "name": "Afghani Chaap",
+      "category": "vegetarian",
+      "description": "White creamy afghani style chaap",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 89,
+          "pieces": 3
+        },
+        "full": {
+          "name": "FULL",
+          "price": 169,
+          "pieces": 6
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_006",
+          "name": "Soya Chaap Sticks",
+          "quantity": 0.1875,
+          "unit": "kg",
+          "unitType": "piece",
+          "ingredientUnit": "pc",
+          "costPerUnit": 18
+        },
+        {
+          "ingredientId": "ing_010",
+          "name": "Afghani Marinade Base",
+          "quantity": 0.008,
+          "unit": "kg",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.72
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 0.012,
+          "unit": "l",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "chaap",
+      "gramsPerPiece": 62.5,
+      "costPrice": 45,
+      "sellingPrice": 89,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "12",
+      "name": "Paneer Tikka",
+      "category": "vegetarian",
+      "description": "Cottage cheese cubes grilled with spices",
+      "portions": {
+        "half": {
+          "name": "HALF",
+          "price": 79,
+          "pieces": 4
+        },
+        "full": {
+          "name": "FULL",
+          "price": 149,
+          "pieces": 8
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_007",
+          "name": "Fresh Paneer",
+          "quantity": 0.125,
+          "unit": "kg",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.32
+        },
+        {
+          "ingredientId": "ing_009",
+          "name": "Tandoori Masala Mix",
+          "quantity": 0.005,
+          "unit": "kg",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.68
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 0.01,
+          "unit": "l",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        }
+      ],
+      "rawMaterial": "paneer",
+      "gramsPerPiece": 31.25,
+      "costPrice": 45,
+      "sellingPrice": 79,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": "13",
+      "name": "Rumali Roti",
+      "category": "breads",
+      "description": "Thin soft bread perfect for wrapping",
+      "portions": {
+        "piece": {
+          "name": "PER PIECE",
+          "price": 10,
+          "pieces": 1
+        }
+      },
+      "ingredients": [
+        {
+          "ingredientId": "ing_008",
+          "name": "Maida Flour",
+          "quantity": 0.05,
+          "unit": "kg",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.042
+        },
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 0.002,
+          "unit": "l",
+          "unitType": "volume",
+          "ingredientUnit": "ml",
+          "costPerUnit": 0.15
+        },
+        {
+          "ingredientId": "ing_012",
+          "name": "Coal (Tandoori)",
+          "quantity": 0.01,
+          "unit": "kg",
+          "unitType": "weight",
+          "ingredientUnit": "g",
+          "costPerUnit": 0.045
+        }
+      ],
+      "rawMaterial": "other",
+      "gramsPerPiece": 0,
+      "costPrice": 3.5,
+      "sellingPrice": 10,
+      "active": true,
+      "createdAt": "2024-01-15T10:00:00Z"
+    }
+  ],
+  "inventory": []
+}

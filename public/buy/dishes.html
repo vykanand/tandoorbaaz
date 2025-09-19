@@ -1,652 +1,1889 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
+    <title>TandoorBaaz - Dish Management</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dishes Management - TandoorBaaz</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <style>
         :root {
             --primary-color: #0d6efd;
             --success-color: #198754;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
-            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
         }
-        
+
         body {
-            background-color: var(--light-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            overflow-x: hidden;
         }
-        
+
+        .container-fluid {
+            padding: 0.125rem;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
         .card {
             border: none;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 0.125rem;
+            flex-shrink: 0;
         }
-        
+
         .card-header {
-            background-color: white;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #6610f2 100%);
+            color: white;
+            border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+            border: none;
+            padding: 0.5rem;
+        }
+
+        .header-card {
+            flex-shrink: 0;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Enhanced Tabs Styling */
+        .header-card #menuTabs.nav-tabs {
+            --tb-tab-active-bg: #ffffff;
+            --tb-tab-active-color: #0d6efd;
+            --tb-tab-inactive-color: #0b5ed7; /* brand blue for visibility */
+            --tb-tab-border: rgba(13, 110, 253, 0.25);
+            border-bottom: none;
+            gap: 0.5rem;
+        }
+        .header-card #menuTabs .nav-link {
+            color: var(--tb-tab-inactive-color);
+            background: rgba(13, 110, 253, 0.06);
+            border: 1px solid var(--tb-tab-border);
+            border-radius: 999px;
             font-weight: 600;
+            transition: all 0.2s ease;
         }
-        
-        .dish-card {
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
+        .header-card #menuTabs .nav-link:hover {
+            color: #0d6efd;
+            background: rgba(13, 110, 253, 0.08);
+            border-color: rgba(13, 110, 253, 0.2);
         }
-        
-        .dish-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        .header-card #menuTabs .nav-link:focus-visible {
+            outline: 2px solid #0d6efd;
+            outline-offset: 2px;
         }
-        
-        .profit-positive {
-            color: var(--success-color);
+        .header-card #menuTabs .nav-link.active {
+            color: var(--tb-tab-active-color);
+            background: var(--tb-tab-active-bg);
+            border-color: var(--tb-tab-active-bg);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+            position: relative;
         }
-        
-        .profit-negative {
-            color: var(--danger-color);
+        .header-card #menuTabs .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            right: 10%;
+            bottom: -6px;
+            height: 4px;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #0d6efd, #6610f2);
         }
-        
+        .header-card #menuTabs .nav-link i { color: inherit; }
+
+        .dishes-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ingredients-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dishes-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .dish-item {
+            background: white;
+            border: none;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 0.75rem;
+            padding: 1rem;
+            transition: all 0.2s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .dish-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .dish-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .dish-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .dish-status {
+            margin-left: 0.5rem;
+        }
+
+        .dish-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        .dish-category {
+            background: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: capitalize;
+        }
+
+        .dish-pricing {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .price-label {
+            font-size: 0.75rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price-value {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .cost-price {
+            color: #dc3545;
+        }
+
+        .selling-price {
+            color: #198754;
+        }
+
+        .profit-margin {
+            color: #0d6efd;
+        }
+
+        .dish-ingredients {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-bottom: 0.75rem;
+        }
+
         .ingredient-tag {
-            display: inline-block;
-            background-color: #e9ecef;
-            border-radius: 15px;
-            padding: 2px 10px;
-            margin: 2px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            color: #495057;
+        }
+
+        .dish-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .pagination-container {
+            flex-shrink: 0;
+            padding: 0.5rem;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            background: white;
+        }
+
+        .ingredients-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+            display: block; /* container will hold a vendor grid */
+        }
+
+        /* Responsive vendor grid to utilize full width */
+        .vendor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 0.75rem;
+            align-items: start;
+        }
+
+        .ingredient-item {
+            background: white;
+            border: none;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 0.5rem;
+            padding: 0.75rem;
+            transition: all 0.2s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .ingredient-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .ingredient-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #333;
+            margin: 0;
+        }
+
+        /* Vendor Header (Ingredients grouping) */
+        .vendor-header {
+            background: rgba(13, 110, 253, 0.06);
+            border: 1px solid rgba(13, 110, 253, 0.15);
+            border-radius: 8px;
+            padding: 0.35rem 0.5rem;
+        }
+
+        .vendor-group {
+            background: #ffffff;
+            border: 1px solid #e7eaf0;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            padding: 0.5rem;
+        }
+
+        .vendor-items {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .ingredient-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+
+        .ingredient-pricing {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .price-info {
+            text-align: left;
+        }
+
+        .ingredient-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .cost-info {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .profit-margin-badge {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
             font-size: 0.8rem;
         }
-        
-        .status-badge {
-            padding: 0.35em 0.65em;
-            font-size: 0.75em;
-            border-radius: 0.25rem;
+
+        .table-responsive {
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 0.5rem;
+            }
+
+            .header-card {
+                padding: 0.75rem !important;
+            }
+
+            .dish-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dish-status {
+                margin-left: 0;
+                margin-top: 0.25rem;
+            }
+
+            .dish-pricing {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .dish-actions {
+                justify-content: stretch;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .table {
+                min-width: 600px;
+            }
+
+            .ingredients-list {
+                grid-template-columns: 1fr;
+            }
+
+            .ingredient-pricing {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .ingredient-actions {
+                align-self: flex-end;
+            }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .selected-ingredient {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .selected-ingredient .btn {
+            padding: 0.25rem 0.5rem;
         }
     </style>
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                <i class="bi bi-shop me-2"></i>TandoorBaaz
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="orders.html">Orders</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="ingredients.html">Ingredients</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="dishes.html">Dishes</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <div class="container-fluid">
+        <!-- Compact Header with All Controls in Single Line -->
+        <div class="card header-card p-2">
+            <div class="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+                <!-- Title -->
+                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                    <h5 class="mb-0"><i class="bi bi-shop"></i> Menu</h5>
+                </div>
 
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-egg-fried me-2"></i>Dishes Management</h2>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDishModal">
-                <i class="bi bi-plus-lg me-1"></i> Add Dish
-            </button>
-        </div>
+                <!-- Filters -->
+                <div class="flex-shrink-0"><!-- Filters removed --></div>
 
-        <div class="row mb-4">
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h3 class="mb-0" id="totalDishes">0</h3>
-                        <p class="text-muted mb-0">Total Dishes</p>
+                <!-- Search -->
+                <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 250px;">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchInput" class="form-control" placeholder="Search...">
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h3 class="mb-0" id="avgCost">₹0.00</h3>
-                        <p class="text-muted mb-0">Avg. Cost Price</p>
-                    </div>
+
+                <!-- Actions -->
+                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                    <button id="resetBtn" class="btn btn-outline-light btn-sm" title="Reset Filters">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                    <button id="exportBtn" class="btn btn-outline-light btn-sm" title="Export Data">
+                        <i class="bi bi-download"></i>
+                    </button>
+                    <button id="addNewItemBtn" class="btn btn-light btn-sm" title="Add New Item">
+                        <i class="bi bi-plus"></i>
+                    </button>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <h3 class="mb-0" id="avgProfit">0%</h3>
-                        <p class="text-muted mb-0">Avg. Profit Margin</p>
-                    </div>
+
+                <!-- Tabs -->
+                <div class="nav nav-tabs border-0 flex-shrink-0" id="menuTabs" role="tablist">
+                    <button class="nav-link active px-3" id="dishes-tab" data-bs-toggle="tab"
+                        data-bs-target="#dishes-section" type="button" role="tab">
+                        <i class="bi bi-egg-fried"></i> Dishes
+                    </button>
+                    <button class="nav-link px-3" id="ingredients-tab" data-bs-toggle="tab"
+                        data-bs-target="#ingredients-section" type="button" role="tab">
+                        <i class="bi bi-basket"></i> Ingredients
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>Dishes List</span>
-                <div class="input-group" style="max-width: 300px;">
-                    <span class="input-group-text"><i class="bi bi-search"></i></span>
-                    <input type="text" id="searchDishInput" class="form-control" placeholder="Search dishes...">
+        <!-- Tab Content -->
+        <div class="tab-content flex-grow-1 d-flex flex-column">
+            <!-- Dishes Tab Pane -->
+            <div class="tab-pane fade show active" id="dishes-section" role="tabpanel" aria-labelledby="dishes-tab">
+                <div class="card menu-container flex-grow-1 d-flex flex-column">
+                    <div class="menu-list flex-grow-1" id="menuListContainer">
+                        <!-- Dishes will be populated here -->
+                    </div>
+                </div>
+                <div class="pagination-container">
+                    <nav aria-label="Menu Pagination">
+                        <ul class="pagination pagination-sm justify-content-center" id="menuPagination">
+                            <!-- Pagination buttons will be generated here -->
+                        </ul>
+                    </nav>
                 </div>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Dish Name</th>
-                                <th>Category</th>
-                                <th>Ingredients</th>
-                                <th>Cost Price</th>
-                                <th>Selling Price</th>
-                                <th>Profit</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dishesTable">
-                            <!-- Dishes will be loaded here -->
-                        </tbody>
-                    </table>
+            
+            <!-- Ingredients Tab Pane -->
+            <div class="tab-pane fade" id="ingredients-section" role="tabpanel" aria-labelledby="ingredients-tab">
+                <div class="card menu-container flex-grow-1 d-flex flex-column">
+                    <div class="menu-list flex-grow-1" id="ingredientsListContainer">
+                        <!-- Ingredients will be populated here -->
+                    </div>
+                </div>
+                <div class="pagination-container">
+                    <nav aria-label="Ingredients Pagination">
+                        <ul class="pagination pagination-sm justify-content-center" id="ingredientsPagination">
+                            <!-- Pagination buttons will be generated here -->
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <!-- Add/Edit Dish Modal -->
-    <div class="modal fade" id="dishModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+    <div class="modal fade" id="dishModal" tabindex="-1" aria-labelledby="dishModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="dishModalTitle">Add New Dish</h5>
+                    <h5 class="modal-title" id="dishModalLabel">Add New Dish</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form id="dishForm">
-                    <input type="hidden" id="dishId">
-                    <div class="modal-body">
+                <div class="modal-body">
+                    <form id="dishForm">
+                        <input type="hidden" id="dishId" value="">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="dishName" class="form-label">Dish Name</label>
-                                <input type="text" class="form-control" id="dishName" required>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dishName" class="form-label">Dish Name *</label>
+                                    <input type="text" class="form-control" id="dishName" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <!-- Category removed -->
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="dishDescription" class="form-label">Description</label>
+                                    <textarea class="form-control" id="dishDescription" rows="3"></textarea>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label for="dishCostPrice" class="form-label">Cost Price *</label>
+                                            <input type="number" class="form-control" id="dishCostPrice" step="0.01" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="mb-3">
+                                            <label for="dishSellingPrice" class="form-label">Selling Price *</label>
+                                            <input type="number" class="form-control" id="dishSellingPrice" step="0.01" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <!-- Active flag removed -->
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="dishCategory" class="form-label">Category</label>
-                                <select class="form-select" id="dishCategory" required>
-                                    <option value="">Select Category</option>
-                                    <option value="starters">Starters</option>
-                                    <option value="main-course">Main Course</option>
-                                    <option value="breads">Breads</option>
-                                    <option value="rice">Rice & Biryani</option>
-                                    <option value="desserts">Desserts</option>
-                                    <option value="beverages">Beverages</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Ingredients</label>
-                            <div id="ingredientsContainer">
-                                <!-- Ingredient rows will be added here -->
-                            </div>
-                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="addIngredientBtn">
-                                <i class="bi bi-plus-lg me-1"></i> Add Ingredient
-                            </button>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="costPrice" class="form-label">Cost Price (₹)</label>
-                                <input type="number" class="form-control" id="costPrice" min="0" step="0.01" readonly>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="sellingPrice" class="form-label">Selling Price (₹)</label>
-                                <input type="number" class="form-control" id="sellingPrice" min="0" step="0.01" required>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="profitMargin" class="form-label">Profit Margin</label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="profitMargin" min="0" max="1000" step="0.1" value="30" required>
-                                    <span class="input-group-text">%</span>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Add Ingredient</label>
+                                    <div class="input-group mb-2">
+                                        <select class="form-select" id="ingredientSelect">
+                                            <option value="">Select Ingredient</option>
+                                        </select>
+                                        <input type="number" class="form-control" id="ingredientQuantity" placeholder="Qty" step="0.01" min="0.01">
+                                        <select class="form-select" id="dishIngredientUnit" style="max-width: 140px;">
+                                            <option value="">Select unit</option>
+                                        </select>
+                                        <button id="addIngredientBtn" class="btn btn-primary" type="button">
+                                            <i class="bi bi-plus"></i> Add
+                                        </button>
+                                    </div>
+                                    <div id="selectedIngredients" class="mt-2">
+                                        <!-- Selected ingredients will be added here -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="mb-3">
-                            <label for="dishDescription" class="form-label">Description (Optional)</label>
-                            <textarea class="form-control" id="dishDescription" rows="2"></textarea>
-                        </div>
-                        
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="dishActive" checked>
-                            <label class="form-check-label" for="dishActive">Active (Available for Ordering)</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Dish</button>
-                    </div>
-                </form>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button id="saveDishBtn" type="button" class="btn btn-primary">Save Dish</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Add/Edit Ingredient Modal -->
+    <div class="modal fade" id="ingredientModal" tabindex="-1" aria-labelledby="ingredientModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ingredientModalLabel">Add New Ingredient</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="ingredientForm">
+                        <input type="hidden" id="ingredientId" value="">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ingredientName" class="form-label">Ingredient Name *</label>
+                                    <input type="text" class="form-control" id="ingredientName" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <!-- Category removed -->
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="ingredientUnitType" class="form-label">Unit Type</label>
+                                    <select class="form-select" id="ingredientUnitType" required>
+                                        <option value="">Select unit type</option>
+                                        <option value="weight">Weight (g, kg, oz, lb)</option>
+                                        <option value="volume">Volume (ml, l, tsp, tbsp, cup)</option>
+                                        <option value="piece">Piece (pc, doz, pk)</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="ingredientUnit" class="form-label">Unit</label>
+                                    <select class="form-select" id="ingredientUnit" required>
+                                        <option value="">Select unit type first</option>
+                                    </select>
+                                </div>
+                                <div id="densityContainer" class="mb-3" style="display: none;">
+                                    <label for="ingredientDensity" class="form-label">Density (g/ml)</label>
+                                    <input type="number" step="0.01" min="0.1" class="form-control" id="ingredientDensity" value="1">
+                                    <div class="form-text">Weight in grams per milliliter of volume</div>
+                                </div>
+                                <div id="pieceWeightContainer" class="mb-3" style="display: none;">
+                                    <label for="ingredientPieceWeight" class="form-label">Average Weight per Piece (g)</label>
+                                    <input type="number" step="0.1" min="0.1" class="form-control" id="ingredientPieceWeight">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="ingredientCostPerUnit" class="form-label">Cost per Unit *</label>
+                                    <input type="number" class="form-control" id="ingredientCostPerUnit" step="0.01" required>
+                                </div>
+                                <div class="mb-3 form-check">
+                                    <!-- Active flag removed -->
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success">Save Ingredient</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Sample data - in a real app, this would come from a database
-        let dishes = JSON.parse(localStorage.getItem('dishes')) || [];
-        let ingredients = [];
+        // Configuration
+        const CONFIG = {
+            UNITS: {
+                weight: [
+                    { name: 'mg', toBase: 0.001, displayName: 'Milligram (mg)' },
+                    { name: 'g', toBase: 1, displayName: 'Gram (g)' },
+                    { name: 'kg', toBase: 1000, displayName: 'Kilogram (kg)' },
+                    { name: 'oz', toBase: 28.35, displayName: 'Ounce (oz)' },
+                    { name: 'lb', toBase: 453.592, displayName: 'Pound (lb)' },
+                ],
+                volume: [
+                    { name: 'ml', toBase: 1, displayName: 'Milliliter (ml)' },
+                    { name: 'l', toBase: 1000, displayName: 'Liter (l)' },
+                    { name: 'tsp', toBase: 5, displayName: 'Teaspoon (tsp)' },
+                    { name: 'tbsp', toBase: 15, displayName: 'Tablespoon (tbsp)' },
+                    { name: 'fl-oz', toBase: 29.574, displayName: 'Fluid Ounce (fl oz)' },
+                    { name: 'cup', toBase: 240, displayName: 'Cup (cup)' },
+                    { name: 'pt', toBase: 473.176, displayName: 'Pint (pt)' },
+                    { name: 'qt', toBase: 946.353, displayName: 'Quart (qt)' },
+                    { name: 'gal', toBase: 3785.41, displayName: 'Gallon (gal)' },
+                ],
+                piece: [
+                    { name: 'pc', toBase: 1, displayName: 'Piece (pc)' },
+                    { name: 'doz', toBase: 12, displayName: 'Dozen (doz)' },
+                    { name: 'pk', toBase: 24, displayName: 'Pack (pk)' }
+                ]
+            },
+            CATEGORIES: [
+                { id: 'starters', name: 'Starters', description: 'Appetizers and small dishes' },
+                { id: 'main-course', name: 'Main Course', description: 'Main dishes' },
+                { id: 'breads', name: 'Breads', description: 'Various types of breads' },
+                { id: 'rice', name: 'Rice Dishes', description: 'Biryani and other rice preparations' },
+                { id: 'desserts', name: 'Desserts', description: 'Sweet dishes' },
+                { id: 'beverages', name: 'Beverages', description: 'Drinks and beverages' },
+                { id: 'combos', name: 'Combos', description: 'Meal combos' }
+            ],
+            INGREDIENT_CATEGORIES: [
+                { id: 'vegetables', name: 'Vegetables', description: 'Fresh vegetables' },
+                { id: 'meat', name: 'Meat', description: 'Chicken, mutton, and other meats' },
+                { id: 'dairy', name: 'Dairy', description: 'Milk, cheese, and other dairy products' },
+                { id: 'spices', name: 'Spices', description: 'Herbs and spices' },
+                { id: 'grains', name: 'Grains', description: 'Rice, wheat, and other grains' },
+                { id: 'oils', name: 'Oils & Fats', description: 'Cooking oils and fats' },
+                { id: 'others', name: 'Others', description: 'Miscellaneous ingredients' },
+            ],
+            SETTINGS: {
+                version: '1.0.0',
+                currency: 'INR',
+                defaultProfitMargin: 100,
+                defaultPortions: {
+                    full: { name: 'Full', multiplier: 1 },
+                    half: { name: 'Half', multiplier: 0.5 },
+                    mini: { name: 'Mini', multiplier: 0.3 }
+                },
+                pagination: {
+                    dishes: { itemsPerPage: 12 },
+                    ingredients: { itemsPerPage: 30 }
+                }
+            }
+        };
+
+        // Application State
+        let menuData = {
+            ...CONFIG.SETTINGS,
+            lastUpdated: new Date().toISOString(),
+            categories: [...CONFIG.CATEGORIES],
+            ingredientCategories: [...CONFIG.INGREDIENT_CATEGORIES],
+            units: { ...CONFIG.UNITS },
+            ingredients: [],
+            dishes: [],
+            inventory: []
+        };
+
+        let currentTab = 'dishes';
+        let editingDishId = null;
+        let editingIngredientId = null;
+        let selectedIngredients = [];
+        let filteredDishes = [];
+        let filteredIngredients = [];
         
-        // DOM Elements
-        const dishesTable = document.getElementById('dishesTable');
-        const searchDishInput = document.getElementById('searchDishInput');
-        const dishForm = document.getElementById('dishForm');
-        const ingredientsContainer = document.getElementById('ingredientsContainer');
-        const addIngredientBtn = document.getElementById('addIngredientBtn');
-        const costPriceInput = document.getElementById('costPrice');
-        const sellingPriceInput = document.getElementById('sellingPrice');
-        const profitMarginInput = document.getElementById('profitMargin');
-        const dishModal = new bootstrap.Modal(document.getElementById('dishModal'));
-        
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', () => {
-            // In a real app, we would fetch ingredients from the server
-            ingredients = JSON.parse(localStorage.getItem('ingredients')) || [];
-            
-            renderDishes();
-            updateStats();
-            setupEventListeners();
+        // Pagination state
+        const pagination = {
+            dishes: {
+                currentPage: 1,
+                itemsPerPage: 10,
+                totalItems: 0,
+                totalPages: function() {
+                    return Math.ceil(this.totalItems / this.itemsPerPage);
+                }
+            },
+            ingredients: {
+                currentPage: 1,
+                itemsPerPage: 10,
+                totalItems: 0,
+                totalPages: function() {
+                    return Math.ceil(this.totalItems / this.itemsPerPage);
+                }
+            }
+        };
+
+        // Initialize the application when the DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
         });
-        
+
+        // Initialize the application
+        async function init() {
+            console.debug('[Menu] init: starting');
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Load data
+            await loadData();
+            
+            // Initialize UI post data load
+            updateCategoryFilter();
+            populateIngredientSelect();
+            console.debug('[Menu] init: finished');
+        }
+
+        // Set up event listeners
         function setupEventListeners() {
-            // Search functionality
-            searchDishInput.addEventListener('input', (e) => {
-                const searchTerm = e.target.value.toLowerCase();
-                renderDishes(searchTerm);
+            // Tab switching
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(event) {
+                    const targetId = event.target.getAttribute('data-bs-target');
+                    if (targetId === '#dishes-section') {
+                        currentTab = 'dishes';
+                        renderDishes();
+                        renderPagination();
+                    } else if (targetId === '#ingredients-section') {
+                        currentTab = 'ingredients';
+                        renderIngredients();
+                        renderIngredientsPagination();
+                    }
+                    updateCategoryFilter();
+                });
             });
+
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
             
-            // Dish form submission
-            dishForm.addEventListener('submit', handleDishSubmit);
+            // Filters removed
             
-            // Add ingredient button
-            addIngredientBtn.addEventListener('click', addIngredientRow);
+            // Reset filters button
+            document.getElementById('resetBtn').addEventListener('click', resetFilters);
             
-            // Price calculation
-            sellingPriceInput.addEventListener('input', calculateProfitMargin);
-            profitMarginInput.addEventListener('input', calculateSellingPrice);
+            // Export data button
+            document.getElementById('exportBtn').addEventListener('click', downloadMenuData);
             
-            // Initialize the "Add Dish" button
-            document.querySelector('[data-bs-target="#dishModal"]').addEventListener('click', () => {
-                document.getElementById('dishModalTitle').textContent = 'Add New Dish';
-                document.getElementById('dishForm').reset();
-                document.getElementById('dishId').value = '';
-                ingredientsContainer.innerHTML = '';
-                addIngredientRow(); // Add one empty ingredient row by default
-                calculateCostPrice();
-            });
-        }
-        
-        // Render dishes table
-        function renderDishes(searchTerm = '') {
-            let filteredDishes = [...dishes];
+            // Add dish button
+            document.getElementById('addNewItemBtn').addEventListener('click', openDishModal);
             
-            if (searchTerm) {
-                filteredDishes = dishes.filter(dish => 
-                    dish.name.toLowerCase().includes(searchTerm) ||
-                    (dish.category && dish.category.toLowerCase().includes(searchTerm))
-                );
+            // Add ingredient button in dish modal
+            document.getElementById('addIngredientBtn').addEventListener('click', addIngredientToDish);
+            
+            // Populate unit options when ingredient is selected in dish modal
+            const ingredientSelectEl = document.getElementById('ingredientSelect');
+            if (ingredientSelectEl) {
+                ingredientSelectEl.addEventListener('change', updateDishIngredientUnitOptions);
             }
             
-            dishesTable.innerHTML = '';
+            // Save dish button
+            document.getElementById('saveDishBtn').addEventListener('click', saveDish);
             
-            if (filteredDishes.length === 0) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="8" class="text-center py-4 text-muted">
-                        No dishes found. Click "Add Dish" to create a new one.
-                    </td>
-                `;
-                dishesTable.appendChild(row);
-                return;
-            }
+            // Save ingredient button
+            document.querySelector('#ingredientModal .btn-success').addEventListener('click', saveIngredient);
             
-            filteredDishes.forEach(dish => {
-                const costPrice = parseFloat(dish.costPrice) || 0;
-                const sellingPrice = parseFloat(dish.sellingPrice) || 0;
-                const profit = sellingPrice - costPrice;
-                const profitMargin = costPrice > 0 ? (profit / costPrice) * 100 : 0;
-                
-                // Get ingredient names for display
-                const ingredientNames = dish.ingredients?.map(ing => {
-                    const ingredient = ingredients.find(i => i.id === ing.ingredientId);
-                    return ingredient ? `${ing.quantity} ${ing.unit} ${ingredient.name}` : '';
-                }).filter(Boolean);
-                
-                const row = document.createElement('tr');
-                row.className = 'align-middle';
-                row.innerHTML = `
-                    <td>${dish.name}</td>
-                    <td>${formatCategory(dish.category)}</td>
-                    <td>
-                        <div class="d-flex flex-wrap" style="max-width: 250px;">
-                            ${ingredientNames.slice(0, 3).map(name => 
-                                `<span class="ingredient-tag" title="${name}">${name.split(' ')[0]}...</span>`
-                            ).join('')}
-                            ${ingredientNames.length > 3 ? 
-                                `<span class="ingredient-tag">+${ingredientNames.length - 3} more</span>` : ''}
-                        </div>
-                    </td>
-                    <td>₹${costPrice.toFixed(2)}</td>
-                    <td>₹${sellingPrice.toFixed(2)}</td>
-                    <td class="${profit >= 0 ? 'profit-positive' : 'profit-negative'}">
-                        ${profit >= 0 ? '+' : ''}₹${Math.abs(profit).toFixed(2)} (${profitMargin.toFixed(1)}%)
-                    </td>
-                    <td>
-                        <span class="badge ${dish.active ? 'bg-success' : 'bg-secondary'} status-badge">
-                            ${dish.active ? 'Active' : 'Inactive'}
-                        </span>
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="editDish('${dish.id}')">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-outline-danger" onclick="deleteDish('${dish.id}')">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                
-                dishesTable.appendChild(row);
+            // Unit type change
+            document.getElementById('ingredientUnitType').addEventListener('change', function() {
+                updateUnitSelectForType(this.value);
+                toggleIngredientFields(this.value);
             });
         }
-        
-        // Add a new ingredient row to the form
-        function addIngredientRow(ingredientData = {}) {
-            const row = document.createElement('div');
-            row.className = 'row g-2 mb-2 ingredient-row';
-            row.innerHTML = `
-                <div class="col-md-5">
-                    <select class="form-select ingredient-select" required>
-                        <option value="">Select Ingredient</option>
-                        ${ingredients.map(ing => 
-                            `<option value="${ing.id}" 
-                                    data-unit="${ing.unit || 'g'}"
-                                    data-price="${ing.unitPrice || 0}"
-                                    ${ingredientData.ingredientId === ing.id ? 'selected' : ''}>
-                                ${ing.name} (${ing.unit || 'g'})
-                            </option>`
-                        ).join('')}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <input type="number" class="form-control quantity" 
-                           min="0.001" step="0.001" 
-                           value="${ingredientData.quantity || ''}" required>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select unit" ${ingredientData.ingredientId ? 'disabled' : ''}>
-                        <option value="g">g</option>
-                        <option value="kg">kg</option>
-                        <option value="ml">ml</option>
-                        <option value="l">L</option>
-                        <option value="pcs">pcs</option>
-                    </select>
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-ingredient">
-                        <i class="bi bi-x"></i>
-                    </button>
+
+        // Load data from API (single source of truth: /api/menu)
+        async function loadData() {
+            console.debug('[Menu] loadData: starting fetch of /api/menu');
+            try {
+                const res = await fetch('/api/menu', { cache: 'no-store' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const json = await res.json();
+                menuData = normalizeMenuData(json);
+                console.debug('[Menu] loadData: loaded from /api/menu');
+            } catch (err) {
+                console.error('[Menu] loadData: failed to load from /api/menu', err);
+                showToast('Error', 'Failed to load menu. Please ensure server API is running.', 'danger');
+                // Keep defaults in menuData
+            }
+            
+            // Initialize filtered arrays
+            filteredDishes = Array.isArray(menuData.dishes) ? [...menuData.dishes] : [];
+            filteredIngredients = Array.isArray(menuData.ingredients) ? [...menuData.ingredients] : [];
+            
+            // Update pagination
+            pagination.dishes.totalItems = filteredDishes.length;
+            pagination.ingredients.totalItems = filteredIngredients.length;
+            
+            // Render UI
+            renderDishes();
+            renderPagination();
+            renderIngredients();
+            renderIngredientsPagination();
+            
+            showToast('Success', 'Menu data loaded successfully', 'success');
+        }
+
+        // Normalize incoming menu data for compatibility and safety
+        function normalizeMenuData(data) {
+            const safe = data || {};
+            const units = safe.units || CONFIG.UNITS;
+            const cats = safe.categories || CONFIG.CATEGORIES;
+            const ingCats = safe.ingredientCategories || CONFIG.INGREDIENT_CATEGORIES;
+            const dishes = Array.isArray(safe.dishes) ? safe.dishes : [];
+            const ingredients = Array.isArray(safe.ingredients) ? safe.ingredients : [];
+
+            // Coerce IDs to strings and ensure required fields exist
+            const normIngredients = ingredients.map(i => ({
+                ...i,
+                id: String(i.id),
+                unitType: i.unitType || 'weight',
+                unit: i.unit || (CONFIG.UNITS[(i.unitType || 'weight')]?.[0]?.name || 'g'),
+                costPerUnit: Number(i.costPerUnit || 0),
+                minStockLevel: i.minStockLevel != null ? Number(i.minStockLevel) : undefined,
+                currentStock: i.currentStock != null ? Number(i.currentStock) : undefined,
+            }));
+
+            // Build a fast lookup for base ingredient attributes
+            const ingById = new Map(normIngredients.map(i => [String(i.id), i]));
+
+            const normDishes = dishes.map(d => ({
+                ...d,
+                id: String(d.id ?? d.id),
+                costPrice: Number.isFinite(Number(d.costPrice)) ? Number(d.costPrice) : 0,
+                sellingPrice: Number.isFinite(Number(d.sellingPrice)) ? Number(d.sellingPrice) : 0,
+                ingredients: Array.isArray(d.ingredients) ? d.ingredients.map(ing => {
+                    const src = ing || {};
+                    const base = ingById.get(String(src.ingredientId)) || {};
+                    const quantity = Number(src.quantity);
+                    const qty = Number.isFinite(quantity) && quantity > 0 ? quantity : 0;
+                    const unit = src.unit || base.unit || '';
+                    const name = src.name || base.name || '';
+                    const unitType = src.unitType || base.unitType || 'weight';
+                    const ingredientUnit = src.ingredientUnit || base.unit || unit;
+                    const cpuNum = Number(src.costPerUnit != null ? src.costPerUnit : base.costPerUnit);
+                    const costPerUnit = Number.isFinite(cpuNum) ? cpuNum : 0;
+                    return {
+                        ...src,
+                        ingredientId: String(src.ingredientId),
+                        name,
+                        quantity: qty,
+                        unit,
+                        unitType,
+                        ingredientUnit,
+                        costPerUnit,
+                    };
+                }) : []
+            }));
+
+            return {
+                ...menuData, // retain defaults/settings
+                ...safe,
+                units,
+                categories: cats,
+                ingredientCategories: ingCats,
+                ingredients: normIngredients,
+                dishes: normDishes,
+            };
+        }
+
+        // Save data to server (/api/menu)
+        async function saveData() {
+            try {
+                menuData.lastUpdated = new Date().toISOString();
+                const res = await fetch('/api/menu', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(menuData)
+                });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                console.debug('[Menu] saveData: saved to /api/menu at', menuData.lastUpdated);
+                return true;
+            } catch (e) {
+                console.error('[Menu] saveData: failed to save to /api/menu', e);
+                showToast('Error', 'Failed to save menu to server', 'danger');
+                return false;
+            }
+        }
+
+        // Show toast notification
+        function showToast(title, message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            toast.id = toastId;
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <strong>${title}</strong><br>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             `;
             
-            // Set unit if provided
-            if (ingredientData.unit) {
-                row.querySelector('.unit').value = ingredientData.unit;
-            }
+            toastContainer.appendChild(toast);
             
-            // Add event listeners
-            const select = row.querySelector('.ingredient-select');
-            select.addEventListener('change', (e) => {
-                const selectedOption = e.target.options[e.target.selectedIndex];
-                const unit = selectedOption.dataset.unit || 'g';
-                row.querySelector('.unit').value = unit;
-                calculateCostPrice();
+            // Initialize and show the toast
+            const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+            bsToast.show();
+            
+            // Remove toast from DOM after it's hidden
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
             });
+        }
+
+        // Categories removed - keep no-op for compatibility
+        function updateCategoryFilter() { /* no-op: categories removed */ }
+
+        // Populate ingredient select dropdown
+        function populateIngredientSelect() {
+            const select = document.getElementById('ingredientSelect');
+            select.innerHTML = '<option value="">Select Ingredient</option>';
             
-            row.querySelector('.quantity').addEventListener('input', calculateCostPrice);
-            row.querySelector('.remove-ingredient').addEventListener('click', () => {
-                row.remove();
-                calculateCostPrice();
+            menuData.ingredients.forEach(ingredient => {
+                const option = document.createElement('option');
+                option.value = ingredient.id;
+                const stockInfo = (typeof ingredient.currentStock === 'number') ? ` • Stock: ${ingredient.currentStock}${ingredient.unit}` : '';
+                option.textContent = `${ingredient.name} (₹${ingredient.costPerUnit}/${ingredient.unit})${stockInfo}`;
+                select.appendChild(option);
             });
-            
-            ingredientsContainer.appendChild(row);
-            return row;
         }
-        
-        // Calculate total cost price based on ingredients
-        function calculateCostPrice() {
-            let totalCost = 0;
-            const rows = document.querySelectorAll('.ingredient-row');
+
+        // Apply filters based on search only (categories and status removed)
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             
-            rows.forEach(row => {
-                const select = row.querySelector('.ingredient-select');
-                const quantityInput = row.querySelector('.quantity');
-                const unitSelect = row.querySelector('.unit');
+            if (currentTab === 'dishes') {
+                filteredDishes = menuData.dishes.filter(item => {
+                    return item.name.toLowerCase().includes(searchTerm) || 
+                           (item.description && item.description.toLowerCase().includes(searchTerm));
+                });
                 
-                if (!select.value || !quantityInput.value) return;
-                
-                const ingredient = ingredients.find(i => i.id === select.value);
-                if (!ingredient) return;
-                
-                let quantity = parseFloat(quantityInput.value) || 0;
-                let unit = unitSelect.value;
-                
-                // Convert to base unit for calculation (g, ml, pcs)
-                let baseQuantity = quantity;
-                if ((unit === 'kg' || unit === 'l') && ingredient.unit === 'g') {
-                    baseQuantity = quantity * 1000; // Convert kg to g or L to ml
-                }
-                
-                // Calculate cost for this ingredient
-                if (ingredient.unitPrice) {
-                    // In a real app, this would handle different units and conversions
-                    totalCost += (baseQuantity / 1000) * ingredient.unitPrice; // Assuming unitPrice is per kg/L
-                }
-            });
-            
-            // Update the cost price field
-            costPriceInput.value = totalCost.toFixed(2);
-            
-            // Recalculate selling price based on profit margin
-            calculateSellingPrice();
-            
-            return totalCost;
-        }
-        
-        // Calculate selling price based on cost price and profit margin
-        function calculateSellingPrice() {
-            const costPrice = parseFloat(costPriceInput.value) || 0;
-            const profitMargin = parseFloat(profitMarginInput.value) || 0;
-            
-            if (costPrice > 0 && profitMargin >= 0) {
-                const sellingPrice = costPrice * (1 + (profitMargin / 100));
-                sellingPriceInput.value = sellingPrice.toFixed(2);
-            }
-        }
-        
-        // Calculate profit margin based on cost and selling price
-        function calculateProfitMargin() {
-            const costPrice = parseFloat(costPriceInput.value) || 0;
-            const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
-            
-            if (costPrice > 0 && sellingPrice > 0) {
-                const profitMargin = ((sellingPrice - costPrice) / costPrice) * 100;
-                profitMarginInput.value = profitMargin.toFixed(1);
+                pagination.dishes.totalItems = filteredDishes.length;
+                pagination.dishes.currentPage = 1;
+                renderDishes();
+                renderPagination();
             } else {
-                profitMarginInput.value = '0';
+                filteredIngredients = menuData.ingredients.filter(item => {
+                    const nameHit = item.name && item.name.toLowerCase().includes(searchTerm);
+                    const supplierHit = item.supplier && item.supplier.toLowerCase().includes(searchTerm);
+                    return nameHit || supplierHit;
+                });
+                
+                pagination.ingredients.totalItems = filteredIngredients.length;
+                pagination.ingredients.currentPage = 1;
+                renderIngredients();
+                renderIngredientsPagination();
             }
         }
+
+        // Reset search only (filters removed)
+        function resetFilters() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            applyFilters();
+        }
+
+// Render dishes
+function renderDishes() {
+    const container = document.getElementById('menuListContainer');
+    const { currentPage, itemsPerPage } = pagination.dishes;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedItems = filteredDishes.slice(startIndex, endIndex);
+    
+    container.innerHTML = '';
+    
+    if (paginatedItems.length === 0) {
+        container.innerHTML = `
+            <div class="text-center p-4">
+                <i class="bi bi-egg-fried" style="font-size: 2rem; color: #ccc;"></i>
+                <p class="mt-2 text-muted">No dishes found</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(auto-fit, minmax(300px, 1fr))';
+    container.style.gap = '1rem';
+    container.style.alignItems = 'start';
+    
+    paginatedItems.forEach(dish => {
+        const costPrice = dish.costPrice || 0;
+        const sellingPrice = dish.sellingPrice || 0;
+        const profit = sellingPrice - costPrice;
+        const profitMargin = costPrice > 0 ? ((profit / costPrice) * 100).toFixed(1) : 0;
         
-        // Handle dish form submission
-        function handleDishSubmit(e) {
-            e.preventDefault();
+        // Compute dish availability based on ingredient stocks (basic heuristic)
+        const availability = computeDishAvailability(dish);
+        let availabilityBadge = '';
+        if (availability === 'out') availabilityBadge = '<span class="badge bg-danger">Out</span>';
+        else if (availability === 'low') availabilityBadge = '<span class="badge bg-warning text-dark">Low</span>';
+        else availabilityBadge = '<span class="badge bg-success">Available</span>';
+        
+        const dishItem = document.createElement('div');
+        dishItem.className = 'dish-item';
+        dishItem.innerHTML = `
+            <div class="dish-header">
+                <h6 class="dish-title">${dish.name}</h6>
+                <div class="dish-status">${availabilityBadge}</div>
+            </div>
             
-            const id = document.getElementById('dishId').value;
-            const name = document.getElementById('dishName').value;
-            const category = document.getElementById('dishCategory').value;
-            const costPrice = parseFloat(costPriceInput.value) || 0;
-            const sellingPrice = parseFloat(sellingPriceInput.value) || 0;
-            const description = document.getElementById('dishDescription').value;
-            const active = document.getElementById('dishActive').checked;
+            <div class="dish-info">
+                <span><i class="bi bi-clipboard-check"></i> ${dish.ingredients ? dish.ingredients.length : 0} ingredients</span>
+            </div>
+        
+            <div class="dish-pricing">
+                <div class="price-item">
+                    <div class="price-label">Cost</div>
+                    <div class="price-value cost-price">₹${costPrice.toFixed(2)}</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Selling</div>
+                    <div class="price-value selling-price">₹${sellingPrice.toFixed(2)}</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Profit</div>
+                    <div class="price-value profit-margin">₹${profit.toFixed(2)}</div>
+                </div>
+                <div class="price-item">
+                    <div class="price-label">Margin</div>
+                    <div class="price-value profit-margin">${profitMargin}%</div>
+                </div>
+            </div>
             
-            // Collect ingredients
-            const dishIngredients = [];
-            document.querySelectorAll('.ingredient-row').forEach(row => {
-                const select = row.querySelector('.ingredient-select');
-                const quantity = row.querySelector('.quantity').value;
-                const unit = row.querySelector('.unit').value;
-                
-                if (select.value && quantity) {
-                    dishIngredients.push({
-                        ingredientId: select.value,
-                        name: select.options[select.selectedIndex].text.split(' (')[0],
-                        quantity: parseFloat(quantity),
-                        unit: unit
-                    });
-                }
-            });
+            <div class="dish-ingredients">
+                ${dish.ingredients ? dish.ingredients.map(ing => {
+                    const q = Number(ing.quantity);
+                    const qStr = Number.isFinite(q) ? q.toFixed(2) : '0.00';
+                    return `<span class="ingredient-tag">${ing.name} (${qStr}${ing.unit})</span>`;
+                }).join('') : ''}
+            </div>
+            ${dish.portions && Object.keys(dish.portions).length ? `
+            <div class="dish-ingredients">
+                ${Object.entries(dish.portions).map(([key, p]) => {
+                    const piecesInfo = p.pieces ? `, ${p.pieces} pcs` : '';
+                    return `<span class=\"ingredient-tag\">${p.name}: ₹${p.price}${piecesInfo}</span>`;
+                }).join('')}
+            </div>
+            ` : ''}
             
-            if (dishIngredients.length === 0) {
-                alert('Please add at least one ingredient to the dish.');
+            <div class="dish-actions">
+                <button class="btn btn-sm btn-outline-primary" onclick="openDishModal('${dish.id}')" title="Edit Dish">
+                    <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteDish('${dish.id}')" title="Delete Dish">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            </div>
+        `;
+        container.appendChild(dishItem);
+    });
+}
+
+        // Render pagination for dishes
+        function renderPagination() {
+            const paginationContainer = document.getElementById('menuPagination');
+            const { currentPage, totalPages } = pagination.dishes;
+            
+            if (totalPages() <= 1) {
+                paginationContainer.innerHTML = '';
                 return;
             }
             
-            const dishData = {
-                id: id || generateId(),
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="goToPage(${currentPage - 1}); return false;">Previous</a>
+                </li>
+            `;
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages(); i++) {
+                if (i === 1 || i === totalPages() || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginationHTML += `
+                        <li class="page-item ${currentPage === i ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a>
+                        </li>
+                    `;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+            
+            // Next button
+            paginationHTML += `
+                <li class="page-item ${currentPage === totalPages() ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="goToPage(${currentPage + 1}); return false;">Next</a>
+                </li>
+            `;
+            
+            paginationContainer.innerHTML = paginationHTML;
+        }
+
+        // Go to specific page for dishes
+        function goToPage(page) {
+            const { totalPages } = pagination.dishes;
+            if (page >= 1 && page <= totalPages()) {
+                pagination.dishes.currentPage = page;
+                renderDishes();
+                renderPagination();
+            }
+        }
+
+        // Render ingredients
+        function renderIngredients() {
+            const container = document.getElementById('ingredientsListContainer');
+            const { currentPage, itemsPerPage } = pagination.ingredients;
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = filteredIngredients.slice(startIndex, endIndex);
+            
+            container.innerHTML = '';
+            
+            if (paginatedItems.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-4">
+                        <i class="bi bi-basket" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="mt-2 text-muted">No ingredients found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Create vendor grid container to fully utilize width
+            const vendorGrid = document.createElement('div');
+            vendorGrid.className = 'vendor-grid';
+            container.appendChild(vendorGrid);
+
+            // Group by vendor (supplier)
+            const groups = paginatedItems.reduce((acc, ing) => {
+                const vendor = (ing.supplier && String(ing.supplier).trim()) || 'Other Vendors';
+                if (!acc[vendor]) acc[vendor] = [];
+                acc[vendor].push(ing);
+                return acc;
+            }, {});
+
+            Object.keys(groups).sort((a,b) => a.localeCompare(b)).forEach(vendor => {
+                const items = groups[vendor];
+
+                // Group wrapper
+                const group = document.createElement('div');
+                group.className = 'vendor-group';
+
+                // Vendor header
+                const header = document.createElement('div');
+                header.className = 'vendor-header d-flex align-items-center justify-content-between';
+                header.innerHTML = `
+                    <div class="fw-semibold text-primary"><i class="bi bi-shop me-2"></i>${vendor}</div>
+                    <span class="badge bg-primary-subtle text-primary">${items.length}</span>
+                `;
+                group.appendChild(header);
+
+                // Items container
+                const itemsContainer = document.createElement('div');
+                itemsContainer.className = 'vendor-items';
+
+                items.forEach(ingredient => {
+                    const ingredientItem = document.createElement('div');
+                    ingredientItem.className = 'ingredient-item';
+
+                    // Compute stock display and status
+                    const hasStock = typeof ingredient.currentStock === 'number' || typeof ingredient.minStockLevel === 'number';
+                    const current = typeof ingredient.currentStock === 'number' ? ingredient.currentStock : null;
+                    const min = typeof ingredient.minStockLevel === 'number' ? ingredient.minStockLevel : null;
+                    let stockBadge = '';
+                    if (hasStock && current != null && min != null) {
+                        let cls = 'bg-success';
+                        let label = 'OK';
+                        if (current <= 0) { cls = 'bg-danger'; label = 'Out'; }
+                        else if (current < min) { cls = 'bg-warning text-dark'; label = 'Low'; }
+                        stockBadge = `<span class="badge ${cls}">${label}</span>`;
+                    }
+
+                    const stockText = hasStock ? `Stock: ${current ?? '—'}${ingredient.unit || ''} / Min: ${min ?? '—'}${ingredient.unit || ''}` : '';
+                    const supplierCodeText = ingredient.supplierCode ? `Supplier Code: ${ingredient.supplierCode}` : '';
+                    const barcodeText = ingredient.barcode ? `Barcode: ${ingredient.barcode}` : '';
+
+                    ingredientItem.innerHTML = `
+                        <div class="ingredient-header d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="ingredient-title">${ingredient.name}</h6>
+                            ${stockBadge}
+                        </div>
+                        <div class="ingredient-info">
+                            <span class="badge bg-info">Unit: ${ingredient.unit}</span>
+                            ${hasStock ? `<span class="badge bg-secondary">${stockText}</span>` : ''}
+                        </div>
+                        ${supplierCodeText || barcodeText ? `
+                        <div class="mb-2 small text-muted">
+                            ${supplierCodeText ? `<div>${supplierCodeText}</div>` : ''}
+                            ${barcodeText ? `<div>${barcodeText}</div>` : ''}
+                        </div>` : ''}
+                        <div class="ingredient-pricing">
+                            <div class="price-info">
+                                <div class="fw-bold text-success">₹${ingredient.costPerUnit.toFixed(2)}</div>
+                                <small class="text-muted">per ${ingredient.unit}</small>
+                            </div>
+                            <div class="ingredient-actions">
+                                <button class="btn btn-sm btn-outline-primary" onclick="openIngredientModal('${ingredient.id}')" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteIngredient('${ingredient.id}')" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    itemsContainer.appendChild(ingredientItem);
+                });
+
+                group.appendChild(itemsContainer);
+                vendorGrid.appendChild(group);
+            });
+            console.debug('[Menu] renderIngredients: rendered (grouped by vendor grid)', { count: paginatedItems.length, groups: Object.keys(groups).length });
+        }
+
+        // Render pagination for ingredients
+        function renderIngredientsPagination() {
+            const paginationContainer = document.getElementById('ingredientsPagination');
+            const { currentPage, totalPages } = pagination.ingredients;
+            
+            if (totalPages() <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+            
+            let paginationHTML = '';
+            
+            // Previous button
+            paginationHTML += `
+                <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="goToIngredientsPage(${currentPage - 1}); return false;">Previous</a>
+                </li>
+            `;
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages(); i++) {
+                if (i === 1 || i === totalPages() || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginationHTML += `
+                        <li class="page-item ${currentPage === i ? 'active' : ''}">
+                            <a class="page-link" href="#" onclick="goToIngredientsPage(${i}); return false;">${i}</a>
+                        </li>
+                    `;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                }
+            }
+            
+            // Next button
+            paginationHTML += `
+                <li class="page-item ${currentPage === totalPages() ? 'disabled' : ''}">
+                    <a class="page-link" href="#" onclick="goToIngredientsPage(${currentPage + 1}); return false;">Next</a>
+                </li>
+            `;
+            
+            paginationContainer.innerHTML = paginationHTML;
+        }
+
+        // Go to specific page for ingredients
+        function goToIngredientsPage(page) {
+            const { totalPages } = pagination.ingredients;
+            if (page >= 1 && page <= totalPages()) {
+                pagination.ingredients.currentPage = page;
+                renderIngredients();
+                renderIngredientsPagination();
+            }
+        }
+
+        // Open dish modal for adding/editing
+        function openDishModal(dishId = null) {
+            editingDishId = dishId;
+            const modal = new bootstrap.Modal(document.getElementById('dishModal'));
+            const modalTitle = document.getElementById('dishModalLabel');
+            const form = document.getElementById('dishForm');
+            
+            // Reset form
+            form.reset();
+            selectedIngredients = [];
+            document.getElementById('selectedIngredients').innerHTML = '';
+            
+            if (dishId) {
+                // Edit mode
+                const dish = menuData.dishes.find(d => d.id === dishId);
+                if (!dish) {
+                    showToast('Error', 'Dish not found!', 'danger');
+                    return;
+                }
+                
+                modalTitle.textContent = 'Edit Dish';
+                document.getElementById('dishId').value = dish.id;
+                document.getElementById('dishName').value = dish.name;
+                // Category removed
+                document.getElementById('dishDescription').value = dish.description || '';
+                document.getElementById('dishCostPrice').value = dish.costPrice || 0;
+                document.getElementById('dishSellingPrice').value = dish.sellingPrice || 0;
+                // Active removed
+                
+                // Set ingredients
+                if (dish.ingredients) {
+                    // Deep clone to avoid mutating the original on the card list until save
+                    selectedIngredients = JSON.parse(JSON.stringify(dish.ingredients));
+                    renderSelectedIngredients();
+                    // Ensure cost/selling price fields reflect current selection when editing
+                    updateCostPrice();
+                }
+            } else {
+                // Add mode
+                modalTitle.textContent = 'Add New Dish';
+                document.getElementById('dishId').value = '';
+                // Active removed
+            }
+            
+            modal.show();
+        }
+
+        // Add ingredient to dish
+        function addIngredientToDish() {
+            const ingredientSelect = document.getElementById('ingredientSelect');
+            const quantityInput = document.getElementById('ingredientQuantity');
+            const unitSelect = document.getElementById('dishIngredientUnit');
+            
+            const ingredientId = ingredientSelect.value;
+            const quantity = parseFloat(quantityInput.value);
+            const unit = unitSelect.value;
+            
+            if (!ingredientId || isNaN(quantity) || quantity <= 0 || !unit) {
+                showToast('Error', 'Please select an ingredient, enter a valid quantity, and select a unit', 'danger');
+                return;
+            }
+            
+            const ingredient = menuData.ingredients.find(i => String(i.id) === String(ingredientId));
+            if (!ingredient) {
+                showToast('Error', 'Selected ingredient not found', 'danger');
+                return;
+            }
+            
+            // Check if ingredient already exists
+            const existingIndex = selectedIngredients.findIndex(i => String(i.ingredientId) === String(ingredientId) && i.unit === unit);
+            
+            if (existingIndex >= 0) {
+                // Update existing ingredient
+                const prevQty = Number(selectedIngredients[existingIndex].quantity) || 0;
+                selectedIngredients[existingIndex].quantity = prevQty + quantity;
+                // Normalize fields to ensure persistence is consistent
+                selectedIngredients[existingIndex].name = selectedIngredients[existingIndex].name || ingredient.name;
+                selectedIngredients[existingIndex].unitType = selectedIngredients[existingIndex].unitType || ingredient.unitType;
+                selectedIngredients[existingIndex].ingredientUnit = selectedIngredients[existingIndex].ingredientUnit || ingredient.unit;
+                const cpu = Number(selectedIngredients[existingIndex].costPerUnit != null ? selectedIngredients[existingIndex].costPerUnit : ingredient.costPerUnit);
+                selectedIngredients[existingIndex].costPerUnit = Number.isFinite(cpu) ? cpu : 0;
+            } else {
+                // Add new ingredient
+                selectedIngredients.push({
+                    ingredientId: String(ingredient.id),
+                    name: ingredient.name,
+                    quantity: Number(quantity),
+                    unit: unit,
+                    costPerUnit: Number(ingredient.costPerUnit) || 0,
+                    ingredientUnit: ingredient.unit, // the unit that costPerUnit refers to
+                    unitType: ingredient.unitType
+                });
+            }
+            console.debug('[Menu] addIngredientToDish:', { ingredientId, unit, quantity, selectedIngredients });
+            
+            // Reset form
+            ingredientSelect.value = '';
+            quantityInput.value = '';
+            unitSelect.innerHTML = '<option value="">Select unit</option>';
+            
+            // Update UI
+            renderSelectedIngredients();
+            updateCostPrice();
+            
+            showToast('Success', 'Ingredient added successfully', 'success');
+        }
+
+        // Render selected ingredients
+        function renderSelectedIngredients() {
+            const container = document.getElementById('selectedIngredients');
+            container.innerHTML = '';
+            
+            selectedIngredients.forEach((ing, index) => {
+                const ingElement = document.createElement('div');
+                ingElement.className = 'selected-ingredient';
+                const itemCost = computeIngredientCost(ing);
+                ingElement.innerHTML = `
+                    <div>
+                        <strong>${ing.name}</strong>: ${ing.quantity} ${ing.unit}
+                        <br><small>Cost: ₹${itemCost.toFixed(2)}</small>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeIngredient(${index})">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                `;
+                container.appendChild(ingElement);
+            });
+        }
+
+        // Remove ingredient from selected list
+        function removeIngredient(index) {
+            selectedIngredients.splice(index, 1);
+            renderSelectedIngredients();
+            updateCostPrice();
+        }
+
+        // Update cost price based on selected ingredients
+        function updateCostPrice() {
+            let totalCost = 0;
+            selectedIngredients.forEach(ing => {
+                totalCost += computeIngredientCost(ing);
+            });
+            // Guard against non-finite accumulation
+            if (!isFinite(totalCost)) {
+                console.debug('[Menu] updateCostPrice computed non-finite totalCost; resetting to 0', { selectedIngredients, totalCost });
+                totalCost = 0;
+            }
+            const costStr = Number(totalCost).toFixed(2);
+            document.getElementById('dishCostPrice').value = costStr;
+            
+            // Auto-set selling price with 30% margin if not set
+            const sellingPriceInput = document.getElementById('dishSellingPrice');
+            if (!sellingPriceInput.value || sellingPriceInput.value == 0) {
+                const sp = totalCost * 1.3;
+                const spFinal = isFinite(sp) ? sp : 0;
+                sellingPriceInput.value = spFinal.toFixed(2);
+            }
+        }
+
+        // Utility: get toBase factor for a unit
+        function getUnitToBase(unitType, unitName) {
+            const list = (menuData.units && menuData.units[unitType]) || CONFIG.UNITS[unitType] || [];
+            const found = list.find(u => u.name === unitName);
+            return found ? Number(found.toBase) : 1;
+        }
+
+        // Utility: compute ingredient cost considering unit conversion
+        function computeIngredientCost(selIng) {
+            try {
+                const unitType = selIng.unitType || 'weight';
+                const selectedUnit = selIng.unit; // unit used in the dish
+                const ingredientUnit = selIng.ingredientUnit || selectedUnit; // unit of costPerUnit
+                const qty = Number(selIng.quantity || 0);
+                const cpu = Number(selIng.costPerUnit || 0);
+                // Guard: invalid qty/cpu
+                if (!qty || !cpu || !isFinite(qty) || !isFinite(cpu)) return 0;
+                if (selectedUnit === ingredientUnit) {
+                    return qty * cpu;
+                }
+                // Convert by base (g/ml/pc)
+                const toBaseSelected = Number(getUnitToBase(unitType, selectedUnit) || 1);
+                const toBaseIngredient = Number(getUnitToBase(unitType, ingredientUnit) || 1);
+                // cost per base = cpu / toBaseIngredient
+                const costPerBase = cpu / (toBaseIngredient || 1);
+                // qty in base = qty * toBaseSelected
+                const qtyInBase = qty * (toBaseSelected || 1);
+                const result = qtyInBase * costPerBase;
+                // Guard: ensure finite result
+                if (!isFinite(result)) {
+                    console.debug('[Menu] computeIngredientCost produced non-finite value', { selIng, unitType, selectedUnit, ingredientUnit, qty, cpu, toBaseSelected, toBaseIngredient, costPerBase, qtyInBase, result });
+                    return 0;
+                }
+                return result;
+            } catch (e) {
+                console.error('[Menu] computeIngredientCost error', e, selIng);
+                return 0;
+            }
+        }
+
+        // Compute basic availability of a dish based on ingredient stock
+        function computeDishAvailability(dish) {
+            if (!dish || !Array.isArray(dish.ingredients)) return 'available';
+            let low = false;
+            for (const req of dish.ingredients) {
+                const ing = menuData.ingredients.find(i => String(i.id) === String(req.ingredientId));
+                if (!ing) continue;
+                const current = typeof ing.currentStock === 'number' ? ing.currentStock : null;
+                const min = typeof ing.minStockLevel === 'number' ? ing.minStockLevel : null;
+                if (current != null && current <= 0) return 'out';
+                if (current != null && min != null && current < min) low = true;
+            }
+            return low ? 'low' : 'available';
+        }
+
+        // Save dish
+        async function saveDish() {
+            const form = document.getElementById('dishForm');
+            const name = document.getElementById('dishName').value.trim();
+            // Category removed
+            // Recompute costPrice from selectedIngredients to ensure correctness
+            let recomputedCost = 0;
+            try {
+                for (const ing of selectedIngredients) {
+                    recomputedCost += computeIngredientCost(ing);
+                }
+            } catch (e) {
+                console.error('[Menu] saveDish: error computing cost', e, selectedIngredients);
+            }
+            const costPrice = Number.isFinite(recomputedCost) ? Number(recomputedCost.toFixed(2)) : 0;
+            const sellingPrice = parseFloat(document.getElementById('dishSellingPrice').value);
+            // Active removed
+            
+            if (!name || isNaN(costPrice) || isNaN(sellingPrice)) {
+                showToast('Error', 'Please fill in all required fields', 'danger');
+                return;
+            }
+            
+            if (selectedIngredients.length === 0) {
+                showToast('Error', 'Please add at least one ingredient', 'danger');
+                return;
+            }
+            
+            // Normalize ingredients for persistence
+            const persistedIngredients = selectedIngredients.map(src => {
+                const ingredient = menuData.ingredients.find(i => String(i.id) === String(src.ingredientId));
+                const baseUnit = ingredient ? ingredient.unit : src.ingredientUnit || src.unit;
+                const unitType = src.unitType || (ingredient ? ingredient.unitType : 'weight');
+                const cpuNum = Number(src.costPerUnit != null ? src.costPerUnit : (ingredient ? ingredient.costPerUnit : 0));
+                const qtyNum = Number(src.quantity);
+                return {
+                    ingredientId: String(src.ingredientId || (ingredient ? ingredient.id : '')),
+                    name: src.name || (ingredient ? ingredient.name : ''),
+                    quantity: Number.isFinite(qtyNum) && qtyNum > 0 ? qtyNum : 0,
+                    unit: src.unit || baseUnit || '',
+                    costPerUnit: Number.isFinite(cpuNum) ? cpuNum : 0,
+                    ingredientUnit: src.ingredientUnit || baseUnit || (src.unit || ''),
+                    unitType,
+                };
+            });
+
+            // Resolve persisted id from hidden input if present
+            const hiddenId = (document.getElementById('dishId').value || '').trim();
+            const resolvedId = hiddenId || editingDishId || ('dish-' + Date.now());
+
+            const dish = {
+                id: resolvedId,
                 name,
-                category,
-                ingredients: dishIngredients,
+                description: document.getElementById('dishDescription').value,
                 costPrice,
                 sellingPrice,
-                description,
-                active,
-                updatedAt: new Date().toISOString()
+                ingredients: Array.isArray(persistedIngredients) ? persistedIngredients : [],
+                lastUpdated: new Date().toISOString()
             };
+            console.debug('[Menu] saveDish: persisting dish', {
+                id: dish.id,
+                name: dish.name,
+                costPrice: dish.costPrice,
+                sellingPrice: dish.sellingPrice,
+                persistedCount: dish.ingredients.length,
+                selectedCount: selectedIngredients ? selectedIngredients.length : 0,
+                sample: dish.ingredients[0] || null
+            });
             
-            if (id) {
+            if (resolvedId) {
                 // Update existing dish
-                const index = dishes.findIndex(d => d.id === id);
+                const index = menuData.dishes.findIndex(d => String(d.id) === String(resolvedId));
                 if (index !== -1) {
-                    dishes[index] = { ...dishes[index], ...dishData };
+                    menuData.dishes[index] = dish;
+                    console.debug('[Menu] saveDish: updated existing dish', { dishId: resolvedId, index, ingredientsCount: dish.ingredients.length });
+                } else {
+                    // Fallback: dish id not found, append as new to avoid losing data
+                    menuData.dishes.push(dish);
+                    console.warn('[Menu] saveDish: dish id not found, appended dish instead', { dishId: resolvedId, ingredientsCount: dish.ingredients.length });
                 }
             } else {
                 // Add new dish
-                dishData.createdAt = new Date().toISOString();
-                dishes.push(dishData);
+                dish.createdAt = new Date().toISOString();
+                menuData.dishes.push(dish);
             }
             
-            saveDishes();
-            renderDishes();
-            updateStats();
-            dishModal.hide();
-            dishForm.reset();
+            // Save data and update UI
+            if (await saveData()) {
+                filteredDishes = [...menuData.dishes];
+                applyFilters();
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('dishModal'));
+                modal.hide();
+                
+                showToast('Success', 'Dish saved successfully', 'success');
+            }
         }
-        
-        // Edit dish
-        window.editDish = function(id) {
-            const dish = dishes.find(d => d.id === id);
-            if (!dish) return;
+
+        // Delete dish
+        async function deleteDish(dishId) {
+            if (!confirm('Are you sure you want to delete this dish?')) return;
             
-            document.getElementById('dishModalTitle').textContent = 'Edit Dish';
-            document.getElementById('dishId').value = dish.id;
-            document.getElementById('dishName').value = dish.name;
-            document.getElementById('dishCategory').value = dish.category || '';
-            document.getElementById('dishDescription').value = dish.description || '';
-            document.getElementById('dishActive').checked = dish.active !== false; // Default to true if not set
+            const index = menuData.dishes.findIndex(d => d.id === dishId);
+            if (index !== -1) {
+                menuData.dishes.splice(index, 1);
+                
+                if (await saveData()) {
+                    filteredDishes = [...menuData.dishes];
+                    applyFilters();
+                    showToast('Success', 'Dish deleted successfully', 'success');
+                }
+            }
+        }
+
+        // Open ingredient modal for adding/editing
+        function openIngredientModal(ingredientId = null) {
+            editingIngredientId = ingredientId;
+            const modal = new bootstrap.Modal(document.getElementById('ingredientModal'));
+            const modalTitle = document.getElementById('ingredientModalLabel');
+            const form = document.getElementById('ingredientForm');
             
-            // Clear existing ingredient rows
-            ingredientsContainer.innerHTML = '';
+            // Reset form
+            form.reset();
+            document.getElementById('densityContainer').style.display = 'none';
+            document.getElementById('pieceWeightContainer').style.display = 'none';
             
-            // Add ingredient rows
-            if (dish.ingredients && dish.ingredients.length > 0) {
-                dish.ingredients.forEach(ing => {
-                    addIngredientRow(ing);
-                });
+            if (ingredientId) {
+                // Edit mode
+                const ingredient = menuData.ingredients.find(i => i.id === ingredientId);
+                if (!ingredient) {
+                    showToast('Error', 'Ingredient not found!', 'danger');
+                    return;
+                }
+                
+                modalTitle.textContent = 'Edit Ingredient';
+                document.getElementById('ingredientId').value = ingredient.id;
+                document.getElementById('ingredientName').value = ingredient.name;
+                // Category removed
+                document.getElementById('ingredientUnitType').value = ingredient.unitType || 'weight';
+                document.getElementById('ingredientCostPerUnit').value = ingredient.costPerUnit;
+                // Active removed
+                
+                // Update unit select and show/hide fields
+                updateUnitSelectForType(ingredient.unitType || 'weight', ingredient.unit);
+                toggleIngredientFields(ingredient.unitType || 'weight');
+                
+                // Set density or piece weight if applicable
+                if (ingredient.unitType === 'volume' && ingredient.density) {
+                    document.getElementById('ingredientDensity').value = ingredient.density;
+                } else if (ingredient.unitType === 'piece' && ingredient.avgWeightPerPiece) {
+                    document.getElementById('ingredientPieceWeight').value = ingredient.avgWeightPerPiece;
+                }
             } else {
-                addIngredientRow();
+                // Add mode
+                modalTitle.textContent = 'Add New Ingredient';
+                document.getElementById('ingredientId').value = '';
+                // Active removed
+                document.getElementById('ingredientUnitType').value = 'weight';
+                updateUnitSelectForType('weight');
             }
             
-            // Set prices
-            costPriceInput.value = (dish.costPrice || 0).toFixed(2);
-            sellingPriceInput.value = (dish.sellingPrice || 0).toFixed(2);
+            modal.show();
+        }
+
+        // Update unit select options based on unit type
+        function updateUnitSelectForType(unitType, selectedUnit = '') {
+            const unitSelect = document.getElementById('ingredientUnit');
+            unitSelect.innerHTML = '<option value="">Select unit</option>';
             
-            // Calculate and set profit margin
-            const cost = parseFloat(dish.costPrice) || 0;
-            const selling = parseFloat(dish.sellingPrice) || 0;
-            const margin = cost > 0 ? ((selling - cost) / cost) * 100 : 0;
-            profitMarginInput.value = margin.toFixed(1);
+            if (!unitType) return;
             
-            dishModal.show();
-        };
-        
-        // Delete dish
-        window.deleteDish = function(id) {
-            if (!confirm('Are you sure you want to delete this dish? This action cannot be undone.')) {
+            const units = (menuData.units && menuData.units[unitType]) || CONFIG.UNITS[unitType] || [];
+            
+            units.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.name;
+                option.textContent = unit.displayName;
+                if (unit.name === selectedUnit) {
+                    option.selected = true;
+                }
+                unitSelect.appendChild(option);
+            });
+        }
+
+        // Populate the unit options in Add Ingredient (Dish Modal) based on selected ingredient
+        function updateDishIngredientUnitOptions() {
+            try {
+                const ingredientId = document.getElementById('ingredientSelect').value;
+                const unitSelect = document.getElementById('dishIngredientUnit');
+                if (!unitSelect) {
+                    console.warn('[Menu] updateDishIngredientUnitOptions: dishIngredientUnit element not found');
+                    return;
+                }
+                unitSelect.innerHTML = '<option value="">Select unit</option>';
+                if (!ingredientId) return;
+                const ingredient = menuData.ingredients.find(i => i.id === ingredientId);
+                if (!ingredient) return;
+                const unitType = ingredient.unitType || 'weight';
+                const units = (menuData.units && menuData.units[unitType]) || CONFIG.UNITS[unitType] || [];
+                units.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.name;
+                    opt.textContent = u.displayName;
+                    if (u.name === ingredient.unit) opt.selected = true;
+                    unitSelect.appendChild(opt);
+                });
+                console.debug('[Menu] updateDishIngredientUnitOptions:', { ingredientId, unitType });
+            } catch (e) {
+                console.error('[Menu] updateDishIngredientUnitOptions error', e);
+            }
+        }
+
+        // Download current menu data as JSON file
+        function downloadMenuData() {
+            try {
+                const dataStr = JSON.stringify({
+                    units: menuData.units,
+                    ingredients: menuData.ingredients,
+                    dishes: menuData.dishes
+                }, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'menu.json';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showToast('Success', 'Exported menu.json', 'success');
+            } catch (e) {
+                console.error('[Menu] downloadMenuData error', e);
+                showToast('Error', 'Failed to export data', 'danger');
+            }
+        }
+
+        // Toggle ingredient fields based on unit type
+        function toggleIngredientFields(unitType) {
+            document.getElementById('densityContainer').style.display = unitType === 'volume' ? 'block' : 'none';
+            document.getElementById('pieceWeightContainer').style.display = unitType === 'piece' ? 'block' : 'none';
+        }
+
+        // Save ingredient
+        async function saveIngredient() {
+            const form = document.getElementById('ingredientForm');
+            const name = document.getElementById('ingredientName').value.trim();
+            // Category removed
+            const unitType = document.getElementById('ingredientUnitType').value;
+            const unit = document.getElementById('ingredientUnit').value;
+            const costPerUnit = parseFloat(document.getElementById('ingredientCostPerUnit').value);
+            // Active removed
+            
+            if (!name || !unitType || !unit || isNaN(costPerUnit)) {
+                showToast('Error', 'Please fill in all required fields', 'danger');
                 return;
             }
             
-            dishes = dishes.filter(d => d.id !== id);
-            saveDishes();
-            renderDishes();
-            updateStats();
-        };
-        
-        // Update statistics
-        function updateStats() {
-            // Total dishes
-            document.getElementById('totalDishes').textContent = dishes.length;
+            const ingredient = {
+                id: editingIngredientId || 'ing-' + Date.now(),
+                name,
+                unitType,
+                unit,
+                costPerUnit,
+                lastUpdated: new Date().toISOString()
+            };
             
-            // Average cost price
-            const totalCost = dishes.reduce((sum, dish) => sum + (parseFloat(dish.costPrice) || 0), 0);
-            const avgCost = dishes.length > 0 ? totalCost / dishes.length : 0;
-            document.getElementById('avgCost').textContent = `₹${avgCost.toFixed(2)}`;
+            // Add density for volume units
+            if (unitType === 'volume') {
+                ingredient.density = parseFloat(document.getElementById('ingredientDensity').value) || 1;
+            }
             
-            // Average profit margin
-            const totalMargin = dishes.reduce((sum, dish) => {
-                const cost = parseFloat(dish.costPrice) || 0;
-                const selling = parseFloat(dish.sellingPrice) || 0;
-                if (cost > 0) {
-                    return sum + ((selling - cost) / cost) * 100;
+            // Add average weight for piece units
+            if (unitType === 'piece') {
+                ingredient.avgWeightPerPiece = parseFloat(document.getElementById('ingredientPieceWeight').value) || 0;
+            }
+            
+            if (editingIngredientId) {
+                // Update existing ingredient
+                const index = menuData.ingredients.findIndex(i => i.id === editingIngredientId);
+                if (index !== -1) {
+                    menuData.ingredients[index] = ingredient;
                 }
-                return sum;
-            }, 0);
+            } else {
+                // Add new ingredient
+                ingredient.createdAt = new Date().toISOString();
+                menuData.ingredients.push(ingredient);
+            }
             
-            const avgMargin = dishes.length > 0 ? totalMargin / dishes.length : 0;
-            document.getElementById('avgProfit').textContent = `${avgMargin.toFixed(1)}%`;
+            // Save data and update UI
+            if (await saveData()) {
+                filteredIngredients = [...menuData.ingredients];
+                applyFilters();
+                populateIngredientSelect();
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('ingredientModal'));
+                modal.hide();
+                
+                showToast('Success', 'Ingredient saved successfully', 'success');
+            }
         }
-        
-        // Helper functions
-        function generateId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2);
-        }
-        
-        function saveDishes() {
-            localStorage.setItem('dishes', JSON.stringify(dishes));
-        }
-        
-        function formatCategory(category) {
-            if (!category) return 'Uncategorized';
-            return category.split('-').map(word => 
-                word.charAt(0).toUpperCase() + word.slice(1)
-            ).join(' ');
+
+        // Delete ingredient
+        async function deleteIngredient(ingredientId) {
+            if (!confirm('Are you sure you want to delete this ingredient?')) return;
+            
+            // Check if ingredient is used in any dishes
+            const usedInDishes = menuData.dishes.filter(dish => 
+                dish.ingredients && dish.ingredients.some(ing => ing.ingredientId === ingredientId)
+            );
+            
+            if (usedInDishes.length > 0) {
+                showToast('Error', 'Cannot delete ingredient as it is used in one or more dishes', 'danger');
+                return;
+            }
+            
+            const index = menuData.ingredients.findIndex(i => i.id === ingredientId);
+            if (index !== -1) {
+                menuData.ingredients.splice(index, 1);
+                
+                if (await saveData()) {
+                    filteredIngredients = [...menuData.ingredients];
+                    applyFilters();
+                    populateIngredientSelect();
+                    showToast('Success', 'Ingredient deleted successfully', 'success');
+                }
+            }
         }
     </script>
 </body>
+
 </html>

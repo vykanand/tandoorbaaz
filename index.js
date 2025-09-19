@@ -12,6 +12,7 @@ const __dirname = path.dirname(__filename);
 
 // Define the base public directory
 const publicDir = path.join(__dirname, "public");
+const menuFile = path.join(publicDir, "buy", "menu.json");
 
 app.use(express.json());
 
@@ -34,6 +35,40 @@ fs.readdirSync(publicDir).forEach((dir) => {
         res.status(404).send("Page not found");
       }
     });
+
+// Menu data APIs (single source of truth: public/buy/menu.json)
+app.get("/api/menu", (req, res) => {
+  try {
+    if (fs.existsSync(menuFile)) {
+      const data = fs.readFileSync(menuFile, "utf8");
+      const json = data ? JSON.parse(data) : {};
+      res.json(json);
+    } else {
+      res.status(404).json({ message: "menu.json not found" });
+    }
+  } catch (error) {
+    console.error("Error reading menu.json:", error);
+    res.status(500).json({ message: "Failed to load menu.json", error: error.message });
+  }
+});
+
+app.put("/api/menu", (req, res) => {
+  try {
+    const body = req.body;
+    if (!body || typeof body !== "object") {
+      return res.status(400).json({ success: false, message: "Invalid JSON body" });
+    }
+    // Optionally ensure required top-level keys exist
+    const payload = {
+      ...body,
+    };
+    fs.writeFileSync(menuFile, JSON.stringify(payload, null, 2), "utf8");
+    res.json({ success: true, message: "menu.json saved" });
+  } catch (error) {
+    console.error("Error writing menu.json:", error);
+    res.status(500).json({ success: false, message: "Failed to save menu.json", error: error.message });
+  }
+});
 
     // Keep static assets serving
     app.use(`/${dir}`, express.static(dirPath));
