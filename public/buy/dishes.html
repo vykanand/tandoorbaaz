@@ -419,6 +419,38 @@
         .selected-ingredient .btn {
             padding: 0.25rem 0.5rem;
         }
+
+        .dish-description {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            line-clamp: 2;
+            overflow: hidden;
+        }
+        
+        .dish-image-container {
+            height: 180px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .dish-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .dish-card:hover .dish-image {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 
@@ -452,7 +484,7 @@
                         <i class="bi bi-download"></i>
                     </button>
                     <button id="addNewItemBtn" class="btn btn-primary btn-sm" title="Add New Item">
-                        <i class="bi bi-plus"></i> Add Dish
+                        <i class="bi bi-plus"></i> <span id="addButtonText">Add Dish</span>
                     </button>
                 </div>
 
@@ -511,10 +543,10 @@
 
     <!-- Add/Edit Dish Modal -->
     <div class="modal fade" id="dishModal" tabindex="-1" aria-labelledby="dishModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="dishModalLabel">Add New Dish</h5>
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold" id="dishModalLabel">Add New Dish</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -525,6 +557,11 @@
                                 <div class="mb-3">
                                     <label for="dishName" class="form-label">Dish Name *</label>
                                     <input type="text" class="form-control" id="dishName" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="dishPhotoUrl" class="form-label">Photo URL</label>
+                                    <input type="url" class="form-control" id="dishPhotoUrl" placeholder="https://example.com/image.jpg">
+                                    <div class="form-text">Paste a direct image URL for this dish</div>
                                 </div>
 
                                 <div class="mb-3">
@@ -594,7 +631,7 @@
                                         <select class="form-select" id="ingredientSelect">
                                             <option value="">Select Ingredient</option>
                                         </select>
-                                        <input type="number" class="form-control" id="ingredientQuantity" placeholder="Qty" step="0.01" min="0.01">
+                                        <input type="number" class="form-control" id="ingredientQuantity" placeholder="Qty" step="1" min="1" value="1">
                                         <select class="form-select" id="dishIngredientUnit" style="max-width: 140px;">
                                             <option value="">Select unit</option>
                                         </select>
@@ -602,17 +639,28 @@
                                             <i class="bi bi-plus"></i> Add
                                         </button>
                                     </div>
+                                    <div id="ingredientDetails" class="d-flex justify-content-between align-items-center p-2 bg-light rounded" style="display: none !important;">
+                                        <div class="text-muted">Cost per unit: <strong>₹<span id="ingredientCost">0</span>/<span id="ingredientUnit">unit</span></strong></div>
+                                        <div>Total: <strong>₹<span id="ingredientTotalCost">0</span></strong></div>
+                                    </div>
+                                    </div>
                                     <div id="selectedIngredients" class="mt-2">
                                         <!-- Selected ingredients will be added here -->
+                                    </div>
+                                    
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                                        <button type="button" class="btn btn-outline-secondary" id="cancelDishBtn">
+                                            <i class="bi bi-x-lg me-1"></i> Cancel
+                                        </button>
+                                        <button id="saveDishBtn" type="button" class="btn btn-primary">
+                                            <i class="bi bi-save me-1"></i> Save Dish
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button id="saveDishBtn" type="button" class="btn btn-primary">Save Dish</button>
                 </div>
             </div>
         </div>
@@ -788,9 +836,45 @@
             }
         };
 
+        // Utility function to round numbers to whole numbers
+        function roundToWholeNumber(value) {
+            return Math.round(Number(value) || 0);
+        }
+
         // Initialize the application when the DOM is loaded
         document.addEventListener('DOMContentLoaded', function() {
             init();
+            
+            // Update add button text based on active tab
+            const updateAddButtonText = () => {
+                const addButtonText = document.getElementById('addButtonText');
+                if (currentTab === 'dishes') {
+                    addButtonText.textContent = 'Add Dish';
+                } else {
+                    addButtonText.textContent = 'Add Ingredient';
+                }
+            };
+            
+            // Update button text when tab changes
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(event) {
+                    const targetId = event.target.getAttribute('data-bs-target');
+                    currentTab = targetId === '#dishes-section' ? 'dishes' : 'ingredients';
+                    updateAddButtonText();
+                });
+            });
+            
+            // Handle add button click
+            document.getElementById('addNewItemBtn').addEventListener('click', function() {
+                if (currentTab === 'dishes') {
+                    openDishModal();
+                } else {
+                    openIngredientModal();
+                }
+            });
+            
+            // Initial button text setup
+            updateAddButtonText();
         });
 
         // Initialize the application
@@ -841,17 +925,94 @@
             // Add dish button
             document.getElementById('addNewItemBtn').addEventListener('click', openDishModal);
             
-            // Add ingredient button in dish modal
-            document.getElementById('addIngredientBtn').addEventListener('click', addIngredientToDish);
+            // Add ingredient to dish
+            document.getElementById('addIngredientBtn').addEventListener('click', function() {
+                addIngredientToDish();
+            });
             
-            // Populate unit options when ingredient is selected in dish modal
+            // Handle Enter key in quantity field
+            document.getElementById('ingredientQuantity').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addIngredientToDish();
+                }
+            });
+            
+            // Add event listeners for ingredient selection and quantity changes
             const ingredientSelectEl = document.getElementById('ingredientSelect');
+            const ingredientQuantityEl = document.getElementById('ingredientQuantity');
+            const dishIngredientUnitEl = document.getElementById('dishIngredientUnit');
+            
             if (ingredientSelectEl) {
                 ingredientSelectEl.addEventListener('change', updateDishIngredientUnitOptions);
             }
             
-            // Save dish button
-            document.getElementById('saveDishBtn').addEventListener('click', saveDish);
+            if (ingredientQuantityEl) {
+                ingredientQuantityEl.addEventListener('input', updateIngredientCost);
+                ingredientQuantityEl.addEventListener('change', updateIngredientCost);
+            }
+            
+            if (dishIngredientUnitEl) {
+                dishIngredientUnitEl.addEventListener('change', updateIngredientCost);
+            }
+            
+            // Initialize modals
+            const dishModal = new bootstrap.Modal(document.getElementById('dishModal'));
+            
+            // Save dish button with enhanced validation
+            document.getElementById('saveDishBtn').addEventListener('click', async function() {
+                const saveBtn = document.getElementById('saveDishBtn');
+                const originalText = saveBtn.innerHTML;
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
+                
+                try {
+                    // Validate form
+                    const name = document.getElementById('dishName').value.trim();
+                    const sellingPrice = parseFloat(document.getElementById('dishSellingPrice').value);
+                    
+                    if (!name) {
+                        showToast('Error', 'Please enter a dish name', 'danger');
+                        document.getElementById('dishName').focus();
+                        return;
+                    }
+                    
+                    if (isNaN(sellingPrice) || sellingPrice <= 0) {
+                        showToast('Error', 'Please enter a valid selling price', 'danger');
+                        document.getElementById('dishSellingPrice').focus();
+                        return;
+                    }
+                    
+                    if (selectedIngredients.length === 0) {
+                        showToast('Error', 'Please add at least one ingredient', 'danger');
+                        return;
+                    }
+                    
+                    await saveDish();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('dishModal'));
+                    if (modal) modal.hide();
+                    resetDishForm();
+                    showToast('Success', 'Dish saved successfully!', 'success');
+                } catch (e) {
+                    console.error('[Menu] Error saving dish:', e);
+                    showToast('Error', 'Failed to save dish. ' + (e.message || 'Please try again.'), 'danger');
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalText;
+                }
+            });
+            
+            // Cancel dish button
+            document.getElementById('cancelDishBtn').addEventListener('click', function() {
+                dishModal.hide();
+                resetDishForm();
+            });
+            
+            // Reset form when modal is closed
+            document.getElementById('dishModal').addEventListener('hidden.bs.modal', function() {
+                resetDishForm();
+            });
+            
             
             // Save ingredient button
             document.querySelector('#ingredientModal .btn-success').addEventListener('click', saveIngredient);
@@ -1180,6 +1341,12 @@ function renderDishes() {
         const dishItem = document.createElement('div');
         dishItem.className = 'dish-item';
         dishItem.innerHTML = `
+            ${dish.photoUrl ? `
+            <div class="dish-image-container">
+                <img src="${dish.photoUrl}" class="dish-image" alt="${dish.name}" 
+                    onerror="this.onerror=null; this.parentElement.style.display='none';">
+            </div>
+            ` : ''}
             <div class="dish-header">
                 <h6 class="dish-title">${dish.name}</h6>
                 <div class="dish-status">${availabilityBadge}</div>
@@ -1192,11 +1359,11 @@ function renderDishes() {
             <div class="dish-pricing">
                 <div class="price-item">
                     <div class="price-label">Cost</div>
-                    <div class="price-value cost-price">₹${costPrice.toFixed(2)}</div>
+                    <div class="price-value cost-price">₹${Math.round(costPrice)}</div>
                 </div>
                 <div class="price-item">
                     <div class="price-label">Selling</div>
-                    <div class="price-value selling-price">₹${sellingPrice.toFixed(2)}</div>
+                    <div class="price-value selling-price">₹${dish.sellingPrice ? Math.round(dish.sellingPrice) : '0'}</div>
                 </div>
                 <div class="price-item">
                     <div class="price-label">Profit</div>
@@ -1204,22 +1371,22 @@ function renderDishes() {
                 </div>
                 <div class="price-item">
                     <div class="price-label">Margin</div>
-                    <div class="price-value profit-margin">${profitMargin}%</div>
+                    <div class="price-value profit-margin">${Math.round(profitMargin)}%</div>
                 </div>
             </div>
             
             <div class="dish-ingredients">
                 ${dish.ingredients ? dish.ingredients.map(ing => {
                     const q = Number(ing.quantity);
-                    const qStr = Number.isFinite(q) ? q.toFixed(2) : '0.00';
+                    const qStr = Number.isFinite(q) ? Math.round(q) : '0';
                     return `<span class="ingredient-tag">${ing.name} (${qStr}${ing.unit})</span>`;
                 }).join('') : ''}
             </div>
             <div class="dish-ingredients">
                 ${(() => {
                     const sp = Number(dish.sellingPrice || 0);
-                    const full = Number.isFinite(sp) ? sp.toFixed(2) : '0.00';
-                    const half = Number.isFinite(sp) ? (Math.round((sp / 2) * 100) / 100).toFixed(2) : '0.00';
+                    const full = Number.isFinite(sp) ? Math.round(sp) : '0';
+                    const half = Number.isFinite(sp) ? Math.round(sp / 2) : '0';
                     return `<span class=\"ingredient-tag\">FULL: ₹${full}</span><span class=\"ingredient-tag\">HALF: ₹${half}</span>`;
                 })()}
             </div>
@@ -1453,76 +1620,119 @@ function renderDishes() {
             }
         }
 
-        // Open dish modal for adding/editing
-function openDishModal(dishId = null) {
-    editingDishId = dishId;
-    const modal = new bootstrap.Modal(document.getElementById('dishModal'));
-    const modalTitle = document.getElementById('dishModalLabel');
-    const form = document.getElementById('dishForm');
-    
-    // Reset form
-    form.reset();
-    selectedIngredients = [];
-    document.getElementById('selectedIngredients').innerHTML = '';
-    // Reset portions UI state
-    dishPortions = {};
-    const portionsContainer = document.getElementById('portionsListContainer');
-    if (portionsContainer) portionsContainer.innerHTML = '';
-    // Reset portion mode to FULL default
-    const modeSelect = document.getElementById('portionModeSelect');
-    const spInput = document.getElementById('dishSellingPrice');
-    if (modeSelect) modeSelect.value = 'full';
-    if (spInput) spInput.disabled = false;
-    sellingPriceTouched = false;
-    
-    if (dishId) {
-        // Edit mode
-        const dish = menuData.dishes.find(d => d.id === dishId);
-        if (!dish) {
-            showToast('Error', 'Dish not found!', 'danger');
-            return;
-        }
-        
-        modalTitle.textContent = 'Edit Dish';
-        document.getElementById('dishId').value = dish.id;
-        document.getElementById('dishName').value = dish.name;
-        // Category removed
-        document.getElementById('dishDescription').value = dish.description || '';
-        document.getElementById('dishCostPrice').value = dish.costPrice || 0;
-        // Load selling price from portions.full.price if available, else from dish.sellingPrice
-        if (dish.portions && dish.portions.full && typeof dish.portions.full.price === 'number') {
-            document.getElementById('dishSellingPrice').value = dish.portions.full.price;
-        } else {
-            document.getElementById('dishSellingPrice').value = dish.sellingPrice || 0;
-        }
-        sellingPriceTouched = true; // preserve existing selling price on edit
-        // Active removed
-        
-        // Set ingredients
-        if (dish.ingredients) {
-            // Deep clone to avoid mutating the original on the card list until save
-            selectedIngredients = JSON.parse(JSON.stringify(dish.ingredients));
-            renderSelectedIngredients();
-            // Ensure cost/selling price and calculated portions reflect current selection
+        // Function to reset dish form with additional cleanup
+        function resetDishForm() {
+            const form = document.getElementById('dishForm');
+            if (form) {
+                form.reset();
+            }
+            document.getElementById('dishId').value = '';
+            document.getElementById('dishModalLabel').textContent = 'Add New Dish';
+            
+            const selectedIngredientsEl = document.getElementById('selectedIngredients');
+            if (selectedIngredientsEl) {
+                selectedIngredientsEl.innerHTML = '';
+            }
+            
+            // Reset select elements
+            const ingredientSelect = document.getElementById('ingredientSelect');
+            if (ingredientSelect) {
+                ingredientSelect.value = '';
+            }
+            
+            const unitSelect = document.getElementById('dishIngredientUnit');
+            if (unitSelect) {
+                unitSelect.innerHTML = '<option value="">Select unit</option>';
+            }
+            
+            // Reset ingredient details
+            const ingredientDetails = document.getElementById('ingredientDetails');
+            if (ingredientDetails) {
+                ingredientDetails.style.display = 'none';
+            }
+            
+            selectedIngredients = [];
             updateCostPrice();
+            
+            // Reset any validation states
+            const formInputs = form?.querySelectorAll('.is-invalid');
+            formInputs?.forEach(input => input.classList.remove('is-invalid'));
         }
-        
-        // Set portions
-        if (dish.portions) {
-            dishPortions = { ...dish.portions };
-            renderPortionsList();
-            updatePricingSectionVisibility();
+
+        // Open dish modal for adding/editing with enhanced initialization
+        function openDishModal(dishId = null) {
+            editingDishId = dishId;
+            const modalEl = document.getElementById('dishModal');
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            const modalTitle = document.getElementById('dishModalLabel');
+            
+            // Reset form and state
+            resetDishForm();
+            
+            if (dishId) {
+                // Edit mode
+                const dish = menuData.dishes.find(d => d.id === dishId);
+                if (!dish) {
+                    showToast('Error', 'Dish not found!', 'danger');
+                    return;
+                }
+                
+                modalTitle.textContent = 'Edit Dish: ' + dish.name;
+                document.getElementById('dishId').value = dish.id;
+                document.getElementById('dishName').value = dish.name || '';
+                document.getElementById('dishPhotoUrl').value = dish.photoUrl || '';
+                document.getElementById('dishDescription').value = dish.description || '';
+                document.getElementById('dishCostPrice').value = dish.costPrice?.toFixed(2) || '0.00';
+                
+                // Set selling price with validation
+                const sellingPrice = parseFloat(dish.sellingPrice);
+                if (!isNaN(sellingPrice) && sellingPrice > 0) {
+                    document.getElementById('dishSellingPrice').value = sellingPrice.toFixed(2);
+                } else {
+                    document.getElementById('dishSellingPrice').value = '';
+                }
+                
+                // Set portions if they exist
+                if (dish.portions) {
+                    if (dish.portions.full) {
+                        document.getElementById('portionPieces-full').value = dish.portions.full.portionPieces || 1;
+                    }
+                    if (dish.portions.half) {
+                        document.getElementById('portionPieces-half').value = dish.portions.half.portionPieces || 1;
+                    }
+                }
+                
+                // Add ingredients with validation
+                if (Array.isArray(dish.ingredients) && dish.ingredients.length > 0) {
+                    selectedIngredients = dish.ingredients.map(ing => ({
+                        ...ing,
+                        // Ensure all required fields exist
+                        ingredientId: ing.ingredientId || '',
+                        name: ing.name || '',
+                        quantity: parseFloat(ing.quantity) || 0,
+                        unit: ing.unit || '',
+                        costPerUnit: parseFloat(ing.costPerUnit) || 0,
+                        unitType: ing.unitType || 'weight'
+                    }));
+                    renderSelectedIngredients();
+                }
+                
+                // Update cost price display
+                updateCostPrice();
+            } else {
+                // Add mode
+                modalTitle.textContent = 'Add New Dish';
+                document.getElementById('dishSellingPrice').value = '';
+                updateCostPrice();
+            }
+            
+            // Show the modal after a small delay to ensure DOM updates
+            setTimeout(() => {
+                modal.show();
+                // Focus on the first input field
+                document.getElementById('dishName')?.focus();
+            }, 50);
         }
-    } else {
-        // Add mode
-        modalTitle.textContent = 'Add New Dish';
-        document.getElementById('dishId').value = '';
-        // Active removed
-    }
-    
-    updatePricingSectionVisibility();
-    modal.show();
-}
 
         // Add ingredient to dish
         function addIngredientToDish() {
@@ -1531,7 +1741,7 @@ function openDishModal(dishId = null) {
             const unitSelect = document.getElementById('dishIngredientUnit');
             
             const ingredientId = ingredientSelect.value;
-            const quantity = parseFloat(quantityInput.value);
+            const quantity = roundToWholeNumber(parseFloat(quantityInput.value));
             const unit = unitSelect.value;
             
             if (!ingredientId || isNaN(quantity) || quantity <= 0 || !unit) {
@@ -1551,7 +1761,7 @@ function openDishModal(dishId = null) {
             if (existingIndex >= 0) {
                 // Update existing ingredient
                 const prevQty = Number(selectedIngredients[existingIndex].quantity) || 0;
-                selectedIngredients[existingIndex].quantity = prevQty + quantity;
+                selectedIngredients[existingIndex].quantity = Math.round(prevQty + quantity);
                 // Normalize fields to ensure persistence is consistent
                 selectedIngredients[existingIndex].name = selectedIngredients[existingIndex].name || ingredient.name;
                 selectedIngredients[existingIndex].unitType = selectedIngredients[existingIndex].unitType || ingredient.unitType;
@@ -1587,16 +1797,18 @@ function openDishModal(dishId = null) {
         // Render selected ingredients
         function renderSelectedIngredients() {
             const container = document.getElementById('selectedIngredients');
+            if (!container) return;
+            
             container.innerHTML = '';
             
             selectedIngredients.forEach((ing, index) => {
                 const ingElement = document.createElement('div');
-                ingElement.className = 'selected-ingredient';
-                const itemCost = computeIngredientCost(ing);
+                ingElement.className = 'selected-ingredient mb-2 p-2 border rounded d-flex justify-content-between align-items-center';
+                const itemCost = computeIngredientCost(ing) || 0;
                 ingElement.innerHTML = `
                     <div>
-                        <strong>${ing.name}</strong>: ${ing.quantity} ${ing.unit}
-                        <br><small>Cost: ₹${itemCost.toFixed(2)}</small>
+                        <strong>${ing.name}</strong>: ${Math.round(ing.quantity)} ${ing.unit}
+                        <br><small>Cost: ₹${Math.round(itemCost)}</small>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeIngredient(${index})">
                         <i class="bi bi-trash"></i>
@@ -1608,9 +1820,11 @@ function openDishModal(dishId = null) {
 
         // Remove ingredient from selected list
         function removeIngredient(index) {
-            selectedIngredients.splice(index, 1);
-            renderSelectedIngredients();
-            updateCostPrice();
+            if (index >= 0 && index < selectedIngredients.length) {
+                selectedIngredients.splice(index, 1);
+                renderSelectedIngredients();
+                updateCostPrice();
+            }
         }
 
         // Portions helpers and rendering (ensure defined before any usage)
@@ -1716,15 +1930,15 @@ function openDishModal(dishId = null) {
                 console.debug('[Menu] updateCostPrice computed non-finite totalCost; resetting to 0', { selectedIngredients, totalCost });
                 totalCost = 0;
             }
-            const costStr = Number(totalCost).toFixed(2);
-            document.getElementById('dishCostPrice').value = costStr;
+            const roundedCost = roundToWholeNumber(totalCost);
+            document.getElementById('dishCostPrice').value = roundedCost;
 
             // Auto-set selling price from cost with 30% margin only if user hasn't edited it
             const sellingPriceInput = document.getElementById('dishSellingPrice');
             if (!sellingPriceTouched) {
                 const sp = totalCost * 1.3;
-                const spFinal = isFinite(sp) ? sp : 0;
-                sellingPriceInput.value = spFinal.toFixed(2);
+                const spFinal = isFinite(sp) ? roundToWholeNumber(sp) : 0;
+                sellingPriceInput.value = spFinal;
             }
 
             // Update calculated portions (FULL/HALF)
@@ -1759,16 +1973,54 @@ function openDishModal(dishId = null) {
                 // qty in base = qty * toBaseSelected
                 const qtyInBase = qty * (toBaseSelected || 1);
                 const result = qtyInBase * costPerBase;
+                
+                // Debug log for cost calculation
+                console.debug('[Menu] computeIngredientCost calculation:', {
+                    qty,
+                    cpu,
+                    unitType,
+                    selectedUnit,
+                    ingredientUnit,
+                    toBaseSelected,
+                    toBaseIngredient,
+                    costPerBase,
+                    qtyInBase,
+                    result,
+                    rounded: Math.round(result)
+                });
                 // Guard: ensure finite result
                 if (!isFinite(result)) {
                     console.debug('[Menu] computeIngredientCost produced non-finite value', { selIng, unitType, selectedUnit, ingredientUnit, qty, cpu, toBaseSelected, toBaseIngredient, costPerBase, qtyInBase, result });
                     return 0;
                 }
-                return result;
+                // Round to nearest whole number
+                return Math.round(result);
             } catch (e) {
                 console.error('[Menu] computeIngredientCost error', e, selIng);
                 return 0;
             }
+        }
+
+        // Update the price input fields to ensure they only accept whole numbers
+        function setupPriceInputs() {
+            // Update all number inputs to use step="1" for whole numbers
+            const priceInputs = document.querySelectorAll('input[type="number"]');
+            priceInputs.forEach(input => {
+                // Change step to 1 to only allow whole numbers
+                input.step = '1';
+                
+                // Add event listener to round the value when it loses focus
+                input.addEventListener('change', function() {
+                    if (this.value !== '') {
+                        this.value = roundToWholeNumber(this.value);
+                    }
+                });
+                
+                // Also round the current value if it exists
+                if (this.value) {
+                    this.value = roundToWholeNumber(this.value);
+                }
+            });
         }
 
         // Compute basic availability of a dish based on ingredient stock
@@ -1788,106 +2040,122 @@ function openDishModal(dishId = null) {
 
         // Save dish
 async function saveDish() {
-    const form = document.getElementById('dishForm');
-    const name = document.getElementById('dishName').value.trim();
-    // Category removed
-    // Recompute costPrice from selectedIngredients to ensure correctness
-    let recomputedCost = 0;
+    const saveBtn = document.getElementById('saveDishBtn');
+    const originalText = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+    
     try {
-        for (const ing of selectedIngredients) {
-            recomputedCost += computeIngredientCost(ing);
+        const form = document.getElementById('dishForm');
+        const name = document.getElementById('dishName').value.trim();
+        const photoUrl = document.getElementById('dishPhotoUrl').value.trim();
+        // Category removed
+        // Recompute costPrice from selectedIngredients to ensure correctness
+        let recomputedCost = 0;
+        try {
+            for (const ing of selectedIngredients) {
+                recomputedCost += computeIngredientCost(ing);
+            }
+        } catch (e) {
+            console.error('[Menu] saveDish: error computing cost', e, selectedIngredients);
+        }
+        const costPrice = Number.isFinite(recomputedCost) ? roundToWholeNumber(recomputedCost) : 0;
+        const sellingPrice = roundToWholeNumber(document.getElementById('dishSellingPrice').value);
+        // Active removed
+        
+        if (!name || isNaN(costPrice) || isNaN(sellingPrice)) {
+            showToast('Error', 'Please fill in all required fields', 'danger');
+            return;
+        }
+        
+        if (selectedIngredients.length === 0) {
+            showToast('Error', 'Please add at least one ingredient', 'danger');
+            return;
+        }
+        
+        // Normalize ingredients for persistence
+        const persistedIngredients = selectedIngredients.map(src => {
+            const ingredient = menuData.ingredients.find(i => String(i.id) === String(src.ingredientId));
+            const baseUnit = ingredient ? ingredient.unit : src.ingredientUnit || src.unit;
+            const unitType = src.unitType || (ingredient ? ingredient.unitType : 'weight');
+            const cpuNum = Number(src.costPerUnit != null ? src.costPerUnit : (ingredient ? ingredient.costPerUnit : 0));
+            const qtyNum = Number(src.quantity);
+            return {
+                ...src,
+                ingredientId: String(src.ingredientId || (ingredient ? ingredient.id : '')),
+                name: src.name || (ingredient ? ingredient.name : ''),
+                quantity: Number.isFinite(qtyNum) && qtyNum > 0 ? qtyNum : 0,
+                unit: src.unit || baseUnit || '',
+                costPerUnit: Number.isFinite(cpuNum) ? cpuNum : 0,
+                ingredientUnit: src.ingredientUnit || baseUnit || (src.unit || ''),
+                unitType,
+            };
+        });
+
+        // Resolve persisted id from hidden input if present
+        const hiddenId = (document.getElementById('dishId').value || '').trim();
+        const resolvedId = hiddenId || ('dish-' + Date.now());
+        
+        // Get portion pieces from the form
+        const fullPieces = parseInt(document.getElementById('portionPieces-full')?.value) || 1;
+        const halfPieces = parseInt(document.getElementById('portionPieces-half')?.value) || 1;
+        
+        const dish = {
+            id: resolvedId,
+            name,
+            photoUrl,
+            description: document.getElementById('dishDescription').value.trim(),
+            costPrice,
+            sellingPrice,
+            ingredients: persistedIngredients,
+            portions: {
+                full: {
+                    name: 'FULL',
+                    price: roundToWholeNumber(sellingPrice),
+                    multiplier: 1,
+                    portionPieces: fullPieces
+                },
+                half: {
+                    name: 'HALF',
+                    price: roundToWholeNumber(sellingPrice / 2),
+                    multiplier: 0.5,
+                    portionPieces: halfPieces
+                }
+            },
+            lastUpdated: new Date().toISOString()
+        };
+        console.debug('[Menu] saveDish: persisting dish', {
+            id: dish.id,
+            name: dish.name,
+            costPrice: dish.costPrice,
+            sellingPrice: dish.sellingPrice,
+            persistedCount: dish.ingredients.length,
+            selectedCount: selectedIngredients ? selectedIngredients.length : 0,
+            sample: dish.ingredients[0] || null
+        });
+
+        // Update or add dish in local state
+        const existingIndex = menuData.dishes.findIndex(d => String(d.id) === String(dish.id));
+        if (existingIndex >= 0) {
+            menuData.dishes[existingIndex] = dish;
+        } else {
+            menuData.dishes.push(dish);
+        }
+        
+        // Save data and update UI: re-fetch latest and broadcast change for other tabs/pages
+        if (await saveData()) {
+            try { localStorage.setItem('menuUpdated', String(Date.now())); } catch (e) {}
+            await loadData();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('dishModal'));
+            if (modal) modal.hide();
+            showToast('Success', 'Dish saved successfully', 'success');
         }
     } catch (e) {
-        console.error('[Menu] saveDish: error computing cost', e, selectedIngredients);
-    }
-    const costPrice = Number.isFinite(recomputedCost) ? Number(recomputedCost.toFixed(2)) : 0;
-    const sellingPrice = parseFloat(document.getElementById('dishSellingPrice').value);
-    // Active removed
-    
-    if (!name || isNaN(costPrice) || isNaN(sellingPrice)) {
-        showToast('Error', 'Please fill in all required fields', 'danger');
-        return;
-    }
-    
-    if (selectedIngredients.length === 0) {
-        showToast('Error', 'Please add at least one ingredient', 'danger');
-        return;
-    }
-    
-    // Normalize ingredients for persistence
-    const persistedIngredients = selectedIngredients.map(src => {
-        const ingredient = menuData.ingredients.find(i => String(i.id) === String(src.ingredientId));
-        const baseUnit = ingredient ? ingredient.unit : src.ingredientUnit || src.unit;
-        const unitType = src.unitType || (ingredient ? ingredient.unitType : 'weight');
-        const cpuNum = Number(src.costPerUnit != null ? src.costPerUnit : (ingredient ? ingredient.costPerUnit : 0));
-        const qtyNum = Number(src.quantity);
-        return {
-            ingredientId: String(src.ingredientId || (ingredient ? ingredient.id : '')),
-            name: src.name || (ingredient ? ingredient.name : ''),
-            quantity: Number.isFinite(qtyNum) && qtyNum > 0 ? qtyNum : 0,
-            unit: src.unit || baseUnit || '',
-            costPerUnit: Number.isFinite(cpuNum) ? cpuNum : 0,
-            ingredientUnit: src.ingredientUnit || baseUnit || (src.unit || ''),
-            unitType,
-        };
-    });
-
-    // Resolve persisted id from hidden input if present
-    const hiddenId = (document.getElementById('dishId').value || '').trim();
-    const resolvedId = hiddenId || ('dish-' + Date.now());
-    
-    // Get portion pieces from the form
-    const fullPieces = parseInt(document.getElementById('portionPieces-full')?.value) || 1;
-    const halfPieces = parseInt(document.getElementById('portionPieces-half')?.value) || 1;
-    
-    const dish = {
-        id: resolvedId,
-        name,
-        description: document.getElementById('dishDescription').value.trim(),
-        costPrice,
-        sellingPrice,
-        ingredients: persistedIngredients,
-        portions: {
-            full: {
-                name: 'FULL',
-                price: sellingPrice,
-                multiplier: 1,
-                portionPieces: fullPieces
-            },
-            half: {
-                name: 'HALF',
-                price: Math.round((sellingPrice / 2) * 100) / 100,
-                multiplier: 0.5,
-                portionPieces: halfPieces
-            }
-        },
-        lastUpdated: new Date().toISOString()
-    };
-    console.debug('[Menu] saveDish: persisting dish', {
-        id: dish.id,
-        name: dish.name,
-        costPrice: dish.costPrice,
-        sellingPrice: dish.sellingPrice,
-        persistedCount: dish.ingredients.length,
-        selectedCount: selectedIngredients ? selectedIngredients.length : 0,
-        sample: dish.ingredients[0] || null
-    });
-
-    // Update or add dish in local state
-    const existingIndex = menuData.dishes.findIndex(d => String(d.id) === String(dish.id));
-    if (existingIndex >= 0) {
-        menuData.dishes[existingIndex] = dish;
-    } else {
-        menuData.dishes.push(dish);
-    }
-    
-    // Save data and update UI: re-fetch latest and broadcast change for other tabs/pages
-    if (await saveData()) {
-        try { localStorage.setItem('menuUpdated', String(Date.now())); } catch (e) {}
-        await loadData();
-        const modal = bootstrap.Modal.getInstance(document.getElementById('dishModal'));
-        if (modal) modal.hide();
-        showToast('Success', 'Dish saved successfully', 'success');
+        console.error('[Menu] saveDish: error', e);
+        showToast('Error', 'Failed to save dish. Please try again.', 'danger');
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalText;
     }
 }
 
@@ -1978,18 +2246,112 @@ async function saveDish() {
         }
 
         // Populate the unit options in Add Ingredient (Dish Modal) based on selected ingredient
-        function updateDishIngredientUnitOptions() {
+        // Calculate and update ingredient cost
+        function updateIngredientCost() {
             try {
                 const ingredientId = document.getElementById('ingredientSelect').value;
+                const quantity = parseFloat(document.getElementById('ingredientQuantity').value) || 0;
                 const unitSelect = document.getElementById('dishIngredientUnit');
+                const selectedUnit = unitSelect ? unitSelect.value : '';
+                const ingredientDetails = document.getElementById('ingredientDetails');
+                const ingredientCostEl = document.getElementById('ingredientCost');
+                const ingredientUnitEl = document.getElementById('ingredientUnit');
+                const ingredientTotalCostEl = document.getElementById('ingredientTotalCost');
+
+                if (!ingredientId) {
+                    ingredientDetails.style.display = 'none';
+                    return;
+                }
+
+                const ingredient = menuData.ingredients.find(i => i.id === ingredientId);
+                if (!ingredient) {
+                    ingredientDetails.style.display = 'none';
+                    return;
+                }
+
+                // Show ingredient details
+                ingredientDetails.style.display = 'flex';
+                
+                // Get the base cost per unit and base unit from the ingredient
+                let costPerUnit = Number(ingredient.costPerUnit);
+                if (isNaN(costPerUnit)) {
+                    console.warn(`[Menu] Invalid costPerUnit for ${ingredient.name}:`, ingredient.costPerUnit);
+                    costPerUnit = 0;
+                }
+                
+                const baseUnit = (ingredient.unit || '').trim();
+                const displayUnit = (selectedUnit || baseUnit || 'unit').trim();
+                
+                // If the selected unit is different from the base unit, convert the cost
+                if (selectedUnit && selectedUnit !== baseUnit) {
+                    const unitType = ingredient.unitType || 'weight';
+                    const units = (menuData.units && menuData.units[unitType]) || CONFIG.UNITS[unitType] || [];
+                    const baseUnitInfo = units.find(u => u.name === baseUnit);
+                    const selectedUnitInfo = units.find(u => u.name === selectedUnit);
+                    
+                    if (baseUnitInfo && selectedUnitInfo && baseUnitInfo.toBase && selectedUnitInfo.toBase) {
+                        // Convert cost to base unit first, then to selected unit
+                        costPerUnit = (costPerUnit * baseUnitInfo.toBase) / selectedUnitInfo.toBase;
+                        console.debug(`[Menu] Converted cost: ${ingredient.costPerUnit} ${baseUnit} -> ${costPerUnit.toFixed(4)} ${selectedUnit}`, 
+                            {baseUnitInfo, selectedUnitInfo});
+                    } else {
+                        console.warn(`[Menu] Missing unit conversion info`, {baseUnit, selectedUnit, baseUnitInfo, selectedUnitInfo});
+                    }
+                }
+                
+                const totalCost = costPerUnit * quantity;
+                
+                // Update the display with 2 decimal places for monetary values
+                ingredientCostEl.textContent = costPerUnit.toFixed(2);
+                ingredientUnitEl.textContent = displayUnit;
+                ingredientTotalCostEl.textContent = totalCost.toFixed(2);
+                
+                console.debug('[Menu] updateIngredientCost:', {
+                    ingredient: ingredient.name,
+                    baseCost: ingredient.costPerUnit,
+                    baseUnit: baseUnit,
+                    selectedUnit: selectedUnit,
+                    costPerUnit: costPerUnit,
+                    quantity: quantity,
+                    totalCost: totalCost
+                });
+                
+            } catch (e) {
+                console.error('[Menu] updateIngredientCost error', e);
+                // Ensure the details are hidden on error
+                const ingredientDetails = document.getElementById('ingredientDetails');
+                if (ingredientDetails) {
+                    ingredientDetails.style.display = 'none';
+                }
+            }
+        }
+
+        // Populate the unit options in Add Ingredient (Dish Modal) based on selected ingredient
+        function updateDishIngredientUnitOptions() {
+            try {
+                const ingredientSelect = document.getElementById('ingredientSelect');
+                const ingredientId = ingredientSelect.value;
+                const unitSelect = document.getElementById('dishIngredientUnit');
+                
                 if (!unitSelect) {
                     console.warn('[Menu] updateDishIngredientUnitOptions: dishIngredientUnit element not found');
                     return;
                 }
+                
                 unitSelect.innerHTML = '<option value="">Select unit</option>';
-                if (!ingredientId) return;
+                
+                if (!ingredientId) {
+                    document.getElementById('ingredientDetails').style.display = 'none';
+                    return;
+                }
+                
                 const ingredient = menuData.ingredients.find(i => i.id === ingredientId);
-                if (!ingredient) return;
+                if (!ingredient) {
+                    document.getElementById('ingredientDetails').style.display = 'none';
+                    return;
+                }
+                
+                // Update unit options
                 const unitType = ingredient.unitType || 'weight';
                 const units = (menuData.units && menuData.units[unitType]) || CONFIG.UNITS[unitType] || [];
                 units.forEach(u => {
@@ -1999,6 +2361,17 @@ async function saveDish() {
                     if (u.name === ingredient.unit) opt.selected = true;
                     unitSelect.appendChild(opt);
                 });
+                
+                // Update cost display after units are populated
+                setTimeout(() => {
+                    updateIngredientCost();
+                    // Ensure the cost is rounded in the UI
+                    const costInput = document.getElementById('ingredientCost');
+                    if (costInput && costInput.value) {
+                        costInput.value = roundToWholeNumber(costInput.value);
+                    }
+                }, 0);
+                
                 console.debug('[Menu] updateDishIngredientUnitOptions:', { ingredientId, unitType });
             } catch (e) {
                 console.error('[Menu] updateDishIngredientUnitOptions error', e);
@@ -2037,12 +2410,13 @@ async function saveDish() {
 
         // Save ingredient
         async function saveIngredient() {
-            const form = document.getElementById('ingredientForm');
-            const name = document.getElementById('ingredientName').value.trim();
+            const name = document.getElementById('dishName').value.trim();
+            const description = document.getElementById('dishDescription').value.trim();
+            const photoUrl = document.getElementById('dishPhotoUrl').value.trim();
             // Category removed
             const unitType = document.getElementById('ingredientUnitType').value;
             const unit = document.getElementById('ingredientUnit').value;
-            const costPerUnit = parseFloat(document.getElementById('ingredientCostPerUnit').value);
+            const costPerUnit = roundToWholeNumber(parseFloat(document.getElementById('ingredientCostPerUnit').value));
             // Active removed
             
             if (!name || !unitType || !unit || isNaN(costPerUnit)) {
@@ -2051,15 +2425,16 @@ async function saveDish() {
             }
             
             const ingredient = {
-                id: editingIngredientId || 'ing-' + Date.now(),
+                id: dishId || 'dish_' + Date.now(),
                 name,
-                unitType,
+                description,
+                photoUrl: photoUrl || null,
                 unit,
                 costPerUnit,
                 lastUpdated: new Date().toISOString()
             };
             
-            // Add density for volume units
+            // Set optional properties based on unit type
             if (unitType === 'volume') {
                 ingredient.density = parseFloat(document.getElementById('ingredientDensity').value) || 1;
             }
