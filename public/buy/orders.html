@@ -637,7 +637,6 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        }
 
         /* Mobile-specific styles */
         @media (max-width: 768px) {
@@ -1344,6 +1343,7 @@
             font-weight: 700;
             margin-bottom: 0.5rem;
             background: linear-gradient(45deg, #333, #555);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: none;
@@ -2455,20 +2455,32 @@
             ingredients: {}
         };
 
-        // Load centralized menu data (single source of truth: public/buy/menu.json via /api/menu)
+        // Load centralized menu data
         async function loadMenuData() {
             try {
                 console.log('Loading centralized menu data...');
-                // Primary and only source: server API (/api/menu) backed by public/buy/menu.json
-                const apiRes = await fetch('/api/menu', { cache: 'no-store' });
-                if (!apiRes.ok) throw new Error('HTTP ' + apiRes.status);
-                state.menuData = await apiRes.json();
-                console.log('Loaded menu from /api/menu');
-
+                
+                // Try to load from localStorage first
+                const savedMenuData = localStorage.getItem('menuData');
+                
+                if (savedMenuData) {
+                    state.menuData = JSON.parse(savedMenuData);
+                    console.log('Loaded menu from localStorage');
+                } else {
+                    // Load from menu.json
+                    const response = await fetch('./menu.json');
+                    if (response.ok) {
+                        state.menuData = await response.json();
+                        console.log('Loaded menu from menu.json');
+                    } else {
+                        throw new Error('Failed to fetch menu.json');
+                    }
+                }
+                
                 // Convert dishes to the format expected by orders.html
                 const dishes = state.menuData.dishes || [];
                 state.menuItems = {};
-
+                
                 dishes.forEach(dish => {
                     state.menuItems[dish.id] = {
                         name: dish.name,
@@ -2477,65 +2489,36 @@
                         gramsPerPiece: dish.gramsPerPiece,
                         ingredients: dish.ingredients,
                         costPrice: dish.costPrice,
-                        sellingPrice: dish.sellingPrice, // include selling price if no portions
                         category: dish.category
                     };
                 });
-
+                
                 // Store vendors and ingredients for reference
                 state.vendors = {};
                 state.ingredients = {};
-
+                
                 (state.menuData.vendors || []).forEach(vendor => {
                     state.vendors[vendor.id] = vendor;
                 });
-
+                
                 (state.menuData.ingredients || []).forEach(ingredient => {
                     state.ingredients[ingredient.id] = ingredient;
                 });
-
+                
                 console.log('Menu data loaded successfully. Items:', Object.keys(state.menuItems).length);
-
+                
             } catch (error) {
-                console.error('Error loading menu data (single source /api/menu -> ./menu.json):', error);
-                // Enforce single source of truth: do not inject any hardcoded fallback menu
-                state.menuItems = {};
-                state.menuData = { dishes: [], ingredients: [] };
-                alert('Failed to load menu. Please ensure the server API (/api/menu) is running and public/buy/menu.json is accessible.');
+                console.error('Error loading menu data:', error);
+                console.warn('Using fallback menu data');
+                
+                // Fallback to basic menu structure if loading fails
+                state.menuItems = {
+                    1: { name: "Seekh Kebab", portions: { half: { name: "HALF", price: 109, pieces: 2 }, full: { name: "FULL", price: 209, pieces: 4 } }, rawMaterial: "keema", gramsPerPiece: 50 },
+                    2: { name: "Chicken Tikka", portions: { half: { name: "HALF", price: 149, pieces: 4 }, full: { name: "FULL", price: 289, pieces: 8 } }, rawMaterial: "tikka", gramsPerPiece: 23.25 },
+                    3: { name: "Paneer Tikka", portions: { half: { name: "HALF", price: 79, pieces: 4 }, full: { name: "FULL", price: 149, pieces: 8 } }, rawMaterial: "paneer", gramsPerPiece: 31.25 },
+                    4: { name: "Rumali Roti", portions: { piece: { name: "PER PIECE", price: 10, pieces: 1 } }, rawMaterial: "other", gramsPerPiece: 0 }
+                };
             }
-        }
-
-        // Availability helpers (sold-out/low/available) based on ingredient stock from menu.json
-        function computeMenuItemAvailability(menuItem) {
-            try {
-                if (!menuItem || !Array.isArray(menuItem.ingredients)) return 'available';
-                let low = false;
-                for (const req of menuItem.ingredients) {
-                    const ing = state.menuData.ingredients?.find?.(i => String(i.id) === String(req.ingredientId))
-                        || state.ingredients[String(req.ingredientId)];
-                    if (!ing) continue;
-                    const current = typeof ing.currentStock === 'number' ? ing.currentStock : null;
-                    const min = typeof ing.minStockLevel === 'number' ? ing.minStockLevel : null;
-                    if (current != null && current <= 0) return 'out';
-                    if (current != null && min != null && current < min) low = true;
-                }
-                return low ? 'low' : 'available';
-            } catch (e) {
-                console.warn('computeMenuItemAvailability error', e, menuItem);
-                return 'available';
-            }
-        }
-
-        function availabilityBadgeText(level) {
-            if (level === 'out') return 'Sold Out';
-            if (level === 'low') return 'Low Stock';
-            return 'Available';
-        }
-
-        function availabilityBadgeClass(level) {
-            if (level === 'out') return 'badge bg-danger';
-            if (level === 'low') return 'badge bg-warning text-dark';
-            return 'badge bg-success';
         }
 
         // Initialize Application
@@ -3164,8 +3147,6 @@
             // Use filtered orders if search is active, otherwise use all orders
             const ordersToRender = state.searchQuery ? state.filteredOrders : state.currentOrders;
 
-
-
             // Separate orders by status
             const pendingOrders = ordersToRender.filter(order =>
                 order.status === 'preparing' || order.status === 'pending');
@@ -3236,12 +3217,17 @@
                                                 </span>
                                                 <span class="${item.cooked ? 'text-success fw-bold' : ''}">
                                                     ${item.name} (${item.portion}) ×${item.quantity}
-                                                    ${item.pieces ? `<small class="text-muted">(${item.pieces * item.quantity} pcs)</small>` : ''}
+                                                    ${(item.pieces || item.portionPieces) ? 
+                                                        `<small class="text-muted">(${((item.pieces || item.portionPieces || 1) * item.quantity).toFixed(0)} pcs)</small>` : 
+                                                        ''}
                                                 </span>
                                             </div>
-                                            <div>
-                                                <span class="fw-bold">₹${item.price * item.quantity}</span>
-                                                ${item.cooked ? '<span class="ms-1 badge bg-success">Cooked</span>' : ''}
+                                            <div class="text-end">
+                                                <div class="fw-bold">₹${(item.price * item.quantity).toFixed(2)}</div>
+                                                ${(item.pieces || item.portionPieces) ? 
+                                                    `<div class="small text-muted">₹${(item.price / (item.pieces || item.portionPieces || 1)).toFixed(2)}/pc</div>` : 
+                                                    ''}
+                                                ${item.cooked ? '<span class="badge bg-success mt-1">Cooked</span>' : ''}
                                             </div>
                                         </div>
                                     </div>
@@ -4397,26 +4383,17 @@
                     portionSelect.innerHTML = '';
                     if (itemId && state.menuItems[itemId]) {
                         const portions = state.menuItems[itemId].portions;
-                        const hasPortions = portions && Object.keys(portions).length > 0;
-                        if (hasPortions) {
-                            for (const [key, portion] of Object.entries(portions)) {
-                                const option = document.createElement('option');
-                                option.value = key;
-                                const piecesInfo = portion.pieces ? ` (${portion.pieces} pcs)` : '';
-                                option.textContent = `${portion.name}${piecesInfo} - ₹${portion.price}`;
-                                if (item && item.portion === portion.name) {
-                                    option.selected = true;
-                                }
-                                portionSelect.appendChild(option);
+                        for (const [key, portion] of Object.entries(portions)) {
+                            const option = document.createElement('option');
+                            option.value = key;
+                            // Add pieces information if available (check both pieces and portionPieces)
+                            const pieces = portion.pieces || portion.portionPieces || 0;
+                            const piecesInfo = pieces > 0 ? ` (${pieces} pcs)` : '';
+                            option.textContent = `${portion.name}${piecesInfo} - ₹${portion.price}`;
+                            if (item && item.portion === portion.name) {
+                                option.selected = true;
                             }
-                        } else {
-                            // No portions: show a single Standard option using sellingPrice
-                            const std = document.createElement('option');
-                            std.value = 'standard';
-                            const sp = state.menuItems[itemId].sellingPrice || 0;
-                            std.textContent = `Standard - ₹${sp}`;
-                            std.selected = true;
-                            portionSelect.appendChild(std);
+                            portionSelect.appendChild(option);
                         }
                     }
                     updatePrice();
@@ -4426,23 +4403,16 @@
                     const itemId = itemSelect.value;
                     const portionKey = portionSelect.value;
                     const quantity = parseInt(quantityInput.value) || 0;
+                    
                     if (itemId && portionKey && state.menuItems[itemId]) {
-                        const portions = state.menuItems[itemId].portions;
-                        const hasPortions = portions && Object.keys(portions).length > 0;
-                        let price = 0;
-                        if (hasPortions) {
-                            const portionData = portions[portionKey];
-                            price = (portionData?.price || 0) * quantity;
-                            if (portionData && portionData.pieces) {
-                                const totalPieces = portionData.pieces * quantity;
-                                priceDisplay.textContent = `₹${price} (${totalPieces} pcs)`;
-                            } else {
-                                priceDisplay.textContent = `₹${price}`;
-                            }
+                        const portionData = state.menuItems[itemId].portions[portionKey];
+                        const price = portionData.price * quantity;
+                        const pieces = portionData.pieces || portionData.portionPieces;
+                        
+                        if (pieces) {
+                            const totalPieces = pieces * quantity;
+                            priceDisplay.textContent = `₹${price} (${totalPieces} pcs)`;
                         } else {
-                            // No portions: use sellingPrice
-                            const sp = state.menuItems[itemId].sellingPrice || 0;
-                            price = sp * quantity;
                             priceDisplay.textContent = `₹${price}`;
                         }
                     } else {
@@ -4576,42 +4546,21 @@
                         return;
                     }
 
-                    // Availability check: block if sold out
-                    const itemDataForAvailability = state.menuItems[itemId];
-                    const availability = computeMenuItemAvailability(itemDataForAvailability);
-                    if (availability === 'out') {
-                        alert(`Cannot update order: "${itemDataForAvailability.name}" is sold out.`);
-                        return;
-                    }
-
                     const itemData = state.menuItems[itemId];
-                    const portions = itemData.portions;
-                    const hasPortions = portions && Object.keys(portions).length > 0;
-                    if (hasPortions) {
-                        const portionData = portions[portionKey];
-                        items.push({
-                            id: itemId,
-                            name: itemData.name,
-                            portion: portionData.name,
-                            quantity,
-                            price: portionData.price,
-                            pieces: portionData.pieces || null
-                        });
-                    } else {
-                        const sp = itemData.sellingPrice || 0;
-                        items.push({
-                            id: itemId,
-                            name: itemData.name,
-                            portion: 'Standard',
-                            quantity,
-                            price: sp,
-                            pieces: null
-                        });
-                    }
+                    const portionData = itemData.portions[portionKey];
+
+                    items.push({
+                        id: itemId,
+                        name: itemData.name,
+                        portion: portionData.name,
+                        quantity,
+                        price: portionData.price,
+                        pieces: portionData.pieces || null
+                    });
                 }
             }
 
-            const total = items.reduce((sum, i) => sum + (Number(i.price || 0) * Number(i.quantity || 0)), 0);
+            const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
             try {
                 // Prepare update data
@@ -4842,43 +4791,21 @@
                         return;
                     }
 
-                    // Availability check: block if sold out
-                    const itemDataForAvailability = state.menuItems[itemId];
-                    const availability = computeMenuItemAvailability(itemDataForAvailability);
-                    if (availability === 'out') {
-                        alert(`Cannot place order: "${itemDataForAvailability.name}" is sold out.`);
-                        return;
-                    }
-
                     const itemData = state.menuItems[itemId];
-                    const portions = itemData.portions;
-                    const hasPortions = portions && Object.keys(portions).length > 0;
-                    if (hasPortions) {
-                        const portionData = portions[portionKey];
-                        items.push({
-                            id: itemId,
-                            name: itemData.name,
-                            portion: portionData.name,
-                            quantity,
-                            price: portionData.price,
-                            pieces: portionData.pieces || null
-                        });
-                    } else {
-                        const sp = itemData.sellingPrice || 0;
-                        items.push({
-                            id: itemId,
-                            name: itemData.name,
-                            portion: 'Standard',
-                            quantity,
-                            price: sp,
-                            pieces: null
-                        });
-                    }
+                    const portionData = itemData.portions[portionKey];
+                    items.push({
+                        id: itemId,
+                        name: itemData.name,
+                        portion: portionData.name,
+                        quantity,
+                        price: portionData.price,
+                        pieces: portionData.pieces || null
+                    });
                 }
             }
 
-            // Calculate total with numeric guards
-            const total = items.reduce((sum, i) => sum + (Number(i.price || 0) * Number(i.quantity || 0)), 0);
+            // Calculate total
+            const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
             try {
                 // First close the modal before the async operation
@@ -5146,24 +5073,14 @@
                         portionSelect.innerHTML = '';
                         if (itemId && state.menuItems[itemId]) {
                             const portions = state.menuItems[itemId].portions;
-                            const hasPortions = portions && Object.keys(portions).length > 0;
-                            if (hasPortions) {
-                                for (const [key, portion] of Object.entries(portions)) {
-                                    const option = document.createElement('option');
-                                    option.value = key;
-                                    // Add pieces information if available
-                                    const piecesInfo = portion.pieces ? ` (${portion.pieces} pcs)` : '';
-                                    option.textContent = `${portion.name}${piecesInfo} - ₹${portion.price}`;
-                                    portionSelect.appendChild(option);
-                                }
-                            } else {
-                                // No portions: show a single Standard option using sellingPrice
-                                const std = document.createElement('option');
-                                std.value = 'standard';
-                                const sp = state.menuItems[itemId].sellingPrice || 0;
-                                std.textContent = `Standard - ₹${sp}`;
-                                std.selected = true;
-                                portionSelect.appendChild(std);
+                            for (const [key, portion] of Object.entries(portions)) {
+                                const option = document.createElement('option');
+                                option.value = key;
+                                // Add pieces information if available (check both pieces and portionPieces)
+                                const pieces = portion.pieces || portion.portionPieces || 0;
+                                const piecesInfo = pieces > 0 ? ` (${pieces} pcs)` : '';
+                                option.textContent = `${portion.name}${piecesInfo} - ₹${portion.price}`;
+                                portionSelect.appendChild(option);
                             }
                         }
                         updateOrderItemPrice();
@@ -5174,23 +5091,15 @@
                         const portionKey = portionSelect.value;
                         const quantity = parseInt(quantityInput.value) || 0;
                         if (itemId && portionKey && state.menuItems[itemId]) {
-                            const portions = state.menuItems[itemId].portions;
-                            const hasPortions = portions && Object.keys(portions).length > 0;
-                            let price = 0;
-                            if (hasPortions) {
-                                const portionData = portions[portionKey];
-                                price = (portionData?.price || 0) * quantity;
-                                // Add pieces information to the price display if available
-                                if (portionData && portionData.pieces) {
-                                    const totalPieces = portionData.pieces * quantity;
-                                    priceDisplay.textContent = `₹${price} (${totalPieces} pcs)`;
-                                } else {
-                                    priceDisplay.textContent = `₹${price}`;
-                                }
+                            const portionData = state.menuItems[itemId].portions[portionKey];
+                            const price = portionData.price * quantity;
+                            
+                            // Add pieces information to the price display if available (check both pieces and portionPieces)
+                            const pieces = portionData.pieces || portionData.portionPieces;
+                            if (pieces) {
+                                const totalPieces = pieces * quantity;
+                                priceDisplay.textContent = `₹${price} (${totalPieces} pcs)`;
                             } else {
-                                // No portions: use sellingPrice
-                                const sp = state.menuItems[itemId].sellingPrice || 0;
-                                price = sp * quantity;
                                 priceDisplay.textContent = `₹${price}`;
                             }
                         } else {

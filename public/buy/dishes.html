@@ -16,7 +16,7 @@
             --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             --border-radius: 12px;
         }
-
+        
         body {
             background-color: #f8f9fa;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -445,14 +445,14 @@
 
                 <!-- Actions -->
                 <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                    <button id="resetBtn" class="btn btn-outline-light btn-sm" title="Reset Filters">
+                    <button id="resetBtn" class="btn btn-outline-primary btn-sm" title="Refresh">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>
-                    <button id="exportBtn" class="btn btn-outline-light btn-sm" title="Export Data">
+                    <button id="exportBtn" class="btn btn-outline-primary btn-sm" title="Download">
                         <i class="bi bi-download"></i>
                     </button>
-                    <button id="addNewItemBtn" class="btn btn-light btn-sm" title="Add New Item">
-                        <i class="bi bi-plus"></i>
+                    <button id="addNewItemBtn" class="btn btn-primary btn-sm" title="Add New Item">
+                        <i class="bi bi-plus"></i> Add Dish
                     </button>
                 </div>
 
@@ -544,10 +544,44 @@
                                     </div>
                                     <div class="col-6">
                                         <div class="mb-3">
-                                            <label for="dishSellingPrice" class="form-label">Selling Price *</label>
-                                            <input type="number" class="form-control" id="dishSellingPrice" step="0.01" required>
+                                            <label class="form-label" for="portionModeSelect">Portion</label>
+                                            <select id="portionModeSelect" class="form-select mb-2">
+                                                <option value="full" selected>FULL (default)</option>
+                                                <option value="half">HALF</option>
+                                            </select>
+                                            <div id="sellingPriceGroup">
+                                                <label for="dishSellingPrice" class="form-label">Selling Price *</label>
+                                                <input type="number" class="form-control" id="dishSellingPrice" step="0.01">
+                                            </div>
                                         </div>
                                     </div>
+                                </div>
+                                <!-- Calculated Portions (noise removed) -->
+                                <div class="mb-3">
+                                    <label class="form-label">Calculated Portions</label>
+                                    <div class="row g-2 align-items-end" style="display:none">
+                                        <!-- Hidden manual editor to reduce noise but keep DOM stable -->
+                                        <div class="col-4">
+                                            <label class="form-label">Portion Name</label>
+                                            <input type="text" class="form-control" id="portionNameInput" placeholder="HALF">
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="form-label">Price (₹)</label>
+                                            <input type="number" class="form-control" id="portionPriceInput" min="0" step="1" placeholder="149">
+                                        </div>
+                                        <div class="col-3">
+                                            <label class="form-label">Pieces</label>
+                                            <input type="number" class="form-control" id="portionPiecesInput" min="0" step="1" placeholder="optional">
+                                        </div>
+                                        <div class="col-1 d-grid">
+                                            <button type="button" id="addPortionBtn" class="btn btn-primary"><i class="bi bi-plus"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 d-flex gap-2" style="display:none">
+                                        <button type="button" id="quickAddHalfBtn" class="btn btn-outline-secondary btn-sm">Add HALF</button>
+                                        <button type="button" id="quickAddFullBtn" class="btn btn-outline-secondary btn-sm" disabled title="FULL is default via Selling Price">Add FULL (default via Selling Price)</button>
+                                    </div>
+                                    <div id="portionsListContainer" class="mt-2"></div>
                                 </div>
                                 <div class="mb-3 form-check">
                                     <!-- Active flag removed -->
@@ -729,8 +763,10 @@
         let editingDishId = null;
         let editingIngredientId = null;
         let selectedIngredients = [];
+        let dishPortions = {}; // key -> { name, price, pieces }
         let filteredDishes = [];
         let filteredIngredients = [];
+        let sellingPriceTouched = false; // track manual edits to selling price
         
         // Pagination state
         const pagination = {
@@ -825,6 +861,69 @@
                 updateUnitSelectForType(this.value);
                 toggleIngredientFields(this.value);
             });
+            
+            // Portion mode behavior
+            const portionModeSelect = document.getElementById('portionModeSelect');
+            const sellingPriceInput = document.getElementById('dishSellingPrice');
+            if (portionModeSelect && sellingPriceInput) {
+                portionModeSelect.addEventListener('change', () => {
+                    const mode = portionModeSelect.value;
+                    if (mode === 'half') {
+                        sellingPriceInput.disabled = true;
+                        showToast('Info', 'FULL is set via Selling Price. To price HALF, use Add Portion and set HALF price.', 'info');
+                    } else {
+                        sellingPriceInput.disabled = false;
+                    }
+                });
+                // Update FULL display live when selling price changes
+                sellingPriceInput.addEventListener('input', () => {
+                    sellingPriceTouched = true;
+                    renderPortionsList();
+                });
+            }
+
+            // Portions: add button handler
+            const addPortionBtn = document.getElementById('addPortionBtn');
+            if (addPortionBtn) {
+                addPortionBtn.addEventListener('click', () => {
+                    const nameEl = document.getElementById('portionNameInput');
+                    const priceEl = document.getElementById('portionPriceInput');
+                    const piecesEl = document.getElementById('portionPiecesInput');
+                    const name = (nameEl?.value || '').trim();
+                    const price = Number(priceEl?.value || 0);
+                    const pieces = Number(piecesEl?.value || 0);
+                    if (!name || !(price >= 0)) {
+                        showToast('Error', 'Please enter a portion name and a valid price', 'danger');
+                        return;
+                    }
+                    const key = normalizePortionKey(name);
+                    if (key === 'full') {
+                        showToast('Info', 'FULL is the default portion — set its price via Selling Price field.', 'info');
+                        return;
+                    }
+                    if (!dishPortions) dishPortions = {};
+                    dishPortions[key] = { name, price, pieces };
+                    if (nameEl) nameEl.value = '';
+                    if (priceEl) priceEl.value = '';
+                    if (piecesEl) piecesEl.value = '';
+                    renderPortionsList();
+                });
+            }
+
+            const quickAddHalfBtn = document.getElementById('quickAddHalfBtn');
+            if (quickAddHalfBtn) {
+                quickAddHalfBtn.addEventListener('click', () => {
+                    const key = 'half';
+                    if (!dishPortions[key]) dishPortions[key] = { name: 'HALF', price: 0, pieces: 1 };
+                    renderPortionsList();
+                });
+            }
+            const quickAddFullBtn = document.getElementById('quickAddFullBtn');
+            if (quickAddFullBtn) {
+                quickAddFullBtn.addEventListener('click', () => {
+                    showToast('Info', 'FULL is the default portion — set its price via Selling Price field.', 'info');
+                });
+            }
         }
 
         // Load data from API (single source of truth: /api/menu)
@@ -845,6 +944,10 @@
             // Initialize filtered arrays
             filteredDishes = Array.isArray(menuData.dishes) ? [...menuData.dishes] : [];
             filteredIngredients = Array.isArray(menuData.ingredients) ? [...menuData.ingredients] : [];
+            // Debug: list all dish ids and names loaded
+            try {
+                console.debug('[Menu] loaded dishes:', (menuData.dishes || []).map(d => `${d.id}:${d.name}`));
+            } catch (e) { /* noop */ }
             
             // Update pagination
             pagination.dishes.totalItems = filteredDishes.length;
@@ -1000,6 +1103,10 @@
                     return item.name.toLowerCase().includes(searchTerm) || 
                            (item.description && item.description.toLowerCase().includes(searchTerm));
                 });
+                // Debug: show filter term and matched dishes
+                try {
+                    console.debug('[Menu] applyFilters (dishes) term=', searchTerm, 'matched=', filteredDishes.map(d => `${d.id}:${d.name}`));
+                } catch (e) { /* noop */ }
                 
                 pagination.dishes.totalItems = filteredDishes.length;
                 pagination.dishes.currentPage = 1;
@@ -1035,6 +1142,10 @@ function renderDishes() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     const paginatedItems = filteredDishes.slice(startIndex, endIndex);
+    // Debug: log pagination slice and names
+    try {
+        console.debug('[Menu] renderDishes page', currentPage, 'itemsPerPage', itemsPerPage, 'showing', paginatedItems.map(d => `${d.id}:${d.name}`));
+    } catch (e) { /* noop */ }
     
     container.innerHTML = '';
     
@@ -1104,14 +1215,14 @@ function renderDishes() {
                     return `<span class="ingredient-tag">${ing.name} (${qStr}${ing.unit})</span>`;
                 }).join('') : ''}
             </div>
-            ${dish.portions && Object.keys(dish.portions).length ? `
             <div class="dish-ingredients">
-                ${Object.entries(dish.portions).map(([key, p]) => {
-                    const piecesInfo = p.pieces ? `, ${p.pieces} pcs` : '';
-                    return `<span class=\"ingredient-tag\">${p.name}: ₹${p.price}${piecesInfo}</span>`;
-                }).join('')}
+                ${(() => {
+                    const sp = Number(dish.sellingPrice || 0);
+                    const full = Number.isFinite(sp) ? sp.toFixed(2) : '0.00';
+                    const half = Number.isFinite(sp) ? (Math.round((sp / 2) * 100) / 100).toFixed(2) : '0.00';
+                    return `<span class=\"ingredient-tag\">FULL: ₹${full}</span><span class=\"ingredient-tag\">HALF: ₹${half}</span>`;
+                })()}
             </div>
-            ` : ''}
             
             <div class="dish-actions">
                 <button class="btn btn-sm btn-outline-primary" onclick="openDishModal('${dish.id}')" title="Edit Dish">
@@ -1343,51 +1454,75 @@ function renderDishes() {
         }
 
         // Open dish modal for adding/editing
-        function openDishModal(dishId = null) {
-            editingDishId = dishId;
-            const modal = new bootstrap.Modal(document.getElementById('dishModal'));
-            const modalTitle = document.getElementById('dishModalLabel');
-            const form = document.getElementById('dishForm');
-            
-            // Reset form
-            form.reset();
-            selectedIngredients = [];
-            document.getElementById('selectedIngredients').innerHTML = '';
-            
-            if (dishId) {
-                // Edit mode
-                const dish = menuData.dishes.find(d => d.id === dishId);
-                if (!dish) {
-                    showToast('Error', 'Dish not found!', 'danger');
-                    return;
-                }
-                
-                modalTitle.textContent = 'Edit Dish';
-                document.getElementById('dishId').value = dish.id;
-                document.getElementById('dishName').value = dish.name;
-                // Category removed
-                document.getElementById('dishDescription').value = dish.description || '';
-                document.getElementById('dishCostPrice').value = dish.costPrice || 0;
-                document.getElementById('dishSellingPrice').value = dish.sellingPrice || 0;
-                // Active removed
-                
-                // Set ingredients
-                if (dish.ingredients) {
-                    // Deep clone to avoid mutating the original on the card list until save
-                    selectedIngredients = JSON.parse(JSON.stringify(dish.ingredients));
-                    renderSelectedIngredients();
-                    // Ensure cost/selling price fields reflect current selection when editing
-                    updateCostPrice();
-                }
-            } else {
-                // Add mode
-                modalTitle.textContent = 'Add New Dish';
-                document.getElementById('dishId').value = '';
-                // Active removed
-            }
-            
-            modal.show();
+function openDishModal(dishId = null) {
+    editingDishId = dishId;
+    const modal = new bootstrap.Modal(document.getElementById('dishModal'));
+    const modalTitle = document.getElementById('dishModalLabel');
+    const form = document.getElementById('dishForm');
+    
+    // Reset form
+    form.reset();
+    selectedIngredients = [];
+    document.getElementById('selectedIngredients').innerHTML = '';
+    // Reset portions UI state
+    dishPortions = {};
+    const portionsContainer = document.getElementById('portionsListContainer');
+    if (portionsContainer) portionsContainer.innerHTML = '';
+    // Reset portion mode to FULL default
+    const modeSelect = document.getElementById('portionModeSelect');
+    const spInput = document.getElementById('dishSellingPrice');
+    if (modeSelect) modeSelect.value = 'full';
+    if (spInput) spInput.disabled = false;
+    sellingPriceTouched = false;
+    
+    if (dishId) {
+        // Edit mode
+        const dish = menuData.dishes.find(d => d.id === dishId);
+        if (!dish) {
+            showToast('Error', 'Dish not found!', 'danger');
+            return;
         }
+        
+        modalTitle.textContent = 'Edit Dish';
+        document.getElementById('dishId').value = dish.id;
+        document.getElementById('dishName').value = dish.name;
+        // Category removed
+        document.getElementById('dishDescription').value = dish.description || '';
+        document.getElementById('dishCostPrice').value = dish.costPrice || 0;
+        // Load selling price from portions.full.price if available, else from dish.sellingPrice
+        if (dish.portions && dish.portions.full && typeof dish.portions.full.price === 'number') {
+            document.getElementById('dishSellingPrice').value = dish.portions.full.price;
+        } else {
+            document.getElementById('dishSellingPrice').value = dish.sellingPrice || 0;
+        }
+        sellingPriceTouched = true; // preserve existing selling price on edit
+        // Active removed
+        
+        // Set ingredients
+        if (dish.ingredients) {
+            // Deep clone to avoid mutating the original on the card list until save
+            selectedIngredients = JSON.parse(JSON.stringify(dish.ingredients));
+            renderSelectedIngredients();
+            // Ensure cost/selling price and calculated portions reflect current selection
+            updateCostPrice();
+        }
+        
+        // Set portions
+        if (dish.portions) {
+            dishPortions = { ...dish.portions };
+            renderPortionsList();
+            updatePricingSectionVisibility();
+        }
+    } else {
+        // Add mode
+        modalTitle.textContent = 'Add New Dish';
+        document.getElementById('dishId').value = '';
+        // Active removed
+    }
+    
+    updatePricingSectionVisibility();
+    modal.show();
+}
 
         // Add ingredient to dish
         function addIngredientToDish() {
@@ -1421,8 +1556,8 @@ function renderDishes() {
                 selectedIngredients[existingIndex].name = selectedIngredients[existingIndex].name || ingredient.name;
                 selectedIngredients[existingIndex].unitType = selectedIngredients[existingIndex].unitType || ingredient.unitType;
                 selectedIngredients[existingIndex].ingredientUnit = selectedIngredients[existingIndex].ingredientUnit || ingredient.unit;
-                const cpu = Number(selectedIngredients[existingIndex].costPerUnit != null ? selectedIngredients[existingIndex].costPerUnit : ingredient.costPerUnit);
-                selectedIngredients[existingIndex].costPerUnit = Number.isFinite(cpu) ? cpu : 0;
+                const cpuNum = Number(selectedIngredients[existingIndex].costPerUnit != null ? selectedIngredients[existingIndex].costPerUnit : ingredient.costPerUnit);
+                selectedIngredients[existingIndex].costPerUnit = Number.isFinite(cpuNum) ? cpuNum : 0;
             } else {
                 // Add new ingredient
                 selectedIngredients.push({
@@ -1478,27 +1613,122 @@ function renderDishes() {
             updateCostPrice();
         }
 
+        // Portions helpers and rendering (ensure defined before any usage)
+        function normalizePortionKey(name) {
+            return String(name || '').toLowerCase().trim().replace(/\s+/g, '-');
+        }
+
+        function updatePricingSectionVisibility() {
+            // Always show single selling price; HALF uses this as default
+            const sellingGroup = document.getElementById('sellingPriceGroup');
+            if (sellingGroup) sellingGroup.style.display = 'block';
+        }
+
+        function renderPortionsList() {
+            const container = document.getElementById('portionsListContainer');
+            if (!container) return;
+            const sellingInput = document.getElementById('dishSellingPrice');
+            const fullPrice = Number(sellingInput && sellingInput.value ? sellingInput.value : 0) || 0;
+            const halfPrice = Math.round(((fullPrice / 2) || 0) * 100) / 100;
+            container.innerHTML = '';
+
+            // Get the current dish being edited
+            const dishId = document.getElementById('dishId').value;
+            const dish = menuData.dishes.find(d => d.id === dishId) || {};
+            const portions = dish.portions || {};
+
+            // FULL (from Selling Price)
+            const fullRow = document.createElement('div');
+            fullRow.className = 'd-flex align-items-center justify-content-between border rounded p-2 mb-2';
+            fullRow.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <strong class="me-2">FULL</strong>
+                    <span>— ₹${fullPrice.toFixed(2)}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <select class="form-select form-select-sm ms-2" id="portionPieces-full" 
+                            style="width: 100px;" data-portion="full">
+                        <option value="1" ${(portions.full?.portionPieces || 1) === 1 ? 'selected' : ''}>1 piece</option>
+                        <option value="2" ${(portions.full?.portionPieces || 1) === 2 ? 'selected' : ''}>2 pieces</option>
+                        <option value="4" ${(portions.full?.portionPieces || 1) === 4 ? 'selected' : ''}>4 pieces</option>
+                        <option value="8" ${(portions.full?.portionPieces || 1) === 8 ? 'selected' : ''}>8 pieces</option>
+                        <option value="16" ${(portions.full?.portionPieces || 1) === 16 ? 'selected' : ''}>16 pieces</option>
+                    </select>
+                    <span class="text-muted small ms-2">Default via Selling Price</span>
+                </div>
+            `;
+            container.appendChild(fullRow);
+
+            // HALF (calculated from Selling Price)
+            const halfRow = document.createElement('div');
+            halfRow.className = 'd-flex align-items-center justify-content-between border rounded p-2 mb-2';
+            halfRow.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <strong class="me-2">HALF</strong>
+                    <span>— ₹${halfPrice.toFixed(2)}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                    <select class="form-select form-select-sm ms-2" id="portionPieces-half" 
+                            style="width: 100px;" data-portion="half">
+                        <option value="1" ${(portions.half?.portionPieces || 1) === 1 ? 'selected' : ''}>1 piece</option>
+                        <option value="2" ${(portions.half?.portionPieces || 1) === 2 ? 'selected' : ''}>2 pieces</option>
+                        <option value="4" ${(portions.half?.portionPieces || 1) === 4 ? 'selected' : ''}>4 pieces</option>
+                        <option value="8" ${(portions.half?.portionPieces || 1) === 8 ? 'selected' : ''}>8 pieces</option>
+                        <option value="16" ${(portions.half?.portionPieces || 1) === 16 ? 'selected' : ''}>16 pieces</option>
+                    </select>
+                    <span class="text-muted small ms-2">Calculated</span>
+                </div>
+            `;
+            container.appendChild(halfRow);
+
+            // Add event listeners to the new selects
+            document.querySelectorAll('.form-select.portion-pieces').forEach(select => {
+                select.addEventListener('change', function() {
+                    const portionKey = this.dataset.portion;
+                    const pieces = parseInt(this.value) || 1;
+                    
+                    // Update the dish object
+                    const dishId = document.getElementById('dishId').value;
+                    const dishIndex = appData.dishes.findIndex(d => d.id === dishId);
+                    
+                    if (dishIndex !== -1) {
+                        if (!appData.dishes[dishIndex].portions) {
+                            appData.dishes[dishIndex].portions = {};
+                        }
+                        if (!appData.dishes[dishIndex].portions[portionKey]) {
+                            appData.dishes[dishIndex].portions[portionKey] = {};
+                        }
+                        appData.dishes[dishIndex].portions[portionKey].portionPieces = pieces;
+                    }
+                });
+            });
+
+            updatePricingSectionVisibility();
+        }
+
         // Update cost price based on selected ingredients
         function updateCostPrice() {
             let totalCost = 0;
             selectedIngredients.forEach(ing => {
                 totalCost += computeIngredientCost(ing);
             });
-            // Guard against non-finite accumulation
             if (!isFinite(totalCost)) {
                 console.debug('[Menu] updateCostPrice computed non-finite totalCost; resetting to 0', { selectedIngredients, totalCost });
                 totalCost = 0;
             }
             const costStr = Number(totalCost).toFixed(2);
             document.getElementById('dishCostPrice').value = costStr;
-            
-            // Auto-set selling price with 30% margin if not set
+
+            // Auto-set selling price from cost with 30% margin only if user hasn't edited it
             const sellingPriceInput = document.getElementById('dishSellingPrice');
-            if (!sellingPriceInput.value || sellingPriceInput.value == 0) {
+            if (!sellingPriceTouched) {
                 const sp = totalCost * 1.3;
                 const spFinal = isFinite(sp) ? sp : 0;
                 sellingPriceInput.value = spFinal.toFixed(2);
             }
+
+            // Update calculated portions (FULL/HALF)
+            renderPortionsList();
         }
 
         // Utility: get toBase factor for a unit
@@ -1557,102 +1787,109 @@ function renderDishes() {
         }
 
         // Save dish
-        async function saveDish() {
-            const form = document.getElementById('dishForm');
-            const name = document.getElementById('dishName').value.trim();
-            // Category removed
-            // Recompute costPrice from selectedIngredients to ensure correctness
-            let recomputedCost = 0;
-            try {
-                for (const ing of selectedIngredients) {
-                    recomputedCost += computeIngredientCost(ing);
-                }
-            } catch (e) {
-                console.error('[Menu] saveDish: error computing cost', e, selectedIngredients);
-            }
-            const costPrice = Number.isFinite(recomputedCost) ? Number(recomputedCost.toFixed(2)) : 0;
-            const sellingPrice = parseFloat(document.getElementById('dishSellingPrice').value);
-            // Active removed
-            
-            if (!name || isNaN(costPrice) || isNaN(sellingPrice)) {
-                showToast('Error', 'Please fill in all required fields', 'danger');
-                return;
-            }
-            
-            if (selectedIngredients.length === 0) {
-                showToast('Error', 'Please add at least one ingredient', 'danger');
-                return;
-            }
-            
-            // Normalize ingredients for persistence
-            const persistedIngredients = selectedIngredients.map(src => {
-                const ingredient = menuData.ingredients.find(i => String(i.id) === String(src.ingredientId));
-                const baseUnit = ingredient ? ingredient.unit : src.ingredientUnit || src.unit;
-                const unitType = src.unitType || (ingredient ? ingredient.unitType : 'weight');
-                const cpuNum = Number(src.costPerUnit != null ? src.costPerUnit : (ingredient ? ingredient.costPerUnit : 0));
-                const qtyNum = Number(src.quantity);
-                return {
-                    ingredientId: String(src.ingredientId || (ingredient ? ingredient.id : '')),
-                    name: src.name || (ingredient ? ingredient.name : ''),
-                    quantity: Number.isFinite(qtyNum) && qtyNum > 0 ? qtyNum : 0,
-                    unit: src.unit || baseUnit || '',
-                    costPerUnit: Number.isFinite(cpuNum) ? cpuNum : 0,
-                    ingredientUnit: src.ingredientUnit || baseUnit || (src.unit || ''),
-                    unitType,
-                };
-            });
-
-            // Resolve persisted id from hidden input if present
-            const hiddenId = (document.getElementById('dishId').value || '').trim();
-            const resolvedId = hiddenId || editingDishId || ('dish-' + Date.now());
-
-            const dish = {
-                id: resolvedId,
-                name,
-                description: document.getElementById('dishDescription').value,
-                costPrice,
-                sellingPrice,
-                ingredients: Array.isArray(persistedIngredients) ? persistedIngredients : [],
-                lastUpdated: new Date().toISOString()
-            };
-            console.debug('[Menu] saveDish: persisting dish', {
-                id: dish.id,
-                name: dish.name,
-                costPrice: dish.costPrice,
-                sellingPrice: dish.sellingPrice,
-                persistedCount: dish.ingredients.length,
-                selectedCount: selectedIngredients ? selectedIngredients.length : 0,
-                sample: dish.ingredients[0] || null
-            });
-            
-            if (resolvedId) {
-                // Update existing dish
-                const index = menuData.dishes.findIndex(d => String(d.id) === String(resolvedId));
-                if (index !== -1) {
-                    menuData.dishes[index] = dish;
-                    console.debug('[Menu] saveDish: updated existing dish', { dishId: resolvedId, index, ingredientsCount: dish.ingredients.length });
-                } else {
-                    // Fallback: dish id not found, append as new to avoid losing data
-                    menuData.dishes.push(dish);
-                    console.warn('[Menu] saveDish: dish id not found, appended dish instead', { dishId: resolvedId, ingredientsCount: dish.ingredients.length });
-                }
-            } else {
-                // Add new dish
-                dish.createdAt = new Date().toISOString();
-                menuData.dishes.push(dish);
-            }
-            
-            // Save data and update UI
-            if (await saveData()) {
-                filteredDishes = [...menuData.dishes];
-                applyFilters();
-                
-                const modal = bootstrap.Modal.getInstance(document.getElementById('dishModal'));
-                modal.hide();
-                
-                showToast('Success', 'Dish saved successfully', 'success');
-            }
+async function saveDish() {
+    const form = document.getElementById('dishForm');
+    const name = document.getElementById('dishName').value.trim();
+    // Category removed
+    // Recompute costPrice from selectedIngredients to ensure correctness
+    let recomputedCost = 0;
+    try {
+        for (const ing of selectedIngredients) {
+            recomputedCost += computeIngredientCost(ing);
         }
+    } catch (e) {
+        console.error('[Menu] saveDish: error computing cost', e, selectedIngredients);
+    }
+    const costPrice = Number.isFinite(recomputedCost) ? Number(recomputedCost.toFixed(2)) : 0;
+    const sellingPrice = parseFloat(document.getElementById('dishSellingPrice').value);
+    // Active removed
+    
+    if (!name || isNaN(costPrice) || isNaN(sellingPrice)) {
+        showToast('Error', 'Please fill in all required fields', 'danger');
+        return;
+    }
+    
+    if (selectedIngredients.length === 0) {
+        showToast('Error', 'Please add at least one ingredient', 'danger');
+        return;
+    }
+    
+    // Normalize ingredients for persistence
+    const persistedIngredients = selectedIngredients.map(src => {
+        const ingredient = menuData.ingredients.find(i => String(i.id) === String(src.ingredientId));
+        const baseUnit = ingredient ? ingredient.unit : src.ingredientUnit || src.unit;
+        const unitType = src.unitType || (ingredient ? ingredient.unitType : 'weight');
+        const cpuNum = Number(src.costPerUnit != null ? src.costPerUnit : (ingredient ? ingredient.costPerUnit : 0));
+        const qtyNum = Number(src.quantity);
+        return {
+            ingredientId: String(src.ingredientId || (ingredient ? ingredient.id : '')),
+            name: src.name || (ingredient ? ingredient.name : ''),
+            quantity: Number.isFinite(qtyNum) && qtyNum > 0 ? qtyNum : 0,
+            unit: src.unit || baseUnit || '',
+            costPerUnit: Number.isFinite(cpuNum) ? cpuNum : 0,
+            ingredientUnit: src.ingredientUnit || baseUnit || (src.unit || ''),
+            unitType,
+        };
+    });
+
+    // Resolve persisted id from hidden input if present
+    const hiddenId = (document.getElementById('dishId').value || '').trim();
+    const resolvedId = hiddenId || ('dish-' + Date.now());
+    
+    // Get portion pieces from the form
+    const fullPieces = parseInt(document.getElementById('portionPieces-full')?.value) || 1;
+    const halfPieces = parseInt(document.getElementById('portionPieces-half')?.value) || 1;
+    
+    const dish = {
+        id: resolvedId,
+        name,
+        description: document.getElementById('dishDescription').value.trim(),
+        costPrice,
+        sellingPrice,
+        ingredients: persistedIngredients,
+        portions: {
+            full: {
+                name: 'FULL',
+                price: sellingPrice,
+                multiplier: 1,
+                portionPieces: fullPieces
+            },
+            half: {
+                name: 'HALF',
+                price: Math.round((sellingPrice / 2) * 100) / 100,
+                multiplier: 0.5,
+                portionPieces: halfPieces
+            }
+        },
+        lastUpdated: new Date().toISOString()
+    };
+    console.debug('[Menu] saveDish: persisting dish', {
+        id: dish.id,
+        name: dish.name,
+        costPrice: dish.costPrice,
+        sellingPrice: dish.sellingPrice,
+        persistedCount: dish.ingredients.length,
+        selectedCount: selectedIngredients ? selectedIngredients.length : 0,
+        sample: dish.ingredients[0] || null
+    });
+
+    // Update or add dish in local state
+    const existingIndex = menuData.dishes.findIndex(d => String(d.id) === String(dish.id));
+    if (existingIndex >= 0) {
+        menuData.dishes[existingIndex] = dish;
+    } else {
+        menuData.dishes.push(dish);
+    }
+    
+    // Save data and update UI: re-fetch latest and broadcast change for other tabs/pages
+    if (await saveData()) {
+        try { localStorage.setItem('menuUpdated', String(Date.now())); } catch (e) {}
+        await loadData();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('dishModal'));
+        if (modal) modal.hide();
+        showToast('Success', 'Dish saved successfully', 'success');
+    }
+}
 
         // Delete dish
         async function deleteDish(dishId) {

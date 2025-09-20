@@ -1,6 +1,7 @@
-# 📜 Windsurf AI Rules: Production-Grade Code Quality
+# 📜 Blackbox AI Rules: Production-Grade Code Quality
 
 ## 🔒 Code Stability & Safety
+
 1. Do not break working code.
 2. Only modify code when absolutely necessary and keep changes minimal.avoid over complex fixes.always create or fix code in simplest possible way.
 3. Always preserve the intent and behavior of the original logic unless a clear issue is found.
@@ -11,11 +12,13 @@
 8. All code written must be ready to run or compile without errors.
 
 ## ✅ Syntax & Compilation
+
 5. All code must be syntactically correct and ready to run or compile without errors.
 6. Validate the syntax for the target language (e.g., Python 3.10, JavaScript ES2022, Java 17, etc.).
 7. Include all required imports, dependencies, and definitions.
 
 ## 🧠 Context Awareness
+
 8. Always analyze and understand the **entire file** before making any changes.
 9. Consider any **referenced functions, classes, or variables** from other project files.
 10. Carefully handle any core modules, utility functions, or shared code to avoid regressions.
@@ -23,26 +26,32 @@
 12. Summarize and use feature summary.md to remember whats been done and dind and read it everytime working on old code.
 
 ## 🧹 Code Quality & Best Practices
+
 12. Use clean, maintainable, and idiomatic code following the best practices for the language.
 13. Use consistent naming, indentation, and formatting throughout the file.
 14. Prefer clarity and safety over clever or overly complex logic.
 
 ## 📄 Documentation & Comments
+
 15. If modifying or generating non-trivial logic, include a clear and concise comment describing the change.
 16. Maintain existing docstrings and comments unless incorrect — then update respectfully.
 
 ## 🧪 Testing Awareness (Optional if applicable)
+
 17. Do not remove or alter existing tests unless explicitly asked.
 18. If a change affects logic with tests, make sure the code aligns with the expected behavior.
 
 ## 🛑 Behavior with AI Fixes
+
 19. Before applying any auto-fix or refactor, ensure the full context is understood.
 20. When in doubt, leave the code untouched and suggest clarification instead of guessing.
 
 ---
+
 ## 🐞 Debug Logging & Issue Tracing
 
 21. For any function or logic that is modified or newly generated, insert debug logs that:
+
     - Show entry into the function
     - Print key input parameters
     - Log important internal variable changes
@@ -51,6 +60,7 @@
 22. Use structured logging where possible. Prefer logging libraries (e.g., `logging` in Python, `console` in JavaScript, `Logger` in Java) over print statements.
 
 23. Ensure logging is:
+
     - Clear and readable
     - Easy to disable for production (use log levels)
     - Not excessive or redundant
@@ -62,13 +72,15 @@
 26. Never remove or suppress existing debug logs unless they are misleading or incorrect.
 27. Use MCP servers and mcp capabilities wherever necessary make most use out of it.
 
-# 🚦 Windsurf Rules for Full Test Automation
+# 🚦 Blackbox Rules for Full Test Automation
 
 ## 🎯 Code Quality Goals
+
 - All code must be syntactically correct, safe, and stable.
 - Ensure correct behavior through fully automated end-to-end feature testing.
 
 ## 🧪 Automated Testing Behavior
+
 - For every code change or feature edit:
   1. Plan a full test scenario dynamically using the Puppeteer MCP server.
   2. Include all relevant user actions (clicks, inputs, navigation).
@@ -76,6 +88,7 @@
   4. Use selectors based on IDs or ARIA labels if available for stability.
 
 ## 🔍 Testing Details
+
 - Always capture:
   - Console logs from the browser
   - Screenshot of the final UI state
@@ -86,11 +99,13 @@
   - Screenshots show error states or missing UI
 
 ## 🔁 On Test Failure
+
 - Analyze the failure cause using the LLM.
 - Fix the implementation automatically.
 - Re-run the test.
 - Repeat until the test passes or user intervention is required.
 
 ## 🧰 Flexibility
+
 - Dynamically construct test steps based on the UI structure.
 - If user input varies, simulate valid + invalid data scenarios.
