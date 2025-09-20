@@ -251,20 +251,16 @@
         /* Responsive vendor grid to utilize full width */
         .vendor-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-            gap: 0.75rem;
-            align-items: start;
         }
 
         .ingredient-item {
             background: white;
-            border: none;
-            border-radius: 10px;
-            box-shadow: var(--card-shadow);
-            margin-bottom: 0.5rem;
-            padding: 0.75rem;
-            transition: all 0.2s ease;
-            border-left: 4px solid var(--primary-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         .ingredient-item:hover {
@@ -476,19 +472,6 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                    <button id="resetBtn" class="btn btn-outline-primary btn-sm" title="Refresh">
-                        <i class="bi bi-arrow-clockwise"></i>
-                    </button>
-                    <button id="exportBtn" class="btn btn-outline-primary btn-sm" title="Download">
-                        <i class="bi bi-download"></i>
-                    </button>
-                    <button id="addNewItemBtn" class="btn btn-primary btn-sm" title="Add New Item">
-                        <i class="bi bi-plus"></i> <span id="addButtonText">Add Dish</span>
-                    </button>
-                </div>
-
-                <!-- Tabs -->
                 <div class="nav nav-tabs border-0 flex-shrink-0" id="menuTabs" role="tablist">
                     <button class="nav-link active px-3" id="dishes-tab" data-bs-toggle="tab"
                         data-bs-target="#dishes-section" type="button" role="tab">
@@ -498,41 +481,62 @@
                         data-bs-target="#ingredients-section" type="button" role="tab">
                         <i class="bi bi-basket"></i> Ingredients
                     </button>
+                    <button class="nav-link px-3" id="vendors-tab" data-bs-toggle="tab"
+                        data-bs-target="#vendors-section" type="button" role="tab">
+                        <i class="bi bi-shop"></i> Vendors
+                    </button>
+                    <button id="addNewItemBtn" class="btn btn-primary btn-sm" title="Add New Item">
+                        <i class="bi bi-plus"></i> <span id="addButtonText">Add Dish</span>
+                    </button>
                 </div>
-            </div>
-        </div>
 
-        <!-- Tab Content -->
-        <div class="tab-content flex-grow-1 d-flex flex-column">
-            <!-- Dishes Tab Pane -->
-            <div class="tab-pane fade show active" id="dishes-section" role="tabpanel" aria-labelledby="dishes-tab">
-                <div class="card menu-container flex-grow-1 d-flex flex-column">
-                    <div class="menu-list flex-grow-1" id="menuListContainer">
-                        <!-- Dishes will be populated here -->
+                <!-- Tabs -->
+
+                .table-responsive {
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                }
+                        <!-- Vendor tabs will be dynamically added here -->
+                    </ul>
+                    
+                    <div class="tab-content" id="vendorTabsContent">
+                        <div class="tab-pane fade show active" id="all-vendors" role="tabpanel" aria-labelledby="all-vendors-tab">
+                            <!-- All vendors content -->
+                            <div class="ingredients-list" id="ingredientsListContainer"></div>
+                        </div>
                     </div>
-                </div>
-                <div class="pagination-container">
-                    <nav aria-label="Menu Pagination">
-                        <ul class="pagination pagination-sm justify-content-center" id="menuPagination">
-                            <!-- Pagination buttons will be generated here -->
-                        </ul>
-                    </nav>
                 </div>
             </div>
             
-            <!-- Ingredients Tab Pane -->
-            <div class="tab-pane fade" id="ingredients-section" role="tabpanel" aria-labelledby="ingredients-tab">
-                <div class="card menu-container flex-grow-1 d-flex flex-column">
-                    <div class="menu-list flex-grow-1" id="ingredientsListContainer">
-                        <!-- Ingredients will be populated here -->
+            <!-- Vendors Tab Pane -->
+            <div class="tab-pane fade" id="vendors-section" role="tabpanel" aria-labelledby="vendors-tab">
+                <div class="container-fluid p-0">
+                    <div class="card mb-3">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Vendor Management</h5>
+                            <button class="btn btn-primary btn-sm" onclick="openVendorModal()">
+                                <i class="bi bi-plus-lg me-1"></i> Add Vendor
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Vendor Name</th>
+                                            <th>Description</th>
+                                            <th>Ingredients</th>
+                                            <th>Status</th>
+                                            <th class="text-end">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="vendorsList">
+                                        <!-- Vendors will be listed here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="pagination-container">
-                    <nav aria-label="Ingredients Pagination">
-                        <ul class="pagination pagination-sm justify-content-center" id="ingredientsPagination">
-                            <!-- Pagination buttons will be generated here -->
-                        </ul>
-                    </nav>
                 </div>
             </div>
         </div>
@@ -604,11 +608,11 @@
                                         </div>
                                         <div class="col-4">
                                             <label class="form-label">Price (₹)</label>
-                                            <input type="number" class="form-control" id="portionPriceInput" min="0" step="1" placeholder="149">
+                                            <input type="number" class="form-control" id="portionPriceInput" min="0" step="1" placeholder="149" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                                         </div>
                                         <div class="col-3">
                                             <label class="form-label">Pieces</label>
-                                            <input type="number" class="form-control" id="portionPiecesInput" min="0" step="1" placeholder="optional">
+                                            <input type="number" class="form-control" id="portionPiecesInput" min="0" step="1" placeholder="optional" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                                         </div>
                                         <div class="col-1 d-grid">
                                             <button type="button" id="addPortionBtn" class="btn btn-primary"><i class="bi bi-plus"></i></button>
@@ -631,7 +635,7 @@
                                         <select class="form-select" id="ingredientSelect">
                                             <option value="">Select Ingredient</option>
                                         </select>
-                                        <input type="number" class="form-control" id="ingredientQuantity" placeholder="Qty" step="1" min="1" value="1">
+                                        <input type="number" class="form-control" id="ingredientQuantity" placeholder="Qty" step="1" min="1" value="1" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
                                         <select class="form-select" id="dishIngredientUnit" style="max-width: 140px;">
                                             <option value="">Select unit</option>
                                         </select>
@@ -728,6 +732,47 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-success">Save Ingredient</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Vendor Modal -->
+    <div class="modal fade" id="vendorModal" tabindex="-1" aria-labelledby="vendorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="vendorModalLabel">Add New Vendor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="vendorForm">
+                        <input type="hidden" id="vendorId" value="">
+                        <div class="mb-3">
+                            <label for="vendorName" class="form-label">Vendor Name *</label>
+                            <input type="text" class="form-control" id="vendorName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="vendorDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="vendorDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="vendorContact" class="form-label">Contact Information</label>
+                            <input type="text" class="form-control" id="vendorContact">
+                        </div>
+                        <div class="mb-3">
+                            <label for="vendorAddress" class="form-label">Address</label>
+                            <textarea class="form-control" id="vendorAddress" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="vendorActive" checked>
+                            <label class="form-check-label" for="vendorActive">Active</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-success" id="saveVendorBtn">Save Vendor</button>
                 </div>
             </div>
         </div>
@@ -1456,13 +1501,33 @@ function renderDishes() {
             }
         }
 
-        // Render ingredients
+        // Render ingredients grouped by vendor
         function renderIngredients() {
             const container = document.getElementById('ingredientsListContainer');
+            if (!container) return;
+
+            // Get all ingredients and filter them
+            const allIngredients = [...menuData.ingredients];
+            const searchTerm = document.getElementById('ingredientSearch')?.value?.toLowerCase() || '';
+            
+            // Apply search filter
+            const filteredItems = searchTerm 
+                ? allIngredients.filter(ing => 
+                    (ing.name && ing.name.toLowerCase().includes(searchTerm)) ||
+                    (ing.description && ing.description.toLowerCase().includes(searchTerm)) ||
+                    (ing.category && ing.category.toLowerCase().includes(searchTerm))
+                )
+                : allIngredients;
+                
+            // Update pagination with filtered count
+            pagination.ingredients.totalItems = filteredItems.length;
+            renderIngredientsPagination();
+            
+            // Get current page items
             const { currentPage, itemsPerPage } = pagination.ingredients;
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = startIndex + itemsPerPage;
-            const paginatedItems = filteredIngredients.slice(startIndex, endIndex);
+            const paginatedItems = filteredItems.slice(startIndex, endIndex);
             
             container.innerHTML = '';
             
@@ -1476,96 +1541,140 @@ function renderDishes() {
                 return;
             }
 
-            // Create vendor grid container to fully utilize width
+            // Group by vendor
+            const vendorGroups = paginatedItems.reduce((acc, ingredient) => {
+                const vendorId = ingredient.vendorId || 'other';
+                const vendor = menuData.vendors?.find(v => v.id === vendorId) || {
+                    id: vendorId,
+                    name: 'Other Vendors',
+                    description: 'Ingredients without a specific vendor'
+                };
+                
+                if (!acc[vendorId]) {
+                    acc[vendorId] = {
+                        ...vendor,
+                        ingredients: []
+                    };
+                }
+                acc[vendorId].ingredients.push(ingredient);
+                return acc;
+            }, {});
+
+            // Create vendor grid container
             const vendorGrid = document.createElement('div');
             vendorGrid.className = 'vendor-grid';
             container.appendChild(vendorGrid);
 
-            // Group by vendor (supplier)
-            const groups = paginatedItems.reduce((acc, ing) => {
-                const vendor = (ing.supplier && String(ing.supplier).trim()) || 'Other Vendors';
-                if (!acc[vendor]) acc[vendor] = [];
-                acc[vendor].push(ing);
-                return acc;
-            }, {});
-
-            Object.keys(groups).sort((a,b) => a.localeCompare(b)).forEach(vendor => {
-                const items = groups[vendor];
-
-                // Group wrapper
-                const group = document.createElement('div');
-                group.className = 'vendor-group';
-
-                // Vendor header
-                const header = document.createElement('div');
-                header.className = 'vendor-header d-flex align-items-center justify-content-between';
-                header.innerHTML = `
-                    <div class="fw-semibold text-primary"><i class="bi bi-shop me-2"></i>${vendor}</div>
-                    <span class="badge bg-primary-subtle text-primary">${items.length}</span>
-                `;
-                group.appendChild(header);
-
-                // Items container
-                const itemsContainer = document.createElement('div');
-                itemsContainer.className = 'vendor-items';
-
-                items.forEach(ingredient => {
-                    const ingredientItem = document.createElement('div');
-                    ingredientItem.className = 'ingredient-item';
-
-                    // Compute stock display and status
-                    const hasStock = typeof ingredient.currentStock === 'number' || typeof ingredient.minStockLevel === 'number';
-                    const current = typeof ingredient.currentStock === 'number' ? ingredient.currentStock : null;
-                    const min = typeof ingredient.minStockLevel === 'number' ? ingredient.minStockLevel : null;
-                    let stockBadge = '';
-                    if (hasStock && current != null && min != null) {
-                        let cls = 'bg-success';
-                        let label = 'OK';
-                        if (current <= 0) { cls = 'bg-danger'; label = 'Out'; }
-                        else if (current < min) { cls = 'bg-warning text-dark'; label = 'Low'; }
-                        stockBadge = `<span class="badge ${cls}">${label}</span>`;
-                    }
-
-                    const stockText = hasStock ? `Stock: ${current ?? '—'}${ingredient.unit || ''} / Min: ${min ?? '—'}${ingredient.unit || ''}` : '';
-                    const supplierCodeText = ingredient.supplierCode ? `Supplier Code: ${ingredient.supplierCode}` : '';
-                    const barcodeText = ingredient.barcode ? `Barcode: ${ingredient.barcode}` : '';
-
-                    ingredientItem.innerHTML = `
-                        <div class="ingredient-header d-flex justify-content-between align-items-start mb-2">
-                            <h6 class="ingredient-title">${ingredient.name}</h6>
-                            ${stockBadge}
-                        </div>
-                        <div class="ingredient-info">
-                            <span class="badge bg-info">Unit: ${ingredient.unit}</span>
-                            ${hasStock ? `<span class="badge bg-secondary">${stockText}</span>` : ''}
-                        </div>
-                        ${supplierCodeText || barcodeText ? `
-                        <div class="mb-2 small text-muted">
-                            ${supplierCodeText ? `<div>${supplierCodeText}</div>` : ''}
-                            ${barcodeText ? `<div>${barcodeText}</div>` : ''}
-                        </div>` : ''}
-                        <div class="ingredient-pricing">
-                            <div class="price-info">
-                                <div class="fw-bold text-success">₹${ingredient.costPerUnit.toFixed(2)}</div>
-                                <small class="text-muted">per ${ingredient.unit}</small>
-                            </div>
-                            <div class="ingredient-actions">
-                                <button class="btn btn-sm btn-outline-primary" onclick="openIngredientModal('${ingredient.id}')" title="Edit">
-                                    <i class="bi bi-pencil"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteIngredient('${ingredient.id}')" title="Delete">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
+            // Sort vendors by name and render
+            Object.values(vendorGroups)
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .forEach(vendor => {
+                    // Create vendor group
+                    const group = document.createElement('div');
+                    group.className = 'vendor-group mb-4';
+                    
+                    // Vendor header
+                    const header = document.createElement('div');
+                    header.className = 'vendor-header mb-3';
+                    header.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="bi bi-shop me-2"></i>
+                                ${vendor.name}
+                                <small class="text-muted ms-2">${vendor.ingredients.length} items</small>
+                            </h5>
+                            <small class="text-muted">${vendor.description}</small>
                         </div>
                     `;
-                    itemsContainer.appendChild(ingredientItem);
+                    group.appendChild(header);
+
+                    // Items container
+                    const itemsContainer = document.createElement('div');
+                    itemsContainer.className = 'row row-cols-1 row-cols-md-2 g-3';
+                    
+                    // Add each ingredient
+                    vendor.ingredients.forEach(ingredient => {
+                        const col = document.createElement('div');
+                        col.className = 'col';
+                        
+                        const card = document.createElement('div');
+                        card.className = `ingredient-item h-100 ${!ingredient.active ? 'opacity-75' : ''}`;
+                        
+                        // Compute stock status
+                        const hasStock = typeof ingredient.currentStock === 'number' || typeof ingredient.minStockLevel === 'number';
+                        const current = typeof ingredient.currentStock === 'number' ? ingredient.currentStock : null;
+                        const min = typeof ingredient.minStockLevel === 'number' ? ingredient.minStockLevel : null;
+                        
+                        let stockStatus = '';
+                        if (hasStock && current != null) {
+                            let statusClass = 'stock-ok';
+                            if (current <= 0) statusClass = 'stock-out';
+                            else if (min != null && current < min) statusClass = 'stock-low';
+                            
+                            stockStatus = `
+                                <div class="mt-2">
+                                    <span class="stock-badge ${statusClass} me-2">
+                                        <i class="bi ${current <= 0 ? 'bi-x-circle' : current < min ? 'bi-exclamation-triangle' : 'bi-check-circle'}"></i>
+                                        ${current <= 0 ? 'Out of Stock' : current < min ? 'Low Stock' : 'In Stock'}
+                                    </span>
+                                    <small class="text-muted">${current} ${ingredient.unit || ''} available</small>
+                                </div>
+                            `;
+                        }
+
+                        card.innerHTML = `
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="card-title mb-0">${ingredient.name}</h6>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-primary" onclick="openIngredientModal('${ingredient.id}')">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="deleteIngredient('${ingredient.id}')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    ${ingredient.description ? `
+                                        <p class="card-text text-muted small mb-2">${ingredient.description}</p>
+                                    ` : ''}
+                                    
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <div>
+                                            <span class="badge bg-light text-dark border me-2">
+                                                <i class="bi bi-tag me-1"></i> ${ingredient.category || 'No Category'}
+                                            </span>
+                                            <span class="badge bg-light text-dark border">
+                                                <i class="bi bi-box-seam me-1"></i> ${ingredient.unit || 'N/A'}
+                                            </span>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold text-success">₹${(ingredient.costPerUnit || 0).toFixed(2)}</div>
+                                            <small class="text-muted">per ${ingredient.unit || 'unit'}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    ${stockStatus}
+                                </div>
+                            </div>
+                        `;
+                        
+                        itemsContainer.appendChild(col);
+                        col.appendChild(card);
+                    });
+
+                    group.appendChild(itemsContainer);
+                    vendorGrid.appendChild(group);
                 });
 
-                group.appendChild(itemsContainer);
-                vendorGrid.appendChild(group);
+            console.debug('[Menu] renderIngredients: Rendered', { 
+                totalIngredients: allIngredients.length,
+                filtered: filteredItems.length,
+                showing: paginatedItems.length,
+                vendorGroups: Object.keys(vendorGroups).length
             });
-            console.debug('[Menu] renderIngredients: rendered (grouped by vendor grid)', { count: paginatedItems.length, groups: Object.keys(groups).length });
         }
 
         // Render pagination for ingredients
@@ -1960,19 +2069,25 @@ function renderDishes() {
                 const ingredientUnit = selIng.ingredientUnit || selectedUnit; // unit of costPerUnit
                 const qty = Number(selIng.quantity || 0);
                 const cpu = Number(selIng.costPerUnit || 0);
+                
                 // Guard: invalid qty/cpu
                 if (!qty || !cpu || !isFinite(qty) || !isFinite(cpu)) return 0;
+                
+                // If units are the same, simple multiplication
                 if (selectedUnit === ingredientUnit) {
-                    return qty * cpu;
+                    return Math.round(qty * cpu);
                 }
-                // Convert by base (g/ml/pc)
-                const toBaseSelected = Number(getUnitToBase(unitType, selectedUnit) || 1);
-                const toBaseIngredient = Number(getUnitToBase(unitType, ingredientUnit) || 1);
-                // cost per base = cpu / toBaseIngredient
-                const costPerBase = cpu / (toBaseIngredient || 1);
-                // qty in base = qty * toBaseSelected
-                const qtyInBase = qty * (toBaseSelected || 1);
-                const result = qtyInBase * costPerBase;
+                
+                // Get conversion factors for both units
+                const selectedToBase = Number(getUnitToBase(unitType, selectedUnit) || 1);
+                const ingredientToBase = Number(getUnitToBase(unitType, ingredientUnit) || 1);
+                
+                // Calculate the conversion factor from selected unit to ingredient unit
+                // Example: selected = kg (1000g), ingredient = g (1g) => 1kg = 1000g
+                const conversionFactor = selectedToBase / ingredientToBase;
+                
+                // Calculate total cost: quantity * (conversion to ingredient unit) * cost per unit
+                const result = qty * conversionFactor * cpu;
                 
                 // Debug log for cost calculation
                 console.debug('[Menu] computeIngredientCost calculation:', {
@@ -1981,19 +2096,31 @@ function renderDishes() {
                     unitType,
                     selectedUnit,
                     ingredientUnit,
-                    toBaseSelected,
-                    toBaseIngredient,
-                    costPerBase,
-                    qtyInBase,
+                    selectedToBase,
+                    ingredientToBase,
+                    conversionFactor,
                     result,
                     rounded: Math.round(result)
                 });
+                
                 // Guard: ensure finite result
                 if (!isFinite(result)) {
-                    console.debug('[Menu] computeIngredientCost produced non-finite value', { selIng, unitType, selectedUnit, ingredientUnit, qty, cpu, toBaseSelected, toBaseIngredient, costPerBase, qtyInBase, result });
+                    console.debug('[Menu] computeIngredientCost produced non-finite value', { 
+                        selIng, 
+                        unitType, 
+                        selectedUnit, 
+                        ingredientUnit, 
+                        qty, 
+                        cpu, 
+                        selectedToBase, 
+                        ingredientToBase, 
+                        conversionFactor, 
+                        result 
+                    });
                     return 0;
                 }
-                // Round to nearest whole number
+                
+                // Round to nearest whole number for currency
                 return Math.round(result);
             } catch (e) {
                 console.error('[Menu] computeIngredientCost error', e, selIng);
@@ -2008,17 +2135,22 @@ function renderDishes() {
             priceInputs.forEach(input => {
                 // Change step to 1 to only allow whole numbers
                 input.step = '1';
+                input.min = '0';
                 
-                // Add event listener to round the value when it loses focus
-                input.addEventListener('change', function() {
-                    if (this.value !== '') {
-                        this.value = roundToWholeNumber(this.value);
+                // Add event listener to round the value when it changes
+                input.addEventListener('input', function() {
+                    if (this.value !== '' && this.value !== null) {
+                        // Remove any non-digit characters
+                        this.value = this.value.replace(/[^0-9]/g, '');
+                        // Ensure value is a valid number
+                        const numValue = parseInt(this.value) || 0;
+                        this.value = numValue;
                     }
                 });
                 
                 // Also round the current value if it exists
-                if (this.value) {
-                    this.value = roundToWholeNumber(this.value);
+                if (input.value) {
+                    input.value = roundToWholeNumber(input.value);
                 }
             });
         }
@@ -2059,8 +2191,10 @@ async function saveDish() {
         } catch (e) {
             console.error('[Menu] saveDish: error computing cost', e, selectedIngredients);
         }
-        const costPrice = Number.isFinite(recomputedCost) ? roundToWholeNumber(recomputedCost) : 0;
-        const sellingPrice = roundToWholeNumber(document.getElementById('dishSellingPrice').value);
+        // Ensure cost price is a whole number
+        const costPrice = Number.isFinite(recomputedCost) ? Math.round(Number(recomputedCost)) : 0;
+        // Ensure selling price is a whole number
+        const sellingPrice = Math.round(Number(document.getElementById('dishSellingPrice').value) || 0);
         // Active removed
         
         if (!name || isNaN(costPrice) || isNaN(sellingPrice)) {
@@ -2290,10 +2424,13 @@ async function saveDish() {
                     const selectedUnitInfo = units.find(u => u.name === selectedUnit);
                     
                     if (baseUnitInfo && selectedUnitInfo && baseUnitInfo.toBase && selectedUnitInfo.toBase) {
-                        // Convert cost to base unit first, then to selected unit
-                        costPerUnit = (costPerUnit * baseUnitInfo.toBase) / selectedUnitInfo.toBase;
+                        // Convert cost from base unit to selected unit
+                        // Example: If base is g (1g) and selected is kg (1000g), then 1kg = 1000g
+                        // So cost per kg = cost per g * 1000
+                        costPerUnit = costPerUnit * (selectedUnitInfo.toBase / baseUnitInfo.toBase);
+                        
                         console.debug(`[Menu] Converted cost: ${ingredient.costPerUnit} ${baseUnit} -> ${costPerUnit.toFixed(4)} ${selectedUnit}`, 
-                            {baseUnitInfo, selectedUnitInfo});
+                            {baseUnitInfo, selectedUnitInfo, conversionFactor: selectedUnitInfo.toBase / baseUnitInfo.toBase});
                     } else {
                         console.warn(`[Menu] Missing unit conversion info`, {baseUnit, selectedUnit, baseUnitInfo, selectedUnitInfo});
                     }
@@ -2495,6 +2632,359 @@ async function saveDish() {
                 }
             }
         }
+        // Vendor Management Functions
+        
+        // Open vendor modal for adding/editing
+        function openVendorModal(vendorId = null) {
+            const modal = new bootstrap.Modal(document.getElementById('vendorModal'));
+            const form = document.getElementById('vendorForm');
+            
+            // Reset form
+            form.reset();
+            document.getElementById('vendorId').value = '';
+            
+            // If editing, populate form with vendor data
+            if (vendorId) {
+                const vendor = menuData.vendors.find(v => v.id === vendorId);
+                if (vendor) {
+                    document.getElementById('vendorId').value = vendor.id;
+                    document.getElementById('vendorName').value = vendor.name || '';
+                    document.getElementById('vendorDescription').value = vendor.description || '';
+                    document.getElementById('vendorContact').value = vendor.contact || '';
+                    document.getElementById('vendorAddress').value = vendor.address || '';
+                    document.getElementById('vendorActive').checked = vendor.active !== false;
+                    document.getElementById('vendorModalLabel').textContent = 'Edit Vendor';
+                }
+            } else {
+                document.getElementById('vendorModalLabel').textContent = 'Add New Vendor';
+            }
+            
+            modal.show();
+        }
+        
+        // Save vendor
+        async function saveVendor() {
+            try {
+                const id = document.getElementById('vendorId').value || 'vendor_' + Date.now();
+                const name = document.getElementById('vendorName').value.trim();
+                const description = document.getElementById('vendorDescription').value.trim();
+                const contact = document.getElementById('vendorContact').value.trim();
+                const address = document.getElementById('vendorAddress').value.trim();
+                const active = document.getElementById('vendorActive').checked;
+                
+                if (!name) {
+                    showToast('Error', 'Vendor name is required', 'danger');
+                    return;
+                }
+                
+                const vendor = {
+                    id,
+                    name,
+                    description,
+                    contact,
+                    address,
+                    active,
+                    updatedAt: new Date().toISOString()
+                };
+                
+                // Check if this is a new vendor
+                const existingIndex = menuData.vendors.findIndex(v => v.id === id);
+                
+                if (existingIndex >= 0) {
+                    // Update existing vendor
+                    menuData.vendors[existingIndex] = {
+                        ...menuData.vendors[existingIndex],
+                        ...vendor
+                    };
+                } else {
+                    // Add new vendor
+                    vendor.createdAt = new Date().toISOString();
+                    menuData.vendors.push(vendor);
+                }
+                
+                // Save data
+                if (await saveData()) {
+                    showToast('Success', `Vendor ${existingIndex >= 0 ? 'updated' : 'added'} successfully`, 'success');
+                    renderVendorsList();
+                    renderVendorTabs();
+                    
+                    // Close modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('vendorModal'));
+                    if (modal) modal.hide();
+                }
+            } catch (error) {
+                console.error('[Menu] saveVendor error', error);
+                showToast('Error', 'Failed to save vendor', 'danger');
+            }
+        }
+        
+        // Delete vendor
+        async function deleteVendor(vendorId) {
+            if (!confirm('Are you sure you want to delete this vendor? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                // Check if any ingredients are using this vendor
+                const ingredientsUsingVendor = menuData.ingredients.filter(ing => ing.vendorId === vendorId);
+                
+                if (ingredientsUsingVendor.length > 0) {
+                    showToast('Cannot Delete', `This vendor is being used by ${ingredientsUsingVendor.length} ingredient(s). Please update those ingredients first.`, 'warning');
+                    return;
+                }
+                
+                // Remove vendor
+                menuData.vendors = menuData.vendors.filter(v => v.id !== vendorId);
+                
+                // Save data
+                if (await saveData()) {
+                    showToast('Success', 'Vendor deleted successfully', 'success');
+                    renderVendorsList();
+                    renderVendorTabs();
+                }
+            } catch (error) {
+                console.error('[Menu] deleteVendor error', error);
+                showToast('Error', 'Failed to delete vendor', 'danger');
+            }
+        }
+        
+        // Render vendors list in the vendors tab
+        function renderVendorsList() {
+            const vendorsList = document.getElementById('vendorsList');
+            if (!vendorsList) return;
+            
+            if (!menuData.vendors || menuData.vendors.length === 0) {
+                vendorsList.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            <i class="bi bi-shop fs-1 d-block mb-2"></i>
+                            No vendors found. Click "Add Vendor" to get started.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            vendorsList.innerHTML = menuData.vendors.map(vendor => {
+                const ingredientsCount = menuData.ingredients.filter(ing => ing.vendorId === vendor.id).length;
+                
+                return `
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="me-2">
+                                    <i class="bi bi-shop fs-5"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-medium">${vendor.name}</div>
+                                    <small class="text-muted">${vendor.contact || 'No contact'}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${vendor.description || '-'}</td>
+                        <td>${ingredientsCount} ingredient(s)</td>
+                        <td>
+                            <span class="badge ${vendor.active !== false ? 'bg-success' : 'bg-secondary'}">
+                                ${vendor.active !== false ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="openVendorModal('${vendor.id}')">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteVendor('${vendor.id}')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+        
+        // Render vendor tabs in the ingredients section
+        function renderVendorTabs() {
+            const vendorTabsContainer = document.getElementById('vendorTabs');
+            const vendorTabsContent = document.getElementById('vendorTabsContent');
+            
+            if (!vendorTabsContainer || !vendorTabsContent) return;
+            
+            // Clear existing vendor tabs (except the first one)
+            const allVendorsTab = vendorTabsContainer.querySelector('li:first-child');
+            vendorTabsContainer.innerHTML = '';
+            vendorTabsContainer.appendChild(allVendorsTab);
+            
+            // Clear existing vendor tab panes (except the first one)
+            const allVendorsPane = vendorTabsContent.querySelector('#all-vendors').parentNode;
+            vendorTabsContent.innerHTML = '';
+            vendorTabsContent.appendChild(allVendorsPane);
+            
+            // Add tabs for each vendor
+            menuData.vendors.forEach(vendor => {
+                if (vendor.active === false) return; // Skip inactive vendors
+                
+                const tabId = `vendor-${vendor.id}`;
+                
+                // Add tab
+                const tab = document.createElement('li');
+                tab.className = 'nav-item';
+                tab.role = 'presentation';
+                tab.innerHTML = `
+                    <button class="nav-link" id="${tabId}-tab" data-bs-toggle="tab" 
+                        data-bs-target="#${tabId}" type="button" role="tab" 
+                        aria-controls="${tabId}" aria-selected="false">
+                        ${vendor.name}
+                    </button>
+                `;
+                vendorTabsContainer.appendChild(tab);
+                
+                // Add tab pane
+                const pane = document.createElement('div');
+                pane.className = 'tab-pane fade';
+                pane.id = tabId;
+                pane.role = 'tabpanel';
+                pane.setAttribute('aria-labelledby', `${tabId}-tab`);
+                pane.innerHTML = `
+                    <div class="ingredients-list" id="ingredientsList-${vendor.id}"></div>
+                `;
+                vendorTabsContent.appendChild(pane);
+            });
+            
+            // Initialize the first tab as active if no tab is active
+            if (!vendorTabsContainer.querySelector('.active')) {
+                const firstTab = vendorTabsContainer.querySelector('button.nav-link');
+                if (firstTab) firstTab.classList.add('active');
+                
+                const firstPane = vendorTabsContent.querySelector('.tab-pane');
+                if (firstPane) firstPane.classList.add('show', 'active');
+            }
+        }
+        
+        // Update the renderIngredients function to support vendor filtering
+        function renderIngredients(vendorId = null) {
+            const container = vendorId 
+                ? document.getElementById(`ingredientsList-${vendorId}`) 
+                : document.getElementById('ingredientsListContainer');
+                
+            if (!container) return;
+            
+            // Filter ingredients by vendor if specified
+            let filteredIngredients = [...menuData.ingredients];
+            if (vendorId) {
+                filteredIngredients = filteredIngredients.filter(ing => ing.vendorId === vendorId);
+            }
+            
+            if (filteredIngredients.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-4 text-muted">
+                        <i class="bi bi-basket" style="font-size: 2rem; opacity: 0.5;"></i>
+                        <p class="mt-2">No ingredients found</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Render ingredients in a grid
+            container.innerHTML = `
+                <div class="row row-cols-1 row-cols-md-2 g-3">
+                    ${filteredIngredients.map(ingredient => {
+                        const stockStatus = getStockStatus(ingredient);
+                        return `
+                            <div class="col">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h6 class="card-title mb-1">${ingredient.name}</h6>
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-outline-primary" onclick="openIngredientModal('${ingredient.id}')">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                <button class="btn btn-outline-danger" onclick="deleteIngredient('${ingredient.id}')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        ${ingredient.description ? `
+                                            <p class="card-text text-muted small mb-2">${ingredient.description}</p>
+                                        ` : ''}
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div>
+                                                <span class="badge bg-light text-dark border me-2">
+                                                    <i class="bi bi-box-seam me-1"></i> ${ingredient.unit || 'N/A'}
+                                                </span>
+                                            </div>
+                                            <div class="text-end">
+                                                <div class="fw-bold text-success">₹${(ingredient.costPerUnit || 0).toFixed(2)}</div>
+                                                <small class="text-muted">per ${ingredient.unit || 'unit'}</small>
+                                            </div>
+                                        </div>
+                                        ${stockStatus ? `
+                                            <div class="mt-2">
+                                                <span class="badge ${stockStatus.class}">
+                                                    <i class="bi ${stockStatus.icon}"></i> ${stockStatus.text}
+                                                </span>
+                                                <small class="text-muted ms-2">${ingredient.currentStock} ${ingredient.unit || ''} available</small>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            `;
+        }
+        
+        // Helper function to get stock status for an ingredient
+        function getStockStatus(ingredient) {
+            if (typeof ingredient.currentStock === 'undefined' || ingredient.currentStock === null) {
+                return null;
+            }
+            
+            if (ingredient.currentStock <= 0) {
+                return {
+                    text: 'Out of Stock',
+                    class: 'bg-danger',
+                    icon: 'bi-x-circle'
+                };
+            } else if (ingredient.minStockLevel && ingredient.currentStock < ingredient.minStockLevel) {
+                return {
+                    text: 'Low Stock',
+                    class: 'bg-warning text-dark',
+                    icon: 'bi-exclamation-triangle'
+                };
+            } else {
+                return {
+                    text: 'In Stock',
+                    class: 'bg-success',
+                    icon: 'bi-check-circle'
+                };
+            }
+        }
+        
+        // Initialize vendor management
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listener for save vendor button
+            document.getElementById('saveVendorBtn')?.addEventListener('click', saveVendor);
+            
+            // Initialize vendor tabs
+            if (menuData.vendors) {
+                renderVendorsList();
+                renderVendorTabs();
+            }
+            
+            // Handle tab change to render ingredients for the selected vendor
+            document.getElementById('vendorTabs')?.addEventListener('shown.bs.tab', function(event) {
+                const target = event.target;
+                const targetId = target.getAttribute('data-bs-target');
+                
+                if (targetId === '#all-vendors') {
+                    renderIngredients();
+                } else {
+                    const vendorId = targetId.replace('#vendor-', '');
+                    renderIngredients(vendorId);
+                }
+            });
+        });
     </script>
 </body>
 

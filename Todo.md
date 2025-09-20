@@ -1,26 +1,45 @@
-# Ingredient Mapping Improvement Plan
+# Calculation Fixes for dishes.html
 
-## Overview
+## Issues to Fix:
 
-Improve ingredient mapping with better unit/piece management, default to gram (g) instead of kg, and ensure calculations handle unit conversions properly.
+1. **Unit Conversion Logic Problems** in `computeIngredientCost()` function
+2. **Rounding Inconsistencies** throughout calculation functions
+3. **Cost Display Logic Issues** in `updateIngredientCost()`
+4. **Total Cost Calculation Problems** in `updateCostPrice()`
 
-## Tasks
+## Implementation Steps:
 
-- [ ] Update default unit in ingredient modal from kg to g
-- [ ] Add unit conversion utility functions for consistent calculations
-- [ ] Update addIngredient function to handle unit conversions
-- [ ] Update updateCostPrice function to use normalized quantities
-- [ ] Update ingredient select dropdown to display units properly
-- [ ] Update ingredient rendering in dishes to show correct units
-- [ ] Test adding ingredients with different units and verify cost calculations
+### Step 1: Fix Unit Conversion Logic
 
-## Files to Edit
+- [ ] Correct the base unit conversion calculations in `computeIngredientCost()`
+- [ ] Ensure proper handling of different unit types (weight, volume, piece)
+- [ ] Fix the conversion factor calculations
 
-- public/buy/dishes.html (main UI and logic)
-- public/buy/menu.json (update existing ingredient units if needed)
+### Step 2: Standardize Rounding
 
-## Followup Steps
+- [ ] Use consistent rounding methods throughout all functions
+- [ ] Round only at final display, not during intermediate calculations
+- [ ] Ensure all monetary values are properly rounded to whole numbers
 
-- Test the updated ingredient mapping functionality
-- Verify cost calculations with different units
-- Ensure UI displays units correctly
+### Step 3: Fix Cost Display Logic
+
+- [ ] Correct unit conversion when displaying ingredient costs
+- [ ] Ensure proper calculation of total cost for selected quantity
+- [ ] Fix the cost per unit conversion logic
+
+### Step 4: Improve Total Cost Calculation
+
+- [ ] Ensure all ingredient costs are properly summed
+- [ ] Fix any issues with intermediate rounding
+- [ ] Add proper validation for calculation results
+
+## Files to Edit:
+
+- `public/buy/dishes.html` (main file with calculation logic)
+
+## Testing Notes:
+
+- User will test manually after fixes are implemented
+- Focus on unit conversions between different unit types
+- Verify cost calculations with various quantities
+- Test total cost calculation with multiple ingredients
