@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Order Reconciliation</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+<div class="container py-4">
+  <h2 class="mb-4">Order Reconciliation</h2>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label for="startDate" class="form-label">Start Date</label>
+          <input type="date" class="form-control" id="startDate" />
+        </div>
+        <div class="col-md-4">
+          <label for="endDate" class="form-label">End Date</label>
+          <input type="date" class="form-control" id="endDate" />
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-primary" onclick="loadData()">Load Data</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><h5 class="mb-0">Orders and Menu Dish Comparison</h5></div>
+    <div class="card-body" id="comparisonContainer"></div>
+  </div>
+  <div id="ingredientSummaryContainer" class="mt-4"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAEKHWdRyzI8WyBeGeesjDrM-nEzOXCuNk",
+    authDomain: "billion1-a9324.firebaseapp.com",
+    projectId: "billion1-a9324",
+    storageBucket: "billion1-a9324.appspot.com",
+    messagingSenderId: "443716692865",
+    appId: "1:443716692865:web:96813fe32a44f8342cd680",
+    measurementId: "G-FE7NFHY5PG"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  // Extract portion information from dish name and get portion multiplier
+  const getPortionInfo = (name) => {
+    const match = (name || '').match(/\((.*?)\)/);
+    if (match && match[1]) {
+      const portion = match[1].toLowerCase();
+      if (portion.includes('half')) return { 
+        isHalf: true, 
+        portionName: 'Half',
+        multiplier: 0.5
+      };
+      if (portion.includes('full')) return { 
+        isHalf: false, 
+        portionName: 'Full',
+        multiplier: 1.0
+      };
+      if (portion.includes('mini')) return {
+        isHalf: true,
+        portionName: 'Mini',
+        multiplier: 0.3
+      };
+    }
+    // Default to full portion if not specified
+    return { 
+      isHalf: false, 
+      portionName: 'Full',
+      multiplier: 1.0
+    };
+  };
+
+  // Clean dish name but keep portion information
+  const cleanDishName = n => (n||"").replace(/\s*\(.*?\)\s*$/, "").trim().toLowerCase();
+
+  function renderIngredientsList(ingredients, quantity = 1, dishName = '') {
+    if (!Array.isArray(ingredients) || ingredients.length === 0) return `<em>No ingredients</em>`;
+
+    // Get portion information from dish name
+    const { isHalf, portionName, multiplier: portionMultiplier } = getPortionInfo(dishName);
+    
+    // Track total ingredients used across all dishes
+    const ingredientTotals = {};
+
+    // Process ingredients - extract name, unit and quantity
+    const processedIngredients = ingredients.map(i => {
+      if (typeof i === 'string') {
+        return { 
+          name: i, 
+          baseQuantity: 1,
+          unit: 'unit',
+          portionQuantity: (1 * portionMultiplier).toFixed(2),
+          totalQuantity: (1 * portionMultiplier * quantity).toFixed(2)
+        };
+      }
+      if (typeof i === 'object' && i !== null) {
+        const baseQty = i.quantity || 1;
+        const portionQty = baseQty * portionMultiplier;
+        return {
+          name: i.name || i.ingredientName || JSON.stringify(i),
+          baseQuantity: baseQty,
+          unit: i.unit || 'unit',
+          portionQuantity: portionQty.toFixed(2),
+          totalQuantity: (portionQty * quantity).toFixed(2)
+        };
+      }
+      return { 
+        name: String(i), 
+        baseQuantity: 1,
+        unit: 'unit',
+        portionQuantity: (1 * portionMultiplier).toFixed(2),
+        totalQuantity: (1 * portionMultiplier * quantity).toFixed(2)
+      };
+    });
+
+    // Calculate total quantity for each unique ingredient (in case same ingredient is used multiple times)
+    processedIngredients.forEach(ing => {
+      if (!ingredientTotals[ing.name]) {
+        ingredientTotals[ing.name] = {
+          unit: ing.unit,
+          total: 0
+        };
+      }
+      ingredientTotals[ing.name].total += parseFloat(ing.totalQuantity);
+    });
+
+    // Convert to array for display
+    const ingredientsWithTotals = processedIngredients.map(ing => ({
+      ...ing,
+      // Format display quantities based on unit
+      displayBase: ing.baseQuantity % 1 === 0 ? 
+        ing.baseQuantity : 
+        ing.baseQuantity.toFixed(2),
+      displayPortion: ing.portionQuantity % 1 === 0 ?
+        ing.portionQuantity :
+        parseFloat(ing.portionQuantity).toFixed(2),
+      displayTotal: parseFloat(ing.totalQuantity) % 1 === 0 ?
+        parseFloat(ing.totalQuantity) :
+        parseFloat(ing.totalQuantity).toFixed(2)
+    }));
+
+    // Create table rows for ingredients
+    const ingredientRows = ingredientsWithTotals.map(ing => `
+      <tr>
+        <td>${ing.name}</td>
+        <td class="text-end">${ing.displayBase} ${ing.unit} ${portionName !== 'Full' ? `(${portionName})` : ''}</td>
+        <td class="text-end">${quantity}</td>
+        <td class="text-end">${ing.displayTotal} ${ing.unit}</td>
+      </tr>`
+    ).join('');
+
+    const headerText = dishName ? `${dishName} (Qty: ${quantity})` : `Quantity: ${quantity}`;
+
+    return `
+    <div class="card mb-3">
+      <div class="card-header py-1">
+        <strong>${headerText}</strong>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Ingredient</th>
+              <th class="text-end">Per ${portionName} Dish</th>
+              <th class="text-end">Qty</th>
+              <th class="text-end">Total Used</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${ingredientRows}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+
+  // Global object to track ingredient usage across all dishes
+  const globalIngredientUsage = {};
+  let menuIngredientsData = [];
+
+  // Function to get current stock for an ingredient
+  function getIngredientStock(ingredientName) {
+    if (!menuIngredientsData || !menuIngredientsData.length) {
+      console.warn('No menu ingredients data available');
+      return null;
+    }
+    
+    console.log(`Looking up stock for: ${ingredientName}`);
+    
+    // First try exact match
+    let ingredient = menuIngredientsData.find(
+      ing => ing.name && ing.name.toLowerCase() === ingredientName.toLowerCase()
+    );
+    
+    // If no exact match, try partial match (in case units are included in the name)
+    if (!ingredient) {
+      console.log('No exact match, trying partial match...');
+      ingredient = menuIngredientsData.find(
+        ing => ing.name && ingredientName.toLowerCase().includes(ing.name.toLowerCase())
+      );
+    }
+    
+    if (ingredient) {
+      console.log(`Found ingredient:`, ingredient);
+      console.log(`Current stock: ${ingredient.currentStock}, Min stock: ${ingredient.minStockLevel}`);
+    } else {
+      console.warn(`Ingredient not found: ${ingredientName}`);
+      console.log('Available ingredient names:', menuIngredientsData.map(i => i.name));
+    }
+    
+    return ingredient || null;
+  }
+
+  // Function to update global ingredient usage
+  function updateGlobalIngredientUsage(ingredients, quantity, dishName) {
+    console.log(`\nUpdating ingredient usage for dish: ${dishName}, quantity: ${quantity}`);
+    const { multiplier: portionMultiplier } = getPortionInfo(dishName);
+    console.log(`Portion multiplier: ${portionMultiplier}`);
+    
+    ingredients.forEach((ing, index) => {
+      console.log(`\nProcessing ingredient ${index + 1}:`, ing);
+      
+      // Skip if ingredient is not an object or doesn't have required properties
+      if (typeof ing !== 'object' || !ing) {
+        console.log('Skipping invalid ingredient');
+        return;
+      }
+      
+      const baseQty = ing.quantity || 1;
+      const unit = ing.unit || 'unit';
+      const name = ing.name || ing.ingredientName || String(ing);
+      
+      if (!name) {
+        console.log('Skipping ingredient with no name');
+        return; // Skip if no name
+      }
+      
+      const totalQty = baseQty * portionMultiplier * quantity;
+      console.log(`Calculated total quantity: ${totalQty} ${unit} (base: ${baseQty} * multiplier: ${portionMultiplier} * qty: ${quantity})`);
+      
+      if (!globalIngredientUsage[name]) {
+        console.log(`First time seeing ${name}, looking up stock info...`);
+        const stockInfo = getIngredientStock(name);
+        
+        // Use the unit from the ingredient data if available
+        const displayUnit = stockInfo && stockInfo.unit ? stockInfo.unit : unit;
+        
+        globalIngredientUsage[name] = {
+          total: 0,
+          unit: displayUnit,
+          currentStock: stockInfo ? (stockInfo.currentStock !== undefined ? stockInfo.currentStock : null) : null,
+          minStockLevel: stockInfo ? (stockInfo.minStockLevel !== undefined ? stockInfo.minStockLevel : null) : null
+        };
+        
+        console.log(`Initialized ${name}:`, globalIngredientUsage[name]);
+      }
+      
+      const prevTotal = globalIngredientUsage[name].total;
+      globalIngredientUsage[name].total += totalQty;
+      console.log(`Updated total for ${name}: ${prevTotal} + ${totalQty} = ${globalIngredientUsage[name].total}`);
+    });
+    
+    console.log('\nCurrent global ingredient usage:', JSON.stringify(globalIngredientUsage, null, 2));
+  }
+
+  // Function to render the ingredient summary table
+  function renderIngredientSummary() {
+    const ingredients = Object.entries(globalIngredientUsage)
+      .sort(([nameA], [nameB]) => nameA.localeCompare(nameB))
+      .map(([name, data]) => {
+        const hasStockInfo = data.currentStock !== null;
+        const isLowStock = hasStockInfo && data.minStockLevel !== null && 
+                         data.currentStock <= data.minStockLevel;
+        const rowClass = isLowStock ? 'table-warning' : '';
+        
+        let stockStatus = '';
+        if (!hasStockInfo) {
+          stockStatus = '<span class="badge bg-secondary">No Stock Data</span>';
+        } else if (isLowStock) {
+          stockStatus = '<span class="badge bg-danger">Low Stock</span>';
+        } else {
+          stockStatus = '<span class="badge bg-success">In Stock</span>';
+        }
+        
+        // Format numbers to 2 decimal places if needed
+        const formatNumber = (num) => {
+          if (num === null || num === undefined) return 'N/A';
+          return num % 1 === 0 ? num : num.toFixed(2);
+        };
+        
+        // Calculate remaining stock if we have current stock
+        let remainingStock = 'N/A';
+        if (hasStockInfo) {
+          const remaining = data.currentStock - data.total;
+          remainingStock = `${formatNumber(remaining)} ${data.unit}`;
+          
+          // Highlight negative remaining stock in red
+          if (remaining < 0) {
+            remainingStock = `<span class="text-danger">${remainingStock} (Shortage)</span>`;
+          }
+        }
+        
+        return {
+          name,
+          total: data.total,
+          unit: data.unit,
+          currentStock: formatNumber(data.currentStock),
+          minStockLevel: formatNumber(data.minStockLevel),
+          displayTotal: formatNumber(data.total),
+          rowClass,
+          stockStatus,
+          remainingStock
+        };
+      });
+
+    if (ingredients.length === 0) return '';
+
+    const rows = ingredients.map(ing => `
+      <tr class="${ing.rowClass}">
+        <td>${ing.name} ${ing.stockStatus}</td>
+        <td class="text-end">${ing.currentStock} ${ing.unit}</td>
+        <td class="text-end">${ing.displayTotal} ${ing.unit}</td>
+        <td class="text-end">${ing.remainingStock}</td>
+      </tr>
+    `).join('');
+
+    return `
+    <div class="card mt-4">
+      <div class="card-header bg-light">
+        <h5 class="mb-0">Total Ingredients Used</h5>
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm table-bordered mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Ingredient</th>
+              <th class="text-end">Current Stock</th>
+              <th class="text-end">Quantity Used</th>
+              <th class="text-end">Remaining Stock</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  function displayComparisonTable(orders, menu) {
+    const container = document.getElementById("comparisonContainer");
+    if (!orders.length && !menu.length) {
+      container.innerHTML = "<p>No orders or menu dishes to display.</p>";
+      return;
+    }
+    
+    // Reset global ingredient usage
+    Object.keys(globalIngredientUsage).forEach(key => delete globalIngredientUsage[key]);
+
+    // Lookup menu dishes by cleaned name
+    const menuLookup = Object.fromEntries(menu.filter(d => d.name).map(d => [cleanDishName(d.name), d]));
+
+    // Group orders by id
+    const groupedOrders = orders.reduce((acc, order) => {
+      if (!acc[order.id]) acc[order.id] = {...order, items: []};
+      acc[order.id].items.push(...(order.items || []));
+      return acc;
+    }, {});
+
+    // Build rows for each order (grouped)
+    const rows = Object.values(groupedOrders).map(order => {
+      const orderDate = order.timestamp?.toDate?.().toLocaleString() || "N/A";
+
+      if (!order.items.length) {
+        return `<tr>
+          <td>${order.id}</td>
+          <td>${orderDate}</td>
+          <td colspan="6"><em>No items in this order</em></td>
+        </tr>`;
+      }
+
+      // List order dishes, quantities, totals, menu dishes, menu prices, and match status as lists
+      const orderDishesHTML = [];
+      const quantitiesHTML = [];
+      const orderTotalsHTML = [];
+      const menuDishesHTML = [];
+      const menuPricesHTML = [];
+      const matchStatusHTML = [];
+      const ingredientsHTML = [];
+
+      order.items.forEach(item => {
+        // Preserve the original dish name with portion information
+        const rawName = item.name || "Unnamed Dish";
+        // Clean name for lookup but keep original for display
+        const cleanedName = cleanDishName(rawName);
+        const qty = item.quantity || 0;
+        const price = item.price || 0;
+        const total = (price * qty).toFixed(2);
+        const matchedMenuDish = menuLookup[cleanedName] || null;
+
+        orderDishesHTML.push(rawName);
+        quantitiesHTML.push(qty);
+        orderTotalsHTML.push(`₹${total}`);
+        menuDishesHTML.push(matchedMenuDish ? matchedMenuDish.name : '-');
+        menuPricesHTML.push(matchedMenuDish && matchedMenuDish.price !== undefined ? `₹${matchedMenuDish.price.toFixed(2)}` : '-');
+        matchStatusHTML.push(matchedMenuDish ? `<span class="text-success">Name Match</span>` : `<span class="text-danger">No Match</span>`);
+        const ingredients = matchedMenuDish?.ingredients || [];
+        // Update global ingredient usage with menu data
+        if (ingredients.length > 0) {
+          updateGlobalIngredientUsage(ingredients, qty, rawName);
+        }
+        ingredientsHTML.push(renderIngredientsList(ingredients, qty, rawName));
+      });
+
+      return `<tr>
+        <td>${order.id}</td>
+        <td>${orderDate}</td>
+        <td><ul class="list-unstyled mb-0">${orderDishesHTML.map(d => `<li>${d}</li>`).join('')}</ul></td>
+        <td><ul class="list-unstyled mb-0">${quantitiesHTML.map(q => `<li>${q}</li>`).join('')}</ul></td>
+        <td><ul class="list-unstyled mb-0">${orderTotalsHTML.map(t => `<li>${t}</li>`).join('')}</ul></td>
+        <td><ul class="list-unstyled mb-0">${menuDishesHTML.map(d => `<li>${d}</li>`).join('')}</ul></td>
+        <td><ul class="list-unstyled mb-0">${menuPricesHTML.map(p => `<li>${p}</li>`).join('')}</ul></td>
+        <td><ul class="list-unstyled mb-0">${matchStatusHTML.map(s => `<li>${s}</li>`).join('')}</ul></td>
+      </tr>
+      <tr>
+        <td colspan="8">${ingredientsHTML.join('')}</td>
+      </tr>`;
+    }).join("");
+
+    container.innerHTML = `
+      <table class="table table-striped table-bordered table-hover align-middle">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Order Date</th>
+            <th>Order Dish</th>
+            <th>Quantity</th>
+            <th>Order Dish Total (₹)</th>
+            <th>Menu Dish</th>
+            <th>Menu Price (₹)</th>
+            <th>Match Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+      
+    // Add ingredient summary after the main table
+    const summaryContainer = document.getElementById('ingredientSummaryContainer');
+    if (summaryContainer) {
+      summaryContainer.innerHTML = renderIngredientSummary();
+    }
+  }
+
+  async function fetchMenu() {
+    console.log('Fetching menu data...');
+    const res = await fetch('/api/menu');
+    if (!res.ok) throw new Error(`HTTP status ${res.status}`);
+    const data = await res.json();
+    console.log('Full menu data:', data);
+
+    // Store ingredients data for stock tracking
+    if (data.ingredients && Array.isArray(data.ingredients)) {
+      menuIngredientsData = data.ingredients;
+      console.log('Stored ingredients data:', menuIngredientsData);
+    } else {
+      console.warn('No ingredients array found in menu data');
+    }
+
+    let dishes = [];
+    if (Array.isArray(data.dishes)) {
+      dishes = data.dishes;
+    } else if (Array.isArray(data)) {
+      dishes = data;
+    } else {
+      const found = Object.values(data).find(v => Array.isArray(v) && v[0]?.name);
+      dishes = found || [];
+    }
+    
+    console.log('Returning dishes:', dishes);
+    return dishes;
+  }
+
+  async function fetchOrders(startDate, endDate) {
+    const snapshot = await db.collection('orders')
+      .where('timestamp', '>=', startDate)
+      .where('timestamp', '<=', endDate)
+      .orderBy('timestamp', 'desc')
+      .get();
+
+    if (snapshot.empty) return [];
+
+    return snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {id: doc.id, timestamp: data.timestamp, items: data.items || [], total: data.total || 0};
+    });
+  }
+
+  async function loadData() {
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+    if (!start || !end) {
+      alert('Please select both start and end dates.');
+      return;
+    }
+
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    endDate.setHours(23, 59, 59, 999);
+
+    try {
+      const [menu, orders] = await Promise.all([fetchMenu(), fetchOrders(startDate, endDate)]);
+      displayComparisonTable(orders, menu);
+    } catch (e) {
+      alert("Error loading data: " + e.message);
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const today = new Date(), weekAgo = new Date();
+    weekAgo.setDate(today.getDate() - 7);
+    document.getElementById('startDate').valueAsDate = weekAgo;
+    document.getElementById('endDate').valueAsDate = today;
+  });
+</script>
+</body>
+</html>

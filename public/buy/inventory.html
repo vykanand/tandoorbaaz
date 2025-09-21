@@ -276,15 +276,15 @@
                                 <option value="">-- Select a dish --</option>
                             </select>
                         </div>
-                        <div class="mb-3 d-none" id="dishPhotoSection">
-                            <img id="dishThumbnail" src="" class="img-fluid rounded mb-2" style="max-height:100px;" alt="Dish">
+                        <div class="mb-3">
+                            <img id="dishThumbnail" src="" class="img-fluid rounded mb-2" style="display:none; max-height:100px;" alt="Dish">
                             <label class="form-label" for="dishPhotoUrlInput">Photo URL</label>
                             <input type="text" id="dishPhotoUrlInput" class="form-control mb-3" placeholder="Enter image URL">
                         </div>
                         <div id="recipeIngredients" class="mb-3">
                             <!-- Recipe ingredients will be loaded here -->
                         </div>
-                        <button class="btn btn-primary w-100" id="updateRecipeBtn" disabled>
+                        <button class="btn btn-primary w-100" id="updateRecipeBtn">
                             <i class="bi bi-save me-2"></i>Update Recipe
                         </button>
                     </div>
@@ -488,7 +488,7 @@
         let dishes = []; // menuData.dishes
         let inventory = []; // mapped for UI table
         let ingredientCategories = []; // menuData.ingredientCategories
-        let unitDisplayMap = {}; // { unitName: displayName }
+        let unitDisplayMap = {}; 
         let topDishesChart = null;
 
         // DOM Elements
@@ -1009,26 +1009,14 @@
 
         // Helper: set dish photo thumbnail and input safely, avoid broken images
         function setDishPhotoUI(dish) {
-            const photoSection = document.getElementById('dishPhotoSection');
-            const updateRecipeBtn = document.getElementById('updateRecipeBtn');
-            
-            if (!dish) {
-                photoSection?.classList.add('d-none');
-                if (updateRecipeBtn) updateRecipeBtn.disabled = true;
-                return;
-            }
-            
+            if (!dish) return;
             const url = dish.photoUrl || '';
             if (dishPhotoUrlInput) dishPhotoUrlInput.value = url;
             updateThumbnailPreview(url);
-            photoSection?.classList.remove('d-none');
-            if (updateRecipeBtn) updateRecipeBtn.disabled = false;
         }
 
         function updateThumbnailPreview(url) {
             if (!dishThumbnail) return;
-            
-            // Show/hide thumbnail based on URL
             if (!url) {
                 dishThumbnail.style.display = 'none';
                 dishThumbnail.src = '';

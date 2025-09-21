@@ -2,7 +2,7 @@
 
 ## 🔒 Code Stability & Safety
 1. Do not break working code.
-
+Only update the affected lines without regenerating the whole file.
 2. Only modify code when absolutely necessary and keep changes minimal.avoid over complex fixes.always create or fix code in simplest possible way.
 3. Always preserve the intent and behavior of the original logic unless a clear issue is found.
 4. Never introduce incomplete, placeholder, or pseudocode content (e.g., `...`, `TODO`, or "implement this").

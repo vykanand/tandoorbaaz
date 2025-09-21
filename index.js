@@ -36,6 +36,56 @@ fs.readdirSync(publicDir).forEach((dir) => {
       }
     });
 
+// Update inventory after reconciliation
+app.post('/api/update-inventory', (req, res) => {
+    try {
+        const { ingredientsUsed } = req.body;
+        console.log('Updating inventory with:', ingredientsUsed);
+        
+        // Read current menu data
+        const menuData = JSON.parse(fs.readFileSync(menuFile, 'utf8'));
+        let inventoryUpdated = false;
+        
+        // Update each ingredient's stock
+        for (const [ingId, usage] of Object.entries(ingredientsUsed)) {
+            const ingredient = menuData.ingredients.find(i => i.id === ingId);
+            if (ingredient && usage.totalUsed) {
+                const currentStock = parseFloat(ingredient.currentStock) || 0;
+                const used = parseFloat(usage.totalUsed) || 0;
+                
+                // Update stock level (ensure it doesn't go below 0)
+                ingredient.currentStock = Math.max(0, currentStock - used);
+                inventoryUpdated = true;
+                
+                console.log(`Updated ${ingredient.name}: ${currentStock} → ${ingredient.currentStock} ${ingredient.unit}`);
+            }
+        }
+        
+        // Save updated menu data if changes were made
+        if (inventoryUpdated) {
+            fs.writeFileSync(menuFile, JSON.stringify(menuData, null, 2), 'utf8');
+            res.json({ 
+                success: true, 
+                message: 'Inventory updated successfully',
+                updated: true
+            });
+        } else {
+            res.json({ 
+                success: true, 
+                message: 'No inventory updates were needed',
+                updated: false
+            });
+        }
+    } catch (error) {
+        console.error('Error updating inventory:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Failed to update inventory',
+            details: error.message 
+        });
+    }
+});
+
 // Menu data APIs (single source of truth: public/buy/menu.json)
 app.get("/api/menu", (req, res) => {
   try {

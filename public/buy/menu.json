@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-09-21T20:01:56.812Z",
+  "lastUpdated": "2025-09-21T23:11:24.594Z",
   "categories": [
     {
       "id": "starters",
@@ -258,8 +258,7 @@
       "costPerUnit": 200,
       "minStockLevel": 1,
       "currentStock": 2,
-      "supplierId": "vendor_001",
-      "vendorId": "vendor_meat",
+      "vendor": "Afzal chicken",
       "active": true,
       "createdAt": "2025-09-21T10:00:00+05:30",
       "updatedAt": "2025-09-21T20:01:56.812Z",
@@ -276,8 +275,7 @@
       "costPerUnit": 500,
       "minStockLevel": 0.1,
       "currentStock": 0.98,
-      "supplierId": "vendor_002",
-      "vendorId": "vendor_dairy",
+      "vendor": "Butter Paneer vendor",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock",
@@ -293,8 +291,7 @@
       "costPerUnit": 300,
       "minStockLevel": 5,
       "currentStock": 0,
-      "supplierId": "vendor_002",
-      "vendorId": "vendor_dairy",
+      "vendor": "Butter Paneer vendor",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock"
@@ -309,7 +306,7 @@
       "costPerUnit": 50,
       "minStockLevel": 15,
       "currentStock": 0,
-      "supplierId": "vendor_003",
+      "vendor": "Sabzi Vegetables",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock"
@@ -324,7 +321,7 @@
       "costPerUnit": 400,
       "minStockLevel": 2,
       "currentStock": 0,
-      "supplierId": "vendor_004",
+      "vendor": "Grocery and Masalas",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock"
@@ -339,7 +336,7 @@
       "costPerUnit": 45,
       "minStockLevel": 20,
       "currentStock": 0,
-      "supplierId": "vendor_005",
+      "vendor": "aata maida vega",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock"
@@ -354,7 +351,7 @@
       "costPerUnit": 40,
       "minStockLevel": 15,
       "currentStock": 0,
-      "supplierId": "vendor_005",
+      "vendor": "aata maida vega",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock"
@@ -369,7 +366,7 @@
       "costPerUnit": 1000,
       "minStockLevel": 1,
       "currentStock": 0,
-      "supplierId": "vendor_006",
+      "vendor": "pandit gas cylinder",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock"
@@ -384,7 +381,7 @@
       "costPerUnit": 60,
       "minStockLevel": 50,
       "currentStock": 0,
-      "supplierId": "vendor_007",
+      "vendor": "Shukla koyla",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock"
@@ -397,30 +394,32 @@
       "unitType": "weight",
       "unit": "g",
       "costPerUnit": 0.3,
-      "minStockLevel": 5000,
-      "currentStock": 0,
-      "supplier": "Meat Supplier Inc.",
-      "supplierCode": "MS-001",
+      "minStockLevel": 100,
+      "currentStock": 1500,
+      "vendor": "Afzal chicken",
       "barcode": "123456789012",
       "active": true,
       "createdAt": "2025-01-15T10:00:00+05:30",
-      "updatedAt": "2025-09-18T15:30:00+05:30",
+      "updatedAt": "2025-09-21T23:11:24.594Z",
       "notes": "Keep refrigerated",
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "category": "meat"
     },
     {
       "id": "ing_002",
       "name": "Chicken Tikka Pieces",
-      "category": "chicken",
+      "category": "meat",
       "unitType": "weight",
       "unit": "g",
       "costPerUnit": 0.28,
       "density": 1,
       "active": true,
-      "currentStock": 0,
+      "currentStock": 800,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "minStockLevel": 200,
+      "updatedAt": "2025-09-21T23:06:24.539Z"
     },
     {
       "id": "ing_003",
