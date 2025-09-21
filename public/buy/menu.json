@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-09-21T23:11:24.594Z",
+  "lastUpdated": "2025-09-21T23:42:30.792Z",
   "categories": [
     {
       "id": "starters",
@@ -269,47 +269,49 @@
       "id": "ing_102",
       "name": "Butter",
       "description": "Fresh unsalted butter",
-      "category": "dairy",
+      "category": "others",
       "unitType": "weight",
-      "unit": "kg",
+      "unit": "g",
       "costPerUnit": 500,
-      "minStockLevel": 0.1,
-      "currentStock": 0.98,
+      "minStockLevel": 199.98,
+      "currentStock": 1000,
       "vendor": "Butter Paneer vendor",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock",
-      "updatedAt": "2025-09-21T19:53:06.304Z"
+      "updatedAt": "2025-09-21T23:27:09.142Z"
     },
     {
       "id": "ing_103",
       "name": "Paneer",
       "description": "Fresh homemade paneer",
-      "category": "dairy",
+      "category": "others",
       "unitType": "weight",
-      "unit": "kg",
+      "unit": "g",
       "costPerUnit": 300,
       "minStockLevel": 5,
-      "currentStock": 0,
+      "currentStock": 1000,
       "vendor": "Butter Paneer vendor",
       "active": true,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "updatedAt": "2025-09-21T23:29:09.056Z"
     },
     {
       "id": "ing_104",
-      "name": "Mixed Vegetables (Sabzi)",
+      "name": "Onion Pyaaz",
       "description": "Assorted fresh vegetables",
-      "category": "vegetables",
+      "category": "others",
       "unitType": "weight",
       "unit": "kg",
       "costPerUnit": 50,
-      "minStockLevel": 15,
-      "currentStock": 0,
+      "minStockLevel": 1,
+      "currentStock": 5,
       "vendor": "Sabzi Vegetables",
       "active": true,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "updatedAt": "2025-09-21T23:34:02.807Z"
     },
     {
       "id": "ing_105",
@@ -424,28 +426,34 @@
     {
       "id": "ing_003",
       "name": "Chicken Baccha (Drumsticks)",
-      "category": "chicken",
+      "category": "others",
       "unitType": "piece",
       "unit": "pc",
       "costPerUnit": 35,
       "avgWeightPerPiece": 100,
       "active": true,
-      "currentStock": 0,
+      "currentStock": 12,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "vendor": "Afzal chicken",
+      "minStockLevel": 4,
+      "updatedAt": "2025-09-21T23:26:47.588Z"
     },
     {
       "id": "ing_004",
       "name": "Chicken Wings",
-      "category": "chicken",
+      "category": "others",
       "unitType": "piece",
       "unit": "pc",
       "costPerUnit": 22,
       "avgWeightPerPiece": 100,
       "active": true,
-      "currentStock": 0,
+      "currentStock": 12,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "vendor": "Afzal chicken",
+      "minStockLevel": 2,
+      "updatedAt": "2025-09-21T23:42:30.792Z"
     },
     {
       "id": "ing_005",
@@ -528,15 +536,18 @@
     {
       "id": "ing_011",
       "name": "Cooking Oil",
-      "category": "grocery",
+      "category": "others",
       "unitType": "volume",
-      "unit": "ml",
+      "unit": "l",
       "costPerUnit": 0.15,
       "density": 0.92,
       "active": true,
-      "currentStock": 0,
+      "currentStock": 5,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "vendor": "Grocery and Masalas",
+      "minStockLevel": 0.2,
+      "updatedAt": "2025-09-21T23:41:45.711Z"
     },
     {
       "id": "ing_012",
