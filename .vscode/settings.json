@@ -1,4 +1,5 @@
 {
     "zencoder.enableRepoIndexing": true,
-    "CodeGPT.apiKey": "Groq"
+    "CodeGPT.apiKey": "Groq",
+    "codium.codeCompletion.enable": false
 }

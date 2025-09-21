@@ -1350,6 +1350,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     
+    <!-- Sales Data Tracking -->
+    <script src="sales-data.js"></script>
+    
     <!-- AOS Animation Library -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
@@ -1949,7 +1952,17 @@
                     console.warn('Error updating timestamps:', error);
                 });
                 
-                // Clear cart only after successful write
+                // Record sales for each item in the cart
+                for (const item of cart) {
+                    const portion = item.portion || 'full';
+                    if (window.SalesData && typeof window.SalesData.recordSale === 'function') {
+                        window.SalesData.recordSale(item.id, portion, item.quantity);
+                    } else {
+                        console.warn('SalesData.recordSale is not available');
+                    }
+                }
+                
+                // Clear cart only after successful write and sales recording
                 cart = [];
                 saveCart();
                 
