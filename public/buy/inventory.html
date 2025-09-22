@@ -326,8 +326,8 @@
                             <button class="btn btn-outline-success text-start" data-bs-toggle="modal" data-bs-target="#updateInventoryModal">
                                 <i class="bi bi-arrow-repeat me-2"></i>Update Inventory
                             </button>
-                            <button class="btn btn-outline-info text-start" data-bs-toggle="modal" data-bs-target="#generateReportModal">
-                                <i class="bi bi-file-earmark-text me-2"></i>Generate Report
+                            <button class="btn btn-outline-info text-start" id="generatePdfReportBtn">
+                                <i class="bi bi-file-earmark-pdf me-2"></i>Generate PDF Report
                             </button>
                             <button class="btn btn-outline-warning text-start" id="lowStockAlertBtn">
                                 <i class="bi bi-exclamation-triangle me-2"></i>View Low Stock Alerts
@@ -581,6 +581,9 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script>
         // Global state
         let menuData = null; // Full menu.json
@@ -917,14 +920,37 @@
 
         function populateIngredientSelect() {
             ingredientSelect.innerHTML = '<option value="">-- Select Ingredient --</option>';
+            
+            // Group ingredients by vendor
+            const vendors = {};
             ingredients.forEach(ing => {
-                const opt = document.createElement('option');
-                opt.value = ing.id;
-                opt.textContent = ing.name;
-                ingredientSelect.appendChild(opt);
+                const vendor = ing.vendor || 'Other';
+                if (!vendors[vendor]) {
+                    vendors[vendor] = [];
+                }
+                vendors[vendor].push(ing);
             });
-            // Reset unit display
-            unitDisplay.textContent = '';
+
+            // Sort vendors alphabetically
+            const sortedVendors = Object.keys(vendors).sort();
+            
+            // Create optgroups for each vendor
+            sortedVendors.forEach(vendor => {
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = vendor;
+                
+                // Sort ingredients alphabetically within each vendor
+                vendors[vendor]
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .forEach(ing => {
+                        const opt = document.createElement('option');
+                        opt.value = ing.id;
+                        opt.textContent = ing.name;
+                        optgroup.appendChild(opt);
+                    });
+                
+                ingredientSelect.appendChild(optgroup);
+            });
         }
 
         function updateStats() {
@@ -1434,10 +1460,124 @@
             }
         });
 
+        // Export table to PDF
+        function exportTableToPDF(event) {
+            // Prevent any default behavior that might be causing the modal error
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Set document properties
+                doc.setProperties({
+                    title: 'Ingredients Inventory',
+                    subject: 'Current Stock Levels',
+                    author: 'TandoorBaaz',
+                    creator: 'TandoorBaaz Inventory System'
+                });
+                
+                // Add title
+                doc.setFontSize(18);
+                doc.text('Ingredients Inventory', 14, 22);
+                doc.setFontSize(11);
+                doc.setTextColor(100);
+                doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+                
+                // Get table data
+                const table = document.querySelector('.table');
+                if (!table) {
+                    console.error('Table not found');
+                    return;
+                }
+                
+                // Extract headers
+                const headers = [];
+                const headerCells = table.querySelectorAll('thead th');
+                headerCells.forEach(header => {
+                    // Skip the Actions column
+                    if (!header.textContent.trim().toLowerCase().includes('action')) {
+                        headers.push(header.textContent.trim());
+                    }
+                });
+                
+                // Extract data rows
+                const data = [];
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const rowData = [];
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach((cell, index) => {
+                        // Skip the Actions column (last column)
+                        if (index < cells.length - 1) {
+                            rowData.push(cell.textContent.trim());
+                        }
+                    });
+                    if (rowData.length > 0) {
+                        data.push(rowData);
+                    }
+                });
+                
+                // Generate the table
+                doc.autoTable({
+                    head: [headers],
+                    body: data,
+                    startY: 40,
+                    headStyles: { 
+                        fillColor: [13, 110, 253],
+                        textColor: 255,
+                        fontStyle: 'bold'
+                    },
+                    alternateRowStyles: { fillColor: [245, 245, 245] },
+                    margin: { top: 40 },
+                    styles: {
+                        fontSize: 9,
+                        cellPadding: 2,
+                        lineColor: [0, 0, 0],
+                        lineWidth: 0.1
+                    }
+                });
+                
+                // Save the PDF
+                doc.save(`inventory_${new Date().toISOString().split('T')[0]}.pdf`);
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Error generating PDF. Please check console for details.');
+            }
+        }
+        
+        // Initialize the application when DOM is fully loaded
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
+            tooltipTriggerList.map(function (tooltipTriggerEl) { 
+                return new bootstrap.Tooltip(tooltipTriggerEl); 
+            });
+            
+            // Initialize modals
+            const modals = [
+                'addIngredientModal',
+                'updateInventoryModal',
+                'addDishModal',
+                'editVendorModal',
+                'generateReportModal'
+            ];
+            
+            modals.forEach(modalId => {
+                const modalElement = document.getElementById(modalId);
+                if (modalElement) {
+                    new bootstrap.Modal(modalElement);
+                }
+            });
+
+            // Add event listener for PDF report generation
+            const generatePdfBtn = document.getElementById('generatePdfReportBtn');
+            if (generatePdfBtn) {
+                generatePdfBtn.addEventListener('click', exportTableToPDF);
+            }
             
             // Add event listeners for stat cards after DOM is loaded
             document.querySelectorAll('.stat-card[data-filter]').forEach(card => {
