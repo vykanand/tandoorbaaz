@@ -37,6 +37,49 @@
             background-color: rgba(13, 110, 253, 0.05);
         }
         
+        /* Enhanced highlight styles for inventory items */
+        .ingredient-row {
+            transition: all 0.3s ease;
+        }
+
+        .ingredient-row.highlight-low,
+        .ingredient-row[data-status="low-stock"].highlight-low {
+            background-color: rgba(255, 193, 7, 0.25) !important;
+            border-left: 4px solid #ffc107;
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ingredient-row.highlight-out,
+        .ingredient-row[data-status="out-of-stock"].highlight-out {
+            background-color: rgba(220, 53, 69, 0.25) !important;
+            border-left: 4px solid #dc3545;
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .ingredient-row.highlight-in,
+        .ingredient-row[data-status="in-stock"].highlight-in {
+            background-color: rgba(25, 135, 84, 0.25) !important;
+            border-left: 4px solid #198754;
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Make sure the highlight is visible on hover */
+        .ingredient-row.highlight-low:hover,
+        .ingredient-row.highlight-out:hover,
+        .ingredient-row.highlight-in:hover {
+            transform: translateX(10px) scale(1.01);
+            z-index: 2;
+        }
+        
         :root {
             --primary-color: #0d6efd;
             --secondary-color: #6c757d;
@@ -190,28 +233,28 @@
                 <!-- Stats Cards -->
                 <div class="row">
                     <div class="col-md-3">
-                        <div class="stat-card" style="background: linear-gradient(135deg, #4e73df, #224abe);">
+                        <div class="stat-card" id="totalItemsCard" style="background: linear-gradient(135deg, #4e73df, #224abe); cursor: pointer;" data-filter="all">
                             <i class="bi bi-box-seam"></i>
                             <div class="stat-value" id="totalItems">0</div>
                             <div class="stat-label">Total Items</div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="stat-card" style="background: linear-gradient(135deg, #1cc88a, #13855c);">
+                        <div class="stat-card" id="inStockCard" style="background: linear-gradient(135deg, #1cc88a, #13855c); cursor: pointer;" data-filter="in-stock">
                             <i class="bi bi-check-circle"></i>
                             <div class="stat-value" id="inStock">0</div>
                             <div class="stat-label">In Stock</div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="stat-card" style="background: linear-gradient(135deg, #f6c23e, #dda20a);">
+                        <div class="stat-card" id="lowStockCard" style="background: linear-gradient(135deg, #f6c23e, #dda20a); cursor: pointer;" data-filter="low-stock">
                             <i class="bi bi-exclamation-triangle"></i>
                             <div class="stat-value" id="lowStock">0</div>
                             <div class="stat-label">Low Stock</div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="stat-card" style="background: linear-gradient(135deg, #e74a3b, #be2617);">
+                        <div class="stat-card" id="outOfStockCard" style="background: linear-gradient(135deg, #e74a3b, #be2617); cursor: pointer;" data-filter="out-of-stock">
                             <i class="bi bi-x-circle"></i>
                             <div class="stat-value" id="outOfStock">0</div>
                             <div class="stat-label">Out of Stock</div>
@@ -320,7 +363,7 @@
                 </div>
 
                 <!-- Inventory Alerts -->
-                <div class="card">
+                <div class="card" id="lowStockAlertsCard">
                     <div class="card-header bg-warning text-dark">
                         <i class="bi bi-exclamation-triangle me-2"></i>Low Stock Alerts
                     </div>
@@ -670,7 +713,8 @@
         }
 
         function rebuildInventoryFromIngredients() {
-            const inventoryItems = ingredients.map(ing => ({
+            // Update the global inventory variable with current ingredient data
+            inventory = ingredients.map(ing => ({
                 id: ing.id,
                 name: ing.name,
                 category: ing.category || ing.categoryId || 'others',
@@ -681,6 +725,7 @@
                 vendor: ing.vendor || 'Unknown Vendor'
             }));
             
+            // Also return the grouped vendors for other uses
             return groupByVendor(ingredients);
         }
 
@@ -768,6 +813,45 @@
             vendorSelect.appendChild(newOption);
         }
         
+        function highlightInventoryItems(filter) {
+            console.log('Highlighting items with filter:', filter);
+            
+            // First, remove all highlights and reset all rows to be visible
+            document.querySelectorAll('.ingredient-row').forEach(row => {
+                row.classList.remove('highlight-in', 'highlight-low', 'highlight-out');
+                row.style.display = ''; // Make sure all rows are visible
+            });
+
+            if (filter === 'all') {
+                // If 'all' is selected, just remove highlights and show all rows
+                return;
+            }
+
+            // Get the highlight class based on the filter
+            const highlightClass = `highlight-${filter.split('-')[0]}`; // 'in', 'low', or 'out'
+            console.log('Using highlight class:', highlightClass);
+            
+            // First, hide all rows
+            document.querySelectorAll('.ingredient-row').forEach(row => {
+                row.style.display = 'none';
+            });
+            
+            // Then show and highlight only the matching rows
+            const matchingRows = document.querySelectorAll(`.ingredient-row[data-status="${filter}"]`);
+            console.log(`Found ${matchingRows.length} matching rows for status: ${filter}`);
+            
+            matchingRows.forEach(row => {
+                row.style.display = '';
+                row.classList.add(highlightClass);
+                console.log('Highlighted row:', row);
+            });
+            
+            // Also show all vendor headers
+            document.querySelectorAll('.vendor-header').forEach(header => {
+                header.style.display = '';
+            });
+        }
+        
         function renderInventory() {
             inventoryTableBody.innerHTML = '';
             const vendorGroups = rebuildInventoryFromIngredients();
@@ -790,6 +874,7 @@
                 vendorItems.forEach(item => {
                     const row = document.createElement('tr');
                     row.className = 'ingredient-row';
+                    row.setAttribute('data-status', item.status);
                     let statusBadge = '';
                     if (item.status === 'in-stock') {
                         statusBadge = '<span class="badge bg-success">In Stock</span>';
@@ -1336,9 +1421,35 @@
         };
 
         // Initialize tooltips and vendor edit functionality
+        // Smooth scroll to low stock alerts
+        document.getElementById('lowStockAlertBtn')?.addEventListener('click', function() {
+            const alertsCard = document.getElementById('lowStockAlertsCard');
+            if (alertsCard) {
+                alertsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Add highlight effect
+                alertsCard.classList.add('border-warning', 'border-2');
+                setTimeout(() => {
+                    alertsCard.classList.remove('border-warning', 'border-2');
+                }, 2000);
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
+            
+            // Add event listeners for stat cards after DOM is loaded
+            document.querySelectorAll('.stat-card[data-filter]').forEach(card => {
+                card.addEventListener('click', function() {
+                    const filter = this.getAttribute('data-filter');
+                    highlightInventoryItems(filter);
+                    
+                    // Update active state
+                    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
             
             // Vendor edit functionality
             document.addEventListener('click', function(e) {

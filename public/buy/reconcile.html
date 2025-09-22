@@ -619,12 +619,37 @@
     const startDate = new Date(start);
     const endDate = new Date(end);
     endDate.setHours(23, 59, 59, 999);
-
+    
+    const reconcileBtn = document.getElementById('reconcileBtn');
+    const originalText = reconcileBtn.innerHTML;
+    
     try {
+      // Check if this date range is already reconciled
+      const checkResponse = await fetch(`/api/reconciliations/check?startDate=${encodeURIComponent(start)}&endDate=${encodeURIComponent(end)}`);
+      const { isReconciled } = await checkResponse.json();
+      
+      // Update button state based on reconciliation status
+      if (isReconciled) {
+        reconcileBtn.disabled = true;
+        reconcileBtn.innerHTML = 'Already Reconciled';
+        reconcileBtn.classList.add('btn-secondary');
+        reconcileBtn.classList.remove('btn-danger');
+      } else {
+        reconcileBtn.disabled = false;
+        reconcileBtn.innerHTML = '<i class="bi bi-check-circle"></i> Reconcile Quantities';
+        reconcileBtn.classList.remove('btn-secondary');
+        reconcileBtn.classList.add('btn-danger');
+      }
+      
+      // Load and display the data
       const [menu, orders] = await Promise.all([fetchMenu(), fetchOrders(startDate, endDate)]);
       displayComparisonTable(orders, menu);
-    } catch (e) {
-      alert("Error loading data: " + e.message);
+      
+    } catch (error) {
+      console.error('Error loading data:', error);
+      alert('Error loading data: ' + error.message);
+      reconcileBtn.disabled = false;
+      reconcileBtn.innerHTML = originalText;
     }
   }
 
@@ -632,41 +657,108 @@
     const reconcileBtn = document.getElementById('reconcileBtn');
     const originalText = reconcileBtn.innerHTML;
     
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    if (!startDate || !endDate) {
+      alert('Please select both start and end dates.');
+      return;
+    }
+    
+    // Double check if already reconciled (in case of race conditions)
+    try {
+      const checkResponse = await fetch(`/api/reconciliations/check?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`);
+      const { isReconciled } = await checkResponse.json();
+      
+      if (isReconciled) {
+        alert('This date range has already been reconciled.');
+        loadData(); // Refresh the UI
+        return;
+      }
+    } catch (error) {
+      console.error('Error checking reconciliation status:', error);
+      // Continue with reconciliation if we can't check status
+    }
+    
+    if (!confirm('Are you sure you want to reconcile the selected date range? This action cannot be undone.')) {
+      return;
+    }
+    
     try {
       // Disable button and show loading state
       reconcileBtn.disabled = true;
       reconcileBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Updating...';
       
-      // Get the updated quantities
-      const updatedIngredients = Object.entries(globalIngredientUsage).map(([name, data]) => ({
-        name,
-        currentStock: data.currentStock - data.total
-      }));
+      // Prepare the ingredients data for the server
+      const ingredientsUsed = {};
       
-      // Send to server to update menu.json
-      const response = await fetch('/api/update-ingredients', {
+      // Debug: Log the globalIngredientUsage object
+      console.log('Global ingredient usage before processing:', JSON.stringify(globalIngredientUsage, null, 2));
+      
+      // Find the ingredient ID for each ingredient in globalIngredientUsage
+      const menuResponse = await fetch('/api/menu');
+      const menuData = await menuResponse.json();
+      
+      // Create a map of ingredient names to their IDs
+      const ingredientIdMap = {};
+      if (menuData.ingredients) {
+        menuData.ingredients.forEach(ing => {
+          ingredientIdMap[ing.name.toLowerCase()] = ing.id;
+        });
+      }
+      
+      // Process each ingredient in globalIngredientUsage
+      Object.entries(globalIngredientUsage).forEach(([ingredientName, data]) => {
+        if (data.total > 0) {
+          // Try to find the ingredient ID using the name
+          const ingredientId = ingredientIdMap[ingredientName.toLowerCase()] || ingredientName;
+          
+          ingredientsUsed[ingredientId] = {
+            totalUsed: data.total,
+            unit: data.unit
+          };
+          
+          console.log(`Adding ingredient to update: ${ingredientName} (ID: ${ingredientId}), Qty: ${data.total} ${data.unit}`);
+        }
+      });
+      
+      console.log('Sending ingredients to server:', JSON.stringify(ingredientsUsed, null, 2));
+      
+      // Send to server to update inventory and record reconciliation
+      const response = await fetch('/api/update-inventory', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ingredients: updatedIngredients })
+        body: JSON.stringify({
+          ingredientsUsed,
+          startDate,
+          endDate
+        })
       });
       
-      if (!response.ok) throw new Error('Failed to update quantities');
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update quantities');
+      }
       
       // Show success message
-      alert('Quantities updated successfully!');
+      alert(result.message || 'Quantities updated successfully!');
       
       // Reload the data to reflect changes
-      loadData();
+      await loadData();
       
     } catch (error) {
       console.error('Error updating quantities:', error);
-      alert('Error updating quantities: ' + error.message);
-    } finally {
-      // Reset button state
-      reconcileBtn.disabled = false;
-      reconcileBtn.innerHTML = originalText;
+      alert('Error: ' + (error.message || 'Failed to update quantities'));
+      
+      // Reset button state if still on the same date range
+      if (document.getElementById('startDate').value === startDate && 
+          document.getElementById('endDate').value === endDate) {
+        reconcileBtn.disabled = false;
+        reconcileBtn.innerHTML = '<i class="bi bi-check-circle"></i> Reconcile Quantities';
+      }
     }
   }
 
