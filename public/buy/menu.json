@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-09-22T00:52:35.818Z",
+  "lastUpdated": "2025-09-22T10:09:12.641Z",
   "categories": [
     {
       "id": "starters",
@@ -353,12 +353,12 @@
       "unit": "kg",
       "costPerUnit": 40,
       "minStockLevel": 0.5,
-      "currentStock": 1.2000000000000002,
+      "currentStock": 1.18,
       "vendor": "aata maida vega",
       "active": true,
       "minStock": 0,
       "status": "out-of-stock",
-      "updatedAt": "2025-09-21T23:52:58.307Z"
+      "updatedAt": "2025-09-22T10:09:12.641Z"
     },
     {
       "id": "ing_108",
@@ -638,7 +638,9 @@
           "portionPieces": 4
         }
       },
-      "lastUpdated": "2025-09-20T18:52:02.343Z"
+      "lastUpdated": "2025-09-22T09:44:01.330Z",
+      "fullPortionPrice": 210,
+      "halfPortionPrice": 125
     },
     {
       "id": "13",
@@ -742,7 +744,9 @@
           "portionPieces": 4
         }
       },
-      "lastUpdated": "2025-09-20T18:54:16.679Z"
+      "lastUpdated": "2025-09-20T18:54:16.679Z",
+      "fullPortionPrice": 280,
+      "halfPortionPrice": 179.99
     },
     {
       "id": "dish_1758499531759",
@@ -775,7 +779,95 @@
       "photoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrYHMHKjZdjrjjGNQ0E-EY6SEw9WEyINWQ1A&s",
       "createdAt": "2025-09-22T00:05:31.759Z",
       "updatedAt": "2025-09-22T00:05:31.759Z",
-      "lastUpdated": "2025-09-22T00:06:20.537Z"
+      "lastUpdated": "2025-09-22T09:44:19.711Z"
+    },
+    {
+      "id": "dish_1758534911823",
+      "name": "Soya chaap Biryani",
+      "description": "Great taste",
+      "costPrice": 100,
+      "sellingPrice": 230,
+      "sellingPriceHalf": 115,
+      "profitMargin": 0.5652173913043478,
+      "profitMarginHalf": 0.4782608695652174,
+      "category": "starters",
+      "prepTime": "12",
+      "ingredients": [
+        {
+          "ingredientId": "ing_102",
+          "name": "Butter",
+          "quantity": 20,
+          "unit": "g",
+          "costPerUnit": 500,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        },
+        {
+          "ingredientId": "ing_108",
+          "name": "LPG Gas",
+          "quantity": 50,
+          "unit": "g",
+          "costPerUnit": 1000,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "photoUrl": "https://media-cdn.tripadvisor.com/media/photo-s/10/b8/a7/a1/soya-chaap-biryani.jpg",
+      "createdAt": "2025-09-22T09:55:11.823Z",
+      "updatedAt": "2025-09-22T09:55:11.823Z",
+      "portions": {
+        "full": {
+          "price": 230,
+          "cost": 100,
+          "profitMargin": 0.5652173913043478,
+          "ingredients": [
+            {
+              "ingredientId": "ing_102",
+              "name": "Butter",
+              "quantity": 20,
+              "unit": "g",
+              "costPerUnit": 500,
+              "ingredientUnit": "g",
+              "unitType": "weight"
+            },
+            {
+              "ingredientId": "ing_108",
+              "name": "LPG Gas",
+              "quantity": 50,
+              "unit": "g",
+              "costPerUnit": 1000,
+              "ingredientUnit": "kg",
+              "unitType": "weight"
+            }
+          ]
+        },
+        "half": {
+          "price": 115,
+          "cost": 60,
+          "profitMargin": 0.4782608695652174,
+          "ingredients": [
+            {
+              "ingredientId": "ing_102",
+              "name": "Butter",
+              "quantity": 12,
+              "unit": "g",
+              "costPerUnit": 500,
+              "ingredientUnit": "g",
+              "unitType": "weight"
+            },
+            {
+              "ingredientId": "ing_108",
+              "name": "LPG Gas",
+              "quantity": 30,
+              "unit": "g",
+              "costPerUnit": 1000,
+              "ingredientUnit": "kg",
+              "unitType": "weight"
+            }
+          ]
+        }
+      },
+      "lastUpdated": "2025-09-22T09:56:35.525Z"
     }
   ],
   "inventory": []

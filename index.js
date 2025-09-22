@@ -138,6 +138,46 @@ app.get('/api/reconciliations', (req, res) => {
   }
 });
 
+// Get reconciliation history (sorted by date, newest first)
+app.get('/api/reconciliations/history', (req, res) => {
+  try {
+    const data = fs.readFileSync(reconciliationsFile, 'utf8');
+    const reconciliations = JSON.parse(data);
+    
+    // Sort by timestamp in descending order (newest first)
+    const sorted = [...reconciliations].sort((a, b) => 
+      new Date(b.timestamp) - new Date(a.timestamp)
+    );
+    
+    res.json(sorted);
+  } catch (error) {
+    console.error('Error fetching reconciliation history:', error);
+    res.status(500).json({ success: false, error: 'Failed to load reconciliation history' });
+  }
+});
+
+// Get last reconciliation
+app.get('/api/reconciliations/last', (req, res) => {
+  try {
+    const data = fs.readFileSync(reconciliationsFile, 'utf8');
+    const reconciliations = JSON.parse(data);
+    
+    if (reconciliations.length === 0) {
+      return res.json(null);
+    }
+    
+    // Find the most recent reconciliation
+    const lastReconciliation = reconciliations.reduce((latest, current) => {
+      return (new Date(current.timestamp) > new Date(latest.timestamp)) ? current : latest;
+    }, reconciliations[0]);
+    
+    res.json(lastReconciliation);
+  } catch (error) {
+    console.error('Error fetching last reconciliation:', error);
+    res.status(500).json({ success: false, error: 'Failed to load last reconciliation' });
+  }
+});
+
 app.get('/api/reconciliations/check', (req, res) => {
   try {
     const { startDate, endDate } = req.query;

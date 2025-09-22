@@ -8,78 +8,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .vendor-header {
-            font-size: 1.1rem;
-            border-left: 4px solid var(--primary-color);
-            position: relative;
-        }
-        
-        .vendor-header .btn-edit-vendor {
-            font-size: 0.75rem;
-            padding: 0.15rem 0.5rem;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-        
-        .vendor-header:hover .btn-edit-vendor {
-            opacity: 1;
-        }
-        
-        .vendor-header:hover {
-            background-color: #f8f9fa !important;
-        }
-        
-        .ingredient-row {
-            transition: var(--transition);
-        }
-        
-        .ingredient-row:hover {
-            background-color: rgba(13, 110, 253, 0.05);
-        }
-        
-        /* Enhanced highlight styles for inventory items */
-        .ingredient-row {
-            transition: all 0.3s ease;
-        }
-
-        .ingredient-row.highlight-low,
-        .ingredient-row[data-status="low-stock"].highlight-low {
-            background-color: rgba(255, 193, 7, 0.25) !important;
-            border-left: 4px solid #ffc107;
-            transform: translateX(5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .ingredient-row.highlight-out,
-        .ingredient-row[data-status="out-of-stock"].highlight-out {
-            background-color: rgba(220, 53, 69, 0.25) !important;
-            border-left: 4px solid #dc3545;
-            transform: translateX(5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .ingredient-row.highlight-in,
-        .ingredient-row[data-status="in-stock"].highlight-in {
-            background-color: rgba(25, 135, 84, 0.25) !important;
-            border-left: 4px solid #198754;
-            transform: translateX(5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Make sure the highlight is visible on hover */
-        .ingredient-row.highlight-low:hover,
-        .ingredient-row.highlight-out:hover,
-        .ingredient-row.highlight-in:hover {
-            transform: translateX(10px) scale(1.01);
-            z-index: 2;
-        }
-        
         :root {
             --primary-color: #0d6efd;
             --secondary-color: #6c757d;
@@ -233,28 +161,28 @@
                 <!-- Stats Cards -->
                 <div class="row">
                     <div class="col-md-3">
-                        <div class="stat-card" id="totalItemsCard" style="background: linear-gradient(135deg, #4e73df, #224abe); cursor: pointer;" data-filter="all">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #4e73df, #224abe);">
                             <i class="bi bi-box-seam"></i>
                             <div class="stat-value" id="totalItems">0</div>
                             <div class="stat-label">Total Items</div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="stat-card" id="inStockCard" style="background: linear-gradient(135deg, #1cc88a, #13855c); cursor: pointer;" data-filter="in-stock">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #1cc88a, #13855c);">
                             <i class="bi bi-check-circle"></i>
                             <div class="stat-value" id="inStock">0</div>
                             <div class="stat-label">In Stock</div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="stat-card" id="lowStockCard" style="background: linear-gradient(135deg, #f6c23e, #dda20a); cursor: pointer;" data-filter="low-stock">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #f6c23e, #dda20a);">
                             <i class="bi bi-exclamation-triangle"></i>
                             <div class="stat-value" id="lowStock">0</div>
                             <div class="stat-label">Low Stock</div>
                         </div>
                     </div>
                     <div class="col-md-3">
-                        <div class="stat-card" id="outOfStockCard" style="background: linear-gradient(135deg, #e74a3b, #be2617); cursor: pointer;" data-filter="out-of-stock">
+                        <div class="stat-card" style="background: linear-gradient(135deg, #e74a3b, #be2617);">
                             <i class="bi bi-x-circle"></i>
                             <div class="stat-value" id="outOfStock">0</div>
                             <div class="stat-label">Out of Stock</div>
@@ -326,8 +254,8 @@
                             <button class="btn btn-outline-success text-start" data-bs-toggle="modal" data-bs-target="#updateInventoryModal">
                                 <i class="bi bi-arrow-repeat me-2"></i>Update Inventory
                             </button>
-                            <button class="btn btn-outline-info text-start" id="generatePdfReportBtn">
-                                <i class="bi bi-file-earmark-pdf me-2"></i>Generate PDF Report
+                            <button class="btn btn-outline-info text-start" data-bs-toggle="modal" data-bs-target="#generateReportModal">
+                                <i class="bi bi-file-earmark-text me-2"></i>Generate Report
                             </button>
                             <button class="btn btn-outline-warning text-start" id="lowStockAlertBtn">
                                 <i class="bi bi-exclamation-triangle me-2"></i>View Low Stock Alerts
@@ -363,7 +291,7 @@
                 </div>
 
                 <!-- Inventory Alerts -->
-                <div class="card" id="lowStockAlertsCard">
+                <div class="card">
                     <div class="card-header bg-warning text-dark">
                         <i class="bi bi-exclamation-triangle me-2"></i>Low Stock Alerts
                     </div>
@@ -393,16 +321,16 @@
                             <input type="text" class="form-control" id="addIngName" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label" for="addIngVendorEl">Vendor</label>
-                            <select class="form-select" id="addIngVendorEl" required>
-                                <option value="">Select Vendor</option>
-                                <option value="Afzal chicken">Afzal chicken</option>
-                                <option value="Butter Paneer vendor">Butter Paneer vendor</option>
-                                <option value="Sabzi Vegetables">Sabzi Vegetables</option>
-                                <option value="Grocery and Masalas">Grocery and Masalas</option>
-                                <option value="aata maida vega">Aata Maida Vega</option>
-                                <option value="pandit gas cylinder">Pandit Gas Cylinder</option>
-                                <option value="Shukla koyla">Shukla Koyla</option>
+                            <label class="form-label" for="addIngCategory">Category</label>
+                            <select class="form-select" id="addIngCategory" required>
+                                <option value="">Select Category</option>
+                                <option value="vegetables">Vegetables</option>
+                                <option value="meat">Meat</option>
+                                <option value="dairy">Dairy</option>
+                                <option value="spices">Spices</option>
+                                <option value="grains">Grains</option>
+                                <option value="oils">Oils & Fats</option>
+                                <option value="others">Others</option>
                             </select>
                         </div>
                         <div class="row">
@@ -478,16 +406,26 @@
                             </button>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label" for="dishSellingPrice">Selling Price (₹)</label>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="dishSellingPrice">Base Price (₹)</label>
                                 <input type="number" class="form-control" id="dishSellingPrice" step="0.01" required>
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label" for="dishCostPrice">Cost Price (₹)</label>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="dishFullPortionPrice">Full Portion (₹)</label>
+                                <input type="number" class="form-control" id="dishFullPortionPrice" step="0.01">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="dishHalfPortionPrice">Half Portion (₹)</label>
+                                <input type="number" class="form-control" id="dishHalfPortionPrice" step="0.01">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label" for="dishCostPrice">Cost (₹)</label>
                                 <input type="number" class="form-control" id="dishCostPrice" step="0.01" required>
                             </div>
+                        </div>
+                        <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label class="form-label" for="dishPrepTime">Preparation Time (min)</label>
+                                <label class="form-label" for="dishPrepTime">Prep Time (min)</label>
                                 <input type="number" class="form-control" id="dishPrepTime" value="15" min="0">
                             </div>
                         </div>
@@ -495,34 +433,6 @@
                             <button type="submit" class="btn btn-primary">Save Dish</button>
                         </div>
                     </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit Vendor Modal -->
-    <div class="modal fade" id="editVendorModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Update Vendor</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Select or Create Vendor</label>
-                        <select class="form-select" id="vendorSelect">
-                            <!-- Options will be populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="mb-3" id="newVendorGroup" style="display: none;">
-                        <label class="form-label">New Vendor Name</label>
-                        <input type="text" class="form-control" id="newVendorName" placeholder="Enter new vendor name">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="saveVendorBtn">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -581,9 +491,6 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <script>
         // Global state
         let menuData = null; // Full menu.json
@@ -609,15 +516,14 @@
 
         // Add Ingredient form elements
         const addIngModal = document.getElementById('addIngredientModal');
-        const addIngModalTitle = document.querySelector('#addIngredientModal .modal-title');
+        const addIngModalTitle = document.getElementById('addIngModalTitle');
         const addIngredientForm = document.getElementById('addIngredientForm');
         const addIngIdEl = document.getElementById('addIngId');
         const addIngNameEl = document.getElementById('addIngName');
-        const addIngVendorEl = document.getElementById('addIngVendorEl');
+        const addIngCategoryEl = document.getElementById('addIngCategory');
         const addIngStockEl = document.getElementById('addIngStock');
         const addIngUnitEl = document.getElementById('addIngUnit');
         const addIngMinRequiredEl = document.getElementById('addIngMinRequired');
-        const addIngSubmitBtn = document.getElementById('addIngSubmitBtn');
 
         // Update inventory form elements
         const updateInventoryForm = document.getElementById('updateInventoryForm');
@@ -695,28 +601,7 @@
             }
         }
 
-        function groupByVendor(ingredients) {
-            return ingredients.reduce((acc, ing) => {
-                const vendor = ing.vendor || 'Unknown Vendor';
-                if (!acc[vendor]) {
-                    acc[vendor] = [];
-                }
-                acc[vendor].push({
-                    id: ing.id,
-                    name: ing.name,
-                    category: ing.category || ing.categoryId || 'others',
-                    stock: Number(ing.currentStock || 0),
-                    unit: ing.unit || 'g',
-                    minRequired: Number(ing.minStockLevel || 0),
-                    status: computeStatus(ing),
-                    vendor: vendor
-                });
-                return acc;
-            }, {});
-        }
-
         function rebuildInventoryFromIngredients() {
-            // Update the global inventory variable with current ingredient data
             inventory = ingredients.map(ing => ({
                 id: ing.id,
                 name: ing.name,
@@ -724,12 +609,8 @@
                 stock: Number(ing.currentStock || 0),
                 unit: ing.unit || 'g',
                 minRequired: Number(ing.minStockLevel || 0),
-                status: computeStatus(ing),
-                vendor: ing.vendor || 'Unknown Vendor'
+                status: computeStatus(ing)
             }));
-            
-            // Also return the grouped vendors for other uses
-            return groupByVendor(ingredients);
         }
 
         function computeStatus(ing) {
@@ -751,160 +632,36 @@
             return unitDisplayMap[unit] || unit || '';
         }
 
-        function updateVendorForItems(oldVendor, newVendor) {
-            // Update in memory
-            ingredients.forEach(ing => {
-                if (ing.vendor === oldVendor) {
-                    ing.vendor = newVendor;
-                }
-            });
-            
-            // Update in the DOM
-            document.querySelectorAll('.vendor-header').forEach(header => {
-                if (header.textContent.includes(oldVendor)) {
-                    const count = header.querySelector('.vendor-item-count').textContent;
-                    header.innerHTML = `
-                        <td colspan="6" class="fw-bold">
-                            <i class="bi bi-shop me-2"></i>${newVendor}
-                            <span class="badge bg-secondary ms-2 vendor-item-count">${count}</span>
-                            <button class="btn btn-sm btn-outline-secondary ms-2 btn-edit-vendor" data-vendor="${newVendor}">
-                                <i class="bi bi-pencil-square"></i> Edit
-                            </button>
-                        </td>`;
-                }
-            });
-            
-            // Update the vendor dropdown in the edit modal
-            updateVendorDropdown();
-            
-            // Save changes
-            persistMenu();
-            // Re-render to ensure everything is in sync
-            renderInventory();
-        }
-        
-        function updateVendorDropdown() {
-            const vendorSelect = document.getElementById('vendorSelect');
-            if (!vendorSelect) return;
-            
-            // Get unique vendors
-            const vendors = [...new Set(ingredients.map(ing => ing.vendor).filter(Boolean))];
-            
-            vendorSelect.innerHTML = '';
-            
-            // Add current vendor as first option
-            const currentVendor = vendorSelect.dataset.currentVendor || '';
-            if (currentVendor) {
-                const option = document.createElement('option');
-                option.value = currentVendor;
-                option.textContent = currentVendor;
-                vendorSelect.appendChild(option);
-            }
-            
-            // Add other vendors
-            vendors.filter(v => v !== currentVendor).forEach(vendor => {
-                const option = document.createElement('option');
-                option.value = vendor;
-                option.textContent = vendor;
-                vendorSelect.appendChild(option);
-            });
-            
-            // Add option to create new vendor
-            const newOption = document.createElement('option');
-            newOption.value = '';
-            newOption.textContent = '-- Create New Vendor --';
-            vendorSelect.appendChild(newOption);
-        }
-        
-        function highlightInventoryItems(filter) {
-            console.log('Highlighting items with filter:', filter);
-            
-            // First, remove all highlights and reset all rows to be visible
-            document.querySelectorAll('.ingredient-row').forEach(row => {
-                row.classList.remove('highlight-in', 'highlight-low', 'highlight-out');
-                row.style.display = ''; // Make sure all rows are visible
-            });
-
-            if (filter === 'all') {
-                // If 'all' is selected, just remove highlights and show all rows
-                return;
-            }
-
-            // Get the highlight class based on the filter
-            const highlightClass = `highlight-${filter.split('-')[0]}`; // 'in', 'low', or 'out'
-            console.log('Using highlight class:', highlightClass);
-            
-            // First, hide all rows
-            document.querySelectorAll('.ingredient-row').forEach(row => {
-                row.style.display = 'none';
-            });
-            
-            // Then show and highlight only the matching rows
-            const matchingRows = document.querySelectorAll(`.ingredient-row[data-status="${filter}"]`);
-            console.log(`Found ${matchingRows.length} matching rows for status: ${filter}`);
-            
-            matchingRows.forEach(row => {
-                row.style.display = '';
-                row.classList.add(highlightClass);
-                console.log('Highlighted row:', row);
-            });
-            
-            // Also show all vendor headers
-            document.querySelectorAll('.vendor-header').forEach(header => {
-                header.style.display = '';
-            });
-        }
-        
         function renderInventory() {
             inventoryTableBody.innerHTML = '';
-            const vendorGroups = rebuildInventoryFromIngredients();
-            
-            Object.entries(vendorGroups).forEach(([vendor, vendorItems]) => {
-                // Add vendor header row
-                const vendorHeader = document.createElement('tr');
-                vendorHeader.className = 'vendor-header bg-light';
-                vendorHeader.innerHTML = `
-                    <td colspan="6" class="fw-bold">
-                        <i class="bi bi-shop me-2"></i>${vendor}
-                        <span class="badge bg-secondary ms-2 vendor-item-count">${vendorItems.length} items</span>
-                        <button class="btn btn-sm btn-outline-secondary ms-2 btn-edit-vendor" data-vendor="${vendor}">
-                            <i class="bi bi-pencil-square"></i> Edit
+            inventory.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'ingredient-row';
+                let statusBadge = '';
+                if (item.status === 'in-stock') {
+                    statusBadge = '<span class="badge bg-success">In Stock</span>';
+                } else if (item.status === 'low-stock') {
+                    statusBadge = '<span class="badge bg-warning">Low Stock</span>';
+                } else {
+                    statusBadge = '<span class="badge bg-danger">Out of Stock</span>';
+                }
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${formatCategory(item.category)}</td>
+                    <td>${item.stock} ${item.unit}</td>
+                    <td>${formatUnit(item.unit)}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editIngredient('${item.id}')">
+                            <i class="bi bi-pencil"></i>
                         </button>
-                    </td>`;
-                inventoryTableBody.appendChild(vendorHeader);
-                
-                // Add items for this vendor
-                vendorItems.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.className = 'ingredient-row';
-                    row.setAttribute('data-status', item.status);
-                    let statusBadge = '';
-                    if (item.status === 'in-stock') {
-                        statusBadge = '<span class="badge bg-success">In Stock</span>';
-                    } else if (item.status === 'low-stock') {
-                        statusBadge = '<span class="badge bg-warning">Low Stock</span>';
-                    } else {
-                        statusBadge = '<span class="badge bg-danger">Out of Stock</span>';
-                    }
-                    row.innerHTML = `
-                        <td>${item.name}</td>
-                        <td>${formatCategory(item.category)}</td>
-                        <td>${item.stock} ${formatUnit(item.unit)}</td>
-                        <td>${item.minRequired} ${formatUnit(item.unit)}</td>
-                        <td>${statusBadge}</td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editIngredient('${item.id}')">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteIngredient('${item.id}')">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </td>
-                    `;
-                    inventoryTableBody.appendChild(row);
-                });
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteIngredient('${item.id}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                `;
+                inventoryTableBody.appendChild(row);
             });
-            
             updateAlerts();
         }
 
@@ -920,37 +677,14 @@
 
         function populateIngredientSelect() {
             ingredientSelect.innerHTML = '<option value="">-- Select Ingredient --</option>';
-            
-            // Group ingredients by vendor
-            const vendors = {};
             ingredients.forEach(ing => {
-                const vendor = ing.vendor || 'Other';
-                if (!vendors[vendor]) {
-                    vendors[vendor] = [];
-                }
-                vendors[vendor].push(ing);
+                const opt = document.createElement('option');
+                opt.value = ing.id;
+                opt.textContent = ing.name;
+                ingredientSelect.appendChild(opt);
             });
-
-            // Sort vendors alphabetically
-            const sortedVendors = Object.keys(vendors).sort();
-            
-            // Create optgroups for each vendor
-            sortedVendors.forEach(vendor => {
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = vendor;
-                
-                // Sort ingredients alphabetically within each vendor
-                vendors[vendor]
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .forEach(ing => {
-                        const opt = document.createElement('option');
-                        opt.value = ing.id;
-                        opt.textContent = ing.name;
-                        optgroup.appendChild(opt);
-                    });
-                
-                ingredientSelect.appendChild(optgroup);
-            });
+            // Reset unit display
+            unitDisplay.textContent = '';
         }
 
         function updateStats() {
@@ -1037,6 +771,88 @@
         }
 
         function setupEventListeners() {
+            // Edit/Cancel/Save portion prices
+            document.addEventListener('click', (e) => {
+                // Handle edit button click
+                if (e.target.closest('#editPortionPricesBtn')) {
+                    e.preventDefault();
+                    document.getElementById('viewPortionPrices').style.display = 'none';
+                    document.getElementById('editPortionPricesForm').style.display = 'block';
+                    document.getElementById('editPortionPricesBtn').style.display = 'none';
+                }
+                
+                // Handle cancel button click
+                if (e.target.closest('#cancelEditPortionPrices')) {
+                    e.preventDefault();
+                    document.getElementById('viewPortionPrices').style.display = 'block';
+                    document.getElementById('editPortionPricesForm').style.display = 'none';
+                    document.getElementById('editPortionPricesBtn').style.display = 'block';
+                }
+            });
+
+            // Handle form submission for portion prices
+            document.addEventListener('submit', async (e) => {
+                if (e.target.id === 'editPortionPricesForm') {
+                    e.preventDefault();
+                    
+                    const dishId = dishSelect.value;
+                    if (!dishId) return;
+                    
+                    const fullPrice = parseFloat(document.getElementById('fullPortionPrice').value);
+                    const halfPrice = parseFloat(document.getElementById('halfPortionPrice').value);
+                    
+                    if (isNaN(fullPrice) || isNaN(halfPrice) || fullPrice <= 0 || halfPrice <= 0) {
+                        alert('Please enter valid prices for both portions');
+                        return;
+                    }
+                    
+                    const dish = dishes.find(d => String(d.id) === String(dishId));
+                    if (dish) {
+                        dish.fullPortionPrice = fullPrice;
+                        dish.halfPortionPrice = halfPrice;
+                        await persistMenu();
+                        
+                        // Update the display
+                        document.getElementById('viewPortionPrices').innerHTML = `
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Full Portion:</span>
+                                <strong>₹${fullPrice.toFixed(2)}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Half Portion:</span>
+                                <strong>₹${halfPrice.toFixed(2)}</strong>
+                            </div>
+                        `;
+                        
+                        // Reset the form state
+                        document.getElementById('viewPortionPrices').style.display = 'block';
+                        document.getElementById('editPortionPricesForm').style.display = 'none';
+                        document.getElementById('editPortionPricesBtn').style.display = 'block';
+                        
+                        // Show success message
+                        const alertDiv = document.createElement('div');
+                        alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                        alertDiv.role = 'alert';
+                        alertDiv.innerHTML = `
+                            Portion prices updated successfully!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        `;
+                        // Find the first parent container that exists
+                        const container = document.querySelector('#recipeIngredients .card-body') || 
+                                        document.querySelector('#recipeIngredients') || 
+                                        document.querySelector('.recipe-ingredients-container') ||
+                                        document.body;
+                        container.prepend(alertDiv);
+                        
+                        // Auto-dismiss after 3 seconds
+                        setTimeout(() => {
+                            const bsAlert = new bootstrap.Alert(alertDiv);
+                            bsAlert.close();
+                        }, 3000);
+                    }
+                }
+            });
+
             // Dish select change
             dishSelect.addEventListener('change', (e) => {
                 const dishId = e.target.value;
@@ -1092,14 +908,12 @@
                 const idVal = addIngIdEl.value?.trim();
                 const payload = {
                     name: addIngNameEl.value.trim(),
-                    vendor: addIngVendorEl.value,
+                    category: addIngCategoryEl.value,
                     currentStock: Number(addIngStockEl.value || 0),
                     unit: addIngUnitEl.value,
                     minStockLevel: Number(addIngMinRequiredEl.value || 0),
                     unitType: inferUnitType(addIngUnitEl.value),
-                    active: true,
-                    // Keep category for backward compatibility
-                    category: 'others'
+                    active: true
                 };
 
                 if (!payload.name || !payload.category || !payload.unit) return;
@@ -1128,10 +942,6 @@
                 addIngredientForm.reset();
                 addIngIdEl.value = '';
                 addIngModalTitle.textContent = 'Add New Ingredient';
-                // Reset vendor to first option
-                if (addIngVendorEl.options.length > 0) {
-                    addIngVendorEl.selectedIndex = 0;
-                }
             });
 
             // Update Inventory form submit
@@ -1184,120 +994,110 @@
             });
 
             // Open Add Ingredient Modal resets to Add mode
-            document.getElementById('openAddIngredientModalBtn')?.addEventListener('click', () => {
+            document.getElementById('openAddIngredientModalBtn').addEventListener('click', () => {
                 addIngModalTitle.textContent = 'Add New Ingredient';
-                addIngIdEl.value = '';
                 addIngredientForm.reset();
-                // Reset vendor to first option
-                if (addIngVendorEl.options.length > 0) {
-                    addIngVendorEl.selectedIndex = 0;
-                }
-                // Show the modal
-                const modal = new bootstrap.Modal(document.getElementById('addIngredientModal'));
-                modal.show();
+                addIngIdEl.value = '';
             });
-            
-            // Handle dish form submission
-            document.getElementById('addDishForm')?.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                // Get form values
-                const name = document.getElementById('dishName').value.trim();
-                const category = document.getElementById('dishCategory').value;
-                const description = document.getElementById('dishDescription').value.trim();
-                const costPrice = parseFloat(document.getElementById('dishCostPrice').value) || 0;
-                const sellingPrice = parseFloat(document.getElementById('dishSellingPrice').value) || 0;
-                const prepTime = document.getElementById('dishPrepTime').value.trim();
-                
-                // Get ingredients from the form
-                const dishIngredients = [];
-                const ingredientRows = document.querySelectorAll('#dishIngredients .row:not(:first-child)');
-                
-                for (const row of ingredientRows) {
-                    const select = row.querySelector('select');
-                    const qtyInput = row.querySelector('input[type="number"]');
-                    const unitSelect = row.querySelectorAll('select')[1];
+
+            // Add Dish form submit
+            const addDishForm = document.getElementById('addDishForm');
+            if (addDishForm) {
+                addDishForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
                     
-                    if (select && qtyInput && unitSelect) {
-                        const ingredientId = select.value;
-                        const quantity = parseFloat(qtyInput.value) || 0;
-                        const unit = unitSelect.value;
+                    const dishName = document.getElementById('dishName').value.trim();
+                    const dishCategory = document.getElementById('dishCategory').value;
+                    const dishDescription = document.getElementById('dishDescription').value.trim();
+                    const dishSellingPrice = parseFloat(document.getElementById('dishSellingPrice').value) || 0;
+                    const dishFullPortionPrice = parseFloat(document.getElementById('dishFullPortionPrice').value) || dishSellingPrice;
+                    const dishHalfPortionPrice = parseFloat(document.getElementById('dishHalfPortionPrice').value) || (dishSellingPrice * 0.6);
+                    const dishCostPrice = parseFloat(document.getElementById('dishCostPrice').value) || 0;
+                    const dishPrepTime = parseInt(document.getElementById('dishPrepTime').value) || 0;
+                    const dishPhotoUrl = document.getElementById('dishPhotoUrl')?.value.trim() || '';
+
+                    if (!dishName || !dishCategory || dishSellingPrice <= 0 || dishCostPrice < 0) {
+                        alert('Please fill in all required fields with valid values');
+                        return;
+                    }
+
+                    // Calculate profit margin based on base price
+                    const profitMargin = dishSellingPrice > 0 ? (dishSellingPrice - dishCostPrice) / dishSellingPrice : 0;
+
+                    // Create new dish
+                    const newDish = {
+                        id: `dish_${Date.now()}`,
+                        name: dishName,
+                        category: dishCategory,
+                        description: dishDescription,
+                        sellingPrice: dishSellingPrice,
+                        fullPortionPrice: dishFullPortionPrice,
+                        halfPortionPrice: dishHalfPortionPrice,
+                        costPrice: dishCostPrice,
+                        profitMargin: profitMargin,
+                        prepTime: dishPrepTime,
+                        ingredients: [],
+                        active: true,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    // Add photo URL if provided
+                    if (dishPhotoUrl) {
+                        newDish.photoUrl = dishPhotoUrl;
+                    }
+
+                    // Add ingredients if any
+                    const ingredientRows = document.querySelectorAll('#dishIngredients .row');
+                    ingredientRows.forEach(row => {
+                        const select = row.querySelector('select');
+                        const qtyInput = row.querySelector('input[type="number"]');
+                        const unitSelect = row.querySelectorAll('select')[1];
                         
-                        if (ingredientId && quantity > 0) {
-                            const ingredient = ingredients.find(ing => String(ing.id) === String(ingredientId));
-                            if (ingredient) {
-                                dishIngredients.push({
-                                    ingredientId: ingredient.id,
-                                    name: ingredient.name,
-                                    quantity: quantity,
-                                    unit: unit,
-                                    costPerUnit: ingredient.costPerUnit || 0,
-                                    ingredientUnit: ingredient.unit || unit,
-                                    unitType: ingredient.unitType || 'weight'
+                        if (select && qtyInput && unitSelect && select.value) {
+                            const ing = ingredients.find(i => String(i.id) === String(select.value));
+                            if (ing) {
+                                newDish.ingredients.push({
+                                    ingredientId: ing.id,
+                                    name: ing.name,
+                                    quantity: parseFloat(qtyInput.value) || 0,
+                                    unit: unitSelect.value
                                 });
                             }
                         }
-                    }
-                }
-                
-                // Create new dish object
-                const newDish = {
-                    id: `dish_${Date.now()}`,
-                    name: name,
-                    description: description,
-                    costPrice: costPrice,
-                    sellingPrice: sellingPrice,
-                    category: category,
-                    prepTime: prepTime,
-                    ingredients: dishIngredients,
-                    photoUrl: '',
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                };
-                
-                // Add to dishes array and save
-                dishes.push(newDish);
-                
-                try {
+                    });
+
+                    // Add to dishes array and save
+                    dishes.push(newDish);
                     await persistMenu();
                     renderDishSelect();
                     
                     // Reset form and close modal
-                    document.getElementById('addDishForm').reset();
-                    document.getElementById('dishIngredients').innerHTML = `
-                        <div class="row mb-2 fw-bold">
-                            <div class="col-5">Ingredient</div>
-                            <div class="col-3">Quantity</div>
-                            <div class="col-3">Unit</div>
-                            <div class="col-1"></div>
-                        </div>
-                    `;
-                    
+                    addDishForm.reset();
+                    document.getElementById('dishIngredients').innerHTML = '';
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addDishModal'));
-                    if (modal) modal.hide();
-                    
+                    modal.hide();
+
                     // Show success message
                     const alertDiv = document.createElement('div');
                     alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
                     alertDiv.role = 'alert';
                     alertDiv.innerHTML = `
-                        <strong>Success!</strong> Dish "${name}" has been added to the menu.
+                        Dish "${newDish.name}" added successfully!<br>
+                        Full Portion: ₹${dishFullPortionPrice.toFixed(2)} | 
+                        Half Portion: ₹${dishHalfPortionPrice.toFixed(2)}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     `;
-                    document.querySelector('.container').prepend(alertDiv);
-                    
-                    // Auto-remove alert after 5 seconds
+                    document.querySelector('.container.mb-5').prepend(alertDiv);
+
+                    // Auto-dismiss after 3 seconds
                     setTimeout(() => {
-                        const alert = bootstrap.Alert.getOrCreateInstance(alertDiv);
-                        if (alert) alert.close();
-                    }, 5000);
-                    
-                } catch (err) {
-                    console.error('Error saving dish:', err);
-                    alert('Failed to save dish. Please check the console for details.');
-                }
-            });
-            
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }, 3000);
+                });
+            }
+
             // Live preview dish photo when URL changes
             if (dishPhotoUrlInput) {
                 dishPhotoUrlInput.addEventListener('input', () => {
@@ -1389,10 +1189,50 @@
                         <tbody>${rows}</tbody>
                     </table>
                 </div>
-                <div class="mt-2">
-                    ${dish.costPrice !== undefined ? `<strong>Cost Price:</strong> ₹${Number(dish.costPrice).toFixed(2)}<br>` : ''}
-                    ${dish.sellingPrice !== undefined ? `<strong>Selling Price:</strong> ₹${Number(dish.sellingPrice).toFixed(2)}<br>` : ''}
-                    ${dish.profitMargin !== undefined ? `<strong>Profit Margin:</strong> ${(Number(dish.profitMargin) * 100).toFixed(1)}%` : ''}
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Portion Prices</h6>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="editPortionPricesBtn">
+                            <i class="bi bi-pencil"></i> Edit
+                        </button>
+                    </div>
+                    <div id="viewPortionPrices">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Full Portion:</span>
+                            <strong>₹${Number(dish.fullPortionPrice || dish.sellingPrice || 0).toFixed(2)}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Half Portion:</span>
+                            <strong>₹${Number(dish.halfPortionPrice || (dish.sellingPrice ? dish.sellingPrice * 0.6 : 0)).toFixed(2)}</strong>
+                        </div>
+                    </div>
+                    <form id="editPortionPricesForm" style="display: none;">
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text">Full</span>
+                            <input type="number" class="form-control" id="fullPortionPrice" 
+                                   value="${Number(dish.fullPortionPrice || dish.sellingPrice || 0).toFixed(2)}" step="0.01" min="0">
+                            <span class="input-group-text">₹</span>
+                        </div>
+                        <div class="input-group input-group-sm mb-2">
+                            <span class="input-group-text">Half</span>
+                            <input type="number" class="form-control" id="halfPortionPrice" 
+                                   value="${Number(dish.halfPortionPrice || (dish.sellingPrice ? dish.sellingPrice * 0.6 : 0)).toFixed(2)}" step="0.01" min="0">
+                            <span class="input-group-text">₹</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelEditPortionPrices">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                                Save
+                            </button>
+                        </div>
+                    </form>
+                    <div class="mt-2">
+                        ${dish.costPrice !== undefined ? `<strong>Cost Price:</strong> ₹${Number(dish.costPrice).toFixed(2)}<br>` : ''}
+                        ${dish.sellingPrice !== undefined ? `<strong>Base Price:</strong> ₹${Number(dish.sellingPrice).toFixed(2)}<br>` : ''}
+                        ${dish.profitMargin !== undefined ? `<strong>Profit Margin:</strong> ${(Number(dish.profitMargin) * 100).toFixed(1)}%` : ''}
+                    </div>
                 </div>
             `;
         }
@@ -1425,7 +1265,7 @@
             addIngModalTitle.textContent = 'Edit Ingredient';
             addIngIdEl.value = ing.id;
             addIngNameEl.value = ing.name || '';
-            addIngVendorEl.value = ing.vendor || '';
+            addIngCategoryEl.value = (ing.category || ing.categoryId || 'others');
             addIngStockEl.value = Number(ing.currentStock || 0);
             addIngUnitEl.value = (ing.unit || 'g');
             addIngMinRequiredEl.value = Number(ing.minStockLevel || 0);
@@ -1446,189 +1286,10 @@
             }
         };
 
-        // Initialize tooltips and vendor edit functionality
-        // Smooth scroll to low stock alerts
-        document.getElementById('lowStockAlertBtn')?.addEventListener('click', function() {
-            const alertsCard = document.getElementById('lowStockAlertsCard');
-            if (alertsCard) {
-                alertsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // Add highlight effect
-                alertsCard.classList.add('border-warning', 'border-2');
-                setTimeout(() => {
-                    alertsCard.classList.remove('border-warning', 'border-2');
-                }, 2000);
-            }
-        });
-
-        // Export table to PDF
-        function exportTableToPDF(event) {
-            // Prevent any default behavior that might be causing the modal error
-            if (event) {
-                event.preventDefault();
-                event.stopPropagation();
-            }
-            
-            try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Set document properties
-                doc.setProperties({
-                    title: 'Ingredients Inventory',
-                    subject: 'Current Stock Levels',
-                    author: 'TandoorBaaz',
-                    creator: 'TandoorBaaz Inventory System'
-                });
-                
-                // Add title
-                doc.setFontSize(18);
-                doc.text('Ingredients Inventory', 14, 22);
-                doc.setFontSize(11);
-                doc.setTextColor(100);
-                doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
-                
-                // Get table data
-                const table = document.querySelector('.table');
-                if (!table) {
-                    console.error('Table not found');
-                    return;
-                }
-                
-                // Extract headers
-                const headers = [];
-                const headerCells = table.querySelectorAll('thead th');
-                headerCells.forEach(header => {
-                    // Skip the Actions column
-                    if (!header.textContent.trim().toLowerCase().includes('action')) {
-                        headers.push(header.textContent.trim());
-                    }
-                });
-                
-                // Extract data rows
-                const data = [];
-                const rows = table.querySelectorAll('tbody tr');
-                rows.forEach(row => {
-                    const rowData = [];
-                    const cells = row.querySelectorAll('td');
-                    cells.forEach((cell, index) => {
-                        // Skip the Actions column (last column)
-                        if (index < cells.length - 1) {
-                            rowData.push(cell.textContent.trim());
-                        }
-                    });
-                    if (rowData.length > 0) {
-                        data.push(rowData);
-                    }
-                });
-                
-                // Generate the table
-                doc.autoTable({
-                    head: [headers],
-                    body: data,
-                    startY: 40,
-                    headStyles: { 
-                        fillColor: [13, 110, 253],
-                        textColor: 255,
-                        fontStyle: 'bold'
-                    },
-                    alternateRowStyles: { fillColor: [245, 245, 245] },
-                    margin: { top: 40 },
-                    styles: {
-                        fontSize: 9,
-                        cellPadding: 2,
-                        lineColor: [0, 0, 0],
-                        lineWidth: 0.1
-                    }
-                });
-                
-                // Save the PDF
-                doc.save(`inventory_${new Date().toISOString().split('T')[0]}.pdf`);
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Error generating PDF. Please check console for details.');
-            }
-        }
-        
-        // Initialize the application when DOM is fully loaded
+        // Initialize tooltips
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize tooltips
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.map(function (tooltipTriggerEl) { 
-                return new bootstrap.Tooltip(tooltipTriggerEl); 
-            });
-            
-            // Initialize modals
-            const modals = [
-                'addIngredientModal',
-                'updateInventoryModal',
-                'addDishModal',
-                'editVendorModal',
-                'generateReportModal'
-            ];
-            
-            modals.forEach(modalId => {
-                const modalElement = document.getElementById(modalId);
-                if (modalElement) {
-                    new bootstrap.Modal(modalElement);
-                }
-            });
-
-            // Add event listener for PDF report generation
-            const generatePdfBtn = document.getElementById('generatePdfReportBtn');
-            if (generatePdfBtn) {
-                generatePdfBtn.addEventListener('click', exportTableToPDF);
-            }
-            
-            // Add event listeners for stat cards after DOM is loaded
-            document.querySelectorAll('.stat-card[data-filter]').forEach(card => {
-                card.addEventListener('click', function() {
-                    const filter = this.getAttribute('data-filter');
-                    highlightInventoryItems(filter);
-                    
-                    // Update active state
-                    document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
-                    this.classList.add('active');
-                });
-            });
-            
-            // Vendor edit functionality
-            document.addEventListener('click', function(e) {
-                // Handle edit vendor button click
-                if (e.target.closest('.btn-edit-vendor')) {
-                    const button = e.target.closest('.btn-edit-vendor');
-                    const currentVendor = button.dataset.vendor;
-                    const vendorModal = new bootstrap.Modal(document.getElementById('editVendorModal'));
-                    
-                    // Set current vendor in the modal
-                    const vendorSelect = document.getElementById('vendorSelect');
-                    vendorSelect.dataset.currentVendor = currentVendor;
-                    
-                    // Update dropdown with vendors
-                    updateVendorDropdown();
-                    
-                    // Show/hide new vendor input based on selection
-                    vendorSelect.addEventListener('change', function() {
-                        document.getElementById('newVendorGroup').style.display = 
-                            this.value === '' ? 'block' : 'none';
-                    });
-                    
-                    // Save vendor changes
-                    document.getElementById('saveVendorBtn').onclick = function() {
-                        const newVendor = vendorSelect.value === '' 
-                            ? document.getElementById('newVendorName').value.trim()
-                            : vendorSelect.value;
-                            
-                        if (newVendor) {
-                            updateVendorForItems(currentVendor, newVendor);
-                            vendorModal.hide();
-                        } else {
-                            alert('Please enter a vendor name');
-                        }
-                    };
-                    
-                    vendorModal.show();
-                }
-            });
+            tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
         });
 
         // Utility: generate a new ingredient id like ing_XXX
