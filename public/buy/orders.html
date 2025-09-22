@@ -4685,21 +4685,23 @@
     if (!order) return;
 
     // Format order items
-    const itemsText = order.items.map(item => 
+    const itemsText = order.items.map(item =>
         `${item.quantity}x ${item.name} (${item.portion}) - ₹${(item.price * item.quantity).toFixed(2)}`
     ).join('\n');
 
+    // Create payment link in the same format as cart.html
+    const paymentLink = `https://www.tandoorbaaz.shop/buy/pay.html?orderId=${order.docId}&amount=${order.total}`;
+    
     // Create WhatsApp message
     const message = encodeURIComponent(
         `*Order #${(order.id || order.docId).slice(-4)}*\n\n` +
         `*Items:*\n${itemsText}\n\n` +
-        `*Total: ₹${order.total}*\n\n` +
-        `*Delivery Address:* ${order.customerDetails.deliveryAddress || 'Not specified'}\n` +
-        `*Phone:* ${order.customerDetails.phone || 'Not specified'}\n` +
-        `*Comments:* ${order.customerDetails.comments || 'No comments'}\n\n` +
-        `*Order Total: ₹${order.total}*\n\n` +
-        `*Payment Link:* https://tandoorbaaz.com/buy/pay.html?orderId=${order.docId}&amount=${order.total}\n\n` +
-        `Please complete your payment of *₹${order.total}* using the link above. Thank you for your order!`
+        `*Total:* ₹${order.total.toFixed(2)}\n` +
+        `*Status:* ${order.status === 'delivered' ? 'Delivered (Pending Payment)' : order.status}\n\n` +
+        `*Customer:* ${order.customerDetails.name || 'N/A'}\n` +
+        `*Phone:* ${order.customerDetails.phone || 'N/A'}\n\n` +
+        `*Payment Link:* ${paymentLink}\n\n` +
+        `Please complete your payment of *₹${order.total.toFixed(2)}* using the link above. Thank you for your order!`
     );
 
     // Open WhatsApp with the message

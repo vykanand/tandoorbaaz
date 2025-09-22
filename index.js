@@ -19,6 +19,161 @@ const reconciliationsFile = path.join(__dirname, 'reconciliations.json');
 app.use(express.json());
 app.use(express.static(publicDir));
 
+// Function to get directory structure
+function getDirectoryStructure(dir, base = '') {
+    const result = [];
+    const items = fs.readdirSync(dir, { withFileTypes: true });
+    
+    for (const item of items) {
+        const fullPath = path.join(dir, item.name);
+        const relativePath = path.join(base, item.name);
+        
+        if (item.isDirectory()) {
+            result.push({
+                name: item.name,
+                path: relativePath,
+                type: 'directory',
+                children: getDirectoryStructure(fullPath, relativePath)
+            });
+        } else if (item.isFile() && (item.name.endsWith('.html') || item.name.endsWith('.htm'))) {
+            result.push({
+                name: item.name,
+                path: relativePath,
+                type: 'file',
+                url: `/${relativePath.replace(/\\/g, '/')}`
+            });
+        }
+    }
+    
+    return result;
+}
+
+// Serve directory listing at the root
+app.get('/', (req, res) => {
+    try {
+        const structure = getDirectoryStructure(publicDir);
+        
+        // Generate HTML
+        let html = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>TandoorBaaz - Project Index</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body { padding: 20px; font-family: Arial, sans-serif; }
+                .directory { margin-bottom: 30px; }
+                .directory h2 { 
+                    color: #0d6efd; 
+                    border-bottom: 2px solid #0d6efd; 
+                    padding-bottom: 5px; 
+                    margin-top: 20px;
+                }
+                .file-list { 
+                    list-style: none; 
+                    padding-left: 0;
+                }
+                .file-list li { 
+                    margin: 5px 0;
+                    padding: 5px;
+                    border-radius: 4px;
+                }
+                .file-list li:hover { 
+                    background-color: #f8f9fa;
+                }
+                .file-list a { 
+                    text-decoration: none;
+                    color: #212529;
+                    display: block;
+                }
+                .file-list a:hover { 
+                    color: #0d6efd;
+                }
+                .dir-icon { color: #ffc107; }
+                .file-icon { color: #6c757d; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1 class="my-4">TandoorBaaz Project Index</h1>
+                <div class="row">
+                    <div class="col-md-8">
+                        ${renderDirectory(structure)}
+                    </div>
+                </div>
+            </div>
+            <script>
+                // Add collapsible functionality
+                document.querySelectorAll('.toggle-dir').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const target = e.target.closest('button');
+                        const content = target.nextElementSibling;
+                        const icon = target.querySelector('i');
+                        
+                        if (content.style.display === 'none') {
+                            content.style.display = 'block';
+                            icon.className = 'bi bi-folder2-open dir-icon';
+                        } else {
+                            content.style.display = 'none';
+                            icon.className = 'bi bi-folder dir-icon';
+                        }
+                    });
+                });
+                
+                // Expand all by default
+                document.querySelectorAll('.directory-content').forEach(el => {
+                    el.style.display = 'block';
+                });
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+        </body>
+        </html>
+        `;
+        
+        res.send(html);
+    } catch (error) {
+        console.error('Error generating directory listing:', error);
+        res.status(500).send('Error generating directory listing');
+    }
+});
+
+// Helper function to render directory structure as HTML
+function renderDirectory(structure, level = 0) {
+    if (!structure || structure.length === 0) {
+        return '<p class="text-muted">No files found</p>';
+    }
+    
+    const items = structure.map(item => {
+        if (item.type === 'directory') {
+            const hasChildren = item.children && item.children.length > 0;
+            return `
+                <div class="directory">
+                    <button class="btn btn-link p-0 text-start text-decoration-none toggle-dir" style="font-weight: 500;">
+                        <i class="bi bi-folder2-open dir-icon"></i> ${item.name}/
+                    </button>
+                    <div class="directory-content ms-3 mt-2">
+                        ${hasChildren ? renderDirectory(item.children, level + 1) : '<p class="text-muted">Empty directory</p>'}
+                    </div>
+                </div>
+            `;
+        } else {
+            return `
+                <li>
+                    <a href="${item.url}" target="_blank">
+                        <i class="bi bi-file-earmark-text file-icon"></i> ${item.name}
+                    </a>
+                </li>
+            `;
+        }
+    }).join('');
+    
+    return `<ul class="file-list">${items}</ul>`;
+}
+
 // Ensure reconciliations file exists
 if (!fs.existsSync(reconciliationsFile)) {
   fs.writeFileSync(reconciliationsFile, JSON.stringify([], null, 2));
