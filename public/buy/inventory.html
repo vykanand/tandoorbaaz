@@ -1098,31 +1098,38 @@
                 const sellingPrice = parseFloat(document.getElementById('dishSellingPrice').value) || 0;
                 const prepTime = document.getElementById('dishPrepTime').value.trim();
                 
-                // Get ingredients
-                const ingredients = [];
-                const ingredientRows = document.querySelectorAll('#dishIngredients .ingredient-row');
+                // Get ingredients from the form
+                const dishIngredients = [];
+                const ingredientRows = document.querySelectorAll('#dishIngredients .row:not(:first-child)');
                 
                 for (const row of ingredientRows) {
-                    const ingredientId = row.querySelector('.ingredient-select').value;
-                    const ingredientName = row.querySelector('.ingredient-select').options[row.querySelector('.ingredient-select').selectedIndex].text;
-                    const quantity = parseFloat(row.querySelector('.ingredient-quantity').value) || 0;
-                    const unit = row.querySelector('.ingredient-unit').value;
-                    const ingredient = ingredientsList.find(ing => ing.id === ingredientId);
+                    const select = row.querySelector('select');
+                    const qtyInput = row.querySelector('input[type="number"]');
+                    const unitSelect = row.querySelectorAll('select')[1];
                     
-                    if (ingredient) {
-                        ingredients.push({
-                            ingredientId: ingredient.id,
-                            name: ingredient.name,
-                            quantity: quantity,
-                            unit: unit,
-                            costPerUnit: ingredient.costPerUnit || 0,
-                            ingredientUnit: ingredient.unit || unit,
-                            unitType: ingredient.unitType || 'weight'
-                        });
+                    if (select && qtyInput && unitSelect) {
+                        const ingredientId = select.value;
+                        const quantity = parseFloat(qtyInput.value) || 0;
+                        const unit = unitSelect.value;
+                        
+                        if (ingredientId && quantity > 0) {
+                            const ingredient = ingredients.find(ing => String(ing.id) === String(ingredientId));
+                            if (ingredient) {
+                                dishIngredients.push({
+                                    ingredientId: ingredient.id,
+                                    name: ingredient.name,
+                                    quantity: quantity,
+                                    unit: unit,
+                                    costPerUnit: ingredient.costPerUnit || 0,
+                                    ingredientUnit: ingredient.unit || unit,
+                                    unitType: ingredient.unitType || 'weight'
+                                });
+                            }
+                        }
                     }
                 }
                 
-                // Create new dish object matching menu.json structure
+                // Create new dish object
                 const newDish = {
                     id: `dish_${Date.now()}`,
                     name: name,
@@ -1131,13 +1138,14 @@
                     sellingPrice: sellingPrice,
                     category: category,
                     prepTime: prepTime,
-                    ingredients: ingredients,
-                    photoUrl: '' // Will be set when a photo is uploaded
+                    ingredients: dishIngredients,
+                    photoUrl: '',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
                 };
                 
                 // Add to dishes array and save
-                if (!window.dishes) window.dishes = [];
-                window.dishes.push(newDish);
+                dishes.push(newDish);
                 
                 try {
                     await persistMenu();
@@ -1145,15 +1153,37 @@
                     
                     // Reset form and close modal
                     document.getElementById('addDishForm').reset();
-                    document.getElementById('dishIngredients').innerHTML = '';
+                    document.getElementById('dishIngredients').innerHTML = `
+                        <div class="row mb-2 fw-bold">
+                            <div class="col-5">Ingredient</div>
+                            <div class="col-3">Quantity</div>
+                            <div class="col-3">Unit</div>
+                            <div class="col-1"></div>
+                        </div>
+                    `;
                     
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addDishModal'));
                     if (modal) modal.hide();
                     
-                    alert('Dish added successfully!');
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-3';
+                    alertDiv.role = 'alert';
+                    alertDiv.innerHTML = `
+                        <strong>Success!</strong> Dish "${name}" has been added to the menu.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    document.querySelector('.container').prepend(alertDiv);
+                    
+                    // Auto-remove alert after 5 seconds
+                    setTimeout(() => {
+                        const alert = bootstrap.Alert.getOrCreateInstance(alertDiv);
+                        if (alert) alert.close();
+                    }, 5000);
+                    
                 } catch (err) {
                     console.error('Error saving dish:', err);
-                    alert('Failed to save dish. Please try again.');
+                    alert('Failed to save dish. Please check the console for details.');
                 }
             });
             

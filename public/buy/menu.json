@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-09-21T23:42:30.792Z",
+  "lastUpdated": "2025-09-22T00:06:20.537Z",
   "categories": [
     {
       "id": "starters",
@@ -332,31 +332,33 @@
       "id": "ing_106",
       "name": "Aata (Wheat Flour)",
       "description": "Whole wheat flour for chapatis",
-      "category": "flour",
+      "category": "others",
       "unitType": "weight",
       "unit": "kg",
       "costPerUnit": 45,
-      "minStockLevel": 20,
-      "currentStock": 0,
+      "minStockLevel": 1,
+      "currentStock": 5,
       "vendor": "aata maida vega",
       "active": true,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "updatedAt": "2025-09-21T23:53:09.824Z"
     },
     {
       "id": "ing_107",
       "name": "Maida (Refined Flour)",
       "description": "Refined flour for breads and pastries",
-      "category": "flour",
+      "category": "others",
       "unitType": "weight",
       "unit": "kg",
       "costPerUnit": 40,
-      "minStockLevel": 15,
-      "currentStock": 0,
+      "minStockLevel": 0.5,
+      "currentStock": 2,
       "vendor": "aata maida vega",
       "active": true,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "updatedAt": "2025-09-21T23:52:58.307Z"
     },
     {
       "id": "ing_108",
@@ -484,41 +486,50 @@
     {
       "id": "ing_007",
       "name": "Fresh Paneer",
-      "category": "paneer",
+      "category": "others",
       "unitType": "weight",
       "unit": "g",
       "costPerUnit": 0.32,
       "density": 1,
       "active": true,
-      "currentStock": 0,
+      "currentStock": 500,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "vendor": "Butter Paneer vendor",
+      "minStockLevel": 99.96,
+      "updatedAt": "2025-09-21T23:54:45.116Z"
     },
     {
       "id": "ing_008",
       "name": "Maida Flour",
-      "category": "grocery",
+      "category": "others",
       "unitType": "weight",
       "unit": "g",
       "costPerUnit": 0.042,
       "density": 0.85,
       "active": true,
-      "currentStock": 0,
+      "currentStock": 200,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "vendor": "Grocery and Masalas",
+      "minStockLevel": 49.97,
+      "updatedAt": "2025-09-21T23:56:12.141Z"
     },
     {
       "id": "ing_009",
       "name": "Tandoori Masala Mix",
-      "category": "masala",
+      "category": "others",
       "unitType": "weight",
       "unit": "g",
       "costPerUnit": 0.68,
       "density": 0.9,
       "active": true,
-      "currentStock": 0,
+      "currentStock": 500,
       "minStock": 0,
-      "status": "out-of-stock"
+      "status": "out-of-stock",
+      "vendor": "Grocery and Masalas",
+      "minStockLevel": 50,
+      "updatedAt": "2025-09-21T23:55:45.446Z"
     },
     {
       "id": "ing_010",
@@ -728,6 +739,39 @@
         }
       },
       "lastUpdated": "2025-09-20T18:54:16.679Z"
+    },
+    {
+      "id": "dish_1758499531759",
+      "name": "Afghani chaap",
+      "description": "Creamy afghani chaap with kaaju gravy",
+      "costPrice": 79.97,
+      "sellingPrice": 130,
+      "category": "starters",
+      "prepTime": "10",
+      "ingredients": [
+        {
+          "ingredientId": "ing_102",
+          "name": "Butter",
+          "quantity": 30,
+          "unit": "g",
+          "costPerUnit": 500,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        },
+        {
+          "ingredientId": "ing_007",
+          "name": "Fresh Paneer",
+          "quantity": 20,
+          "unit": "g",
+          "costPerUnit": 0.32,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "photoUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrYHMHKjZdjrjjGNQ0E-EY6SEw9WEyINWQ1A&s",
+      "createdAt": "2025-09-22T00:05:31.759Z",
+      "updatedAt": "2025-09-22T00:05:31.759Z",
+      "lastUpdated": "2025-09-22T00:06:20.537Z"
     }
   ],
   "inventory": []
