@@ -816,58 +816,69 @@
                     const dishId = dishSelect.value;
                     if (!dishId) return;
                     
-                    const fullPrice = parseFloat(document.getElementById('fullPortionPrice').value);
-                    const halfPrice = parseFloat(document.getElementById('halfPortionPrice').value);
+                    const dish = dishes.find(d => String(d.id) === String(dishId));
+                    if (!dish) return;
+
+                    // Initialize portions object if it doesn't exist
+                    if (!dish.portions) {
+                        dish.portions = {};
+                    }
                     
-                    if (isNaN(fullPrice) || isNaN(halfPrice) || fullPrice <= 0 || halfPrice <= 0) {
-                        alert('Please enter valid prices for both portions');
+                    // Get all input fields in the form
+                    const inputs = e.target.querySelectorAll('input[type="number"]');
+                    let hasValidInput = false;
+                    
+                    // Update each portion price
+                    inputs.forEach(input => {
+                        const portionKey = input.id.replace('PortionPrice', '');
+                        const price = parseFloat(input.value);
+                        
+                        if (!isNaN(price) && price > 0) {
+                            // Update or create the portion
+                            dish.portions[portionKey] = dish.portions[portionKey] || {};
+                            dish.portions[portionKey].price = price;
+                            hasValidInput = true;
+                            
+                            // For backward compatibility
+                            if (portionKey === 'full') {
+                                dish.fullPortionPrice = price;
+                            } else if (portionKey === 'half') {
+                                dish.halfPortionPrice = price;
+                            }
+                        }
+                    });
+                    
+                    if (!hasValidInput) {
+                        alert('Please enter at least one valid price');
                         return;
                     }
                     
-                    const dish = dishes.find(d => String(d.id) === String(dishId));
-                    if (dish) {
-                        dish.fullPortionPrice = fullPrice;
-                        dish.halfPortionPrice = halfPrice;
-                        await persistMenu();
-                        
-                        // Update the display
-                        document.getElementById('viewPortionPrices').innerHTML = `
-                            <div class="d-flex justify-content-between mb-1">
-                                <span>Full Portion:</span>
-                                <strong>₹${fullPrice.toFixed(2)}</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Half Portion:</span>
-                                <strong>₹${halfPrice.toFixed(2)}</strong>
-                            </div>
-                        `;
-                        
-                        // Reset the form state
-                        document.getElementById('viewPortionPrices').style.display = 'block';
-                        document.getElementById('editPortionPricesForm').style.display = 'none';
-                        document.getElementById('editPortionPricesBtn').style.display = 'block';
-                        
-                        // Show success message
-                        const alertDiv = document.createElement('div');
-                        alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
-                        alertDiv.role = 'alert';
-                        alertDiv.innerHTML = `
-                            Portion prices updated successfully!
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        `;
-                        // Find the first parent container that exists
-                        const container = document.querySelector('#recipeIngredients .card-body') || 
-                                        document.querySelector('#recipeIngredients') || 
-                                        document.querySelector('.recipe-ingredients-container') ||
-                                        document.body;
-                        container.prepend(alertDiv);
-                        
-                        // Auto-dismiss after 3 seconds
-                        setTimeout(() => {
-                            const bsAlert = new bootstrap.Alert(alertDiv);
-                            bsAlert.close();
-                        }, 3000);
-                    }
+                    await persistMenu();
+                    
+                    // Re-render the view to show updated prices
+                    renderRecipeIngredients(dish);
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    alertDiv.role = 'alert';
+                    alertDiv.innerHTML = `
+                        Portion prices updated successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    
+                    // Find the first parent container that exists
+                    const container = document.querySelector('#recipeIngredients .card-body') || 
+                                    document.querySelector('#recipeIngredients') || 
+                                    document.querySelector('.recipe-ingredients-container') ||
+                                    document.body;
+                    container.prepend(alertDiv);
+                    
+                    // Auto-dismiss after 3 seconds
+                    setTimeout(() => {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }, 3000);
                 }
             });
 
@@ -887,64 +898,207 @@
                 }
             });
 
-            // Toggle portion price inputs based on checkbox state
-            document.getElementById('portionHalfCheck')?.addEventListener('change', function() {
-                const halfPriceInput = document.getElementById('halfPortionPrice');
-                halfPriceInput.disabled = !this.checked;
-                if (!this.checked) halfPriceInput.value = '';
-            });
-
-            document.getElementById('portionMiniCheck')?.addEventListener('change', function() {
-                const miniPriceInput = document.getElementById('miniPortionPrice');
-                miniPriceInput.disabled = !this.checked;
-                if (!this.checked) miniPriceInput.value = '';
-            });
-
-            // Auto-calculate other portion prices when full price changes
-            document.getElementById('fullPortionPrice')?.addEventListener('input', function() {
-                const fullPrice = parseFloat(this.value) || 0;
-                
-                // Auto-calculate half price if not manually set
+            // Function to initialize portion price controls
+            function initPortionPriceControls() {
+                // Toggle portion price inputs based on checkbox state
                 const halfCheckbox = document.getElementById('portionHalfCheck');
                 const halfPriceInput = document.getElementById('halfPortionPrice');
-                if (halfCheckbox.checked && !halfPriceInput.dataset.manual) {
-                    halfPriceInput.value = (fullPrice * 0.55).toFixed(2); // Slight discount from 50%
-                }
-                
-                // Auto-calculate mini price if not manually set
                 const miniCheckbox = document.getElementById('portionMiniCheck');
                 const miniPriceInput = document.getElementById('miniPortionPrice');
-                if (miniCheckbox.checked && !miniPriceInput.dataset.manual) {
-                    miniPriceInput.value = (fullPrice * 0.35).toFixed(2); // Slight discount from 30%
+                const fullPriceInput = document.getElementById('fullPortionPrice');
+                
+                if (halfCheckbox) {
+                    halfCheckbox.addEventListener('change', function() {
+                        halfPriceInput.disabled = !this.checked;
+                        if (this.checked) {
+                            // Auto-calculate half price based on full price if not manually set
+                            const fullPrice = parseFloat(fullPriceInput.value) || 0;
+                            halfPriceInput.value = (fullPrice * 0.55).toFixed(2);
+                        } else {
+                            halfPriceInput.value = '';
+                            halfPriceInput.dataset.manual = '';
+                        }
+                    });
                 }
-            });
 
-            // Track manual price changes
-            document.getElementById('halfPortionPrice')?.addEventListener('input', function() {
-                this.dataset.manual = 'true';
-            });
+                if (miniCheckbox) {
+                    miniCheckbox.addEventListener('change', function() {
+                        miniPriceInput.disabled = !this.checked;
+                        if (this.checked) {
+                            // Auto-calculate mini price based on full price if not manually set
+                            const fullPrice = parseFloat(fullPriceInput.value) || 0;
+                            miniPriceInput.value = (fullPrice * 0.35).toFixed(2);
+                        } else {
+                            miniPriceInput.value = '';
+                            miniPriceInput.dataset.manual = '';
+                        }
+                    });
+                }
 
-            document.getElementById('miniPortionPrice')?.addEventListener('input', function() {
-                this.dataset.manual = 'true';
-            });
+                // Auto-calculate other portion prices when full price changes
+                if (fullPriceInput) {
+                    fullPriceInput.addEventListener('input', function() {
+                        const fullPrice = parseFloat(this.value) || 0;
+                        
+                        // Auto-calculate half price if not manually set
+                        if (halfCheckbox?.checked) {
+                            if (!halfPriceInput.dataset.manual) {
+                                halfPriceInput.value = (fullPrice * 0.55).toFixed(2);
+                            }
+                        }
+                        
+                        // Auto-calculate mini price if not manually set
+                        if (miniCheckbox?.checked) {
+                            if (!miniPriceInput.dataset.manual) {
+                                miniPriceInput.value = (fullPrice * 0.35).toFixed(2);
+                            }
+                        }
+                    });
+                }
+
+                // Track manual price changes
+                if (halfPriceInput) {
+                    halfPriceInput.addEventListener('input', function() {
+                        if (this.value.trim() !== '') {
+                            this.dataset.manual = 'true';
+                        } else {
+                            this.dataset.manual = '';
+                        }
+                    });
+                }
+
+                if (miniPriceInput) {
+                    miniPriceInput.addEventListener('input', function() {
+                        if (this.value.trim() !== '') {
+                            this.dataset.manual = 'true';
+                        } else {
+                            this.dataset.manual = '';
+                        }
+                    });
+                }
+            }
+            
+            // Initialize portion price controls when the modal is shown
+            const addDishModal = document.getElementById('addDishModal');
+            if (addDishModal) {
+                addDishModal.addEventListener('shown.bs.modal', function() {
+                    initPortionPriceControls();
+                });
+            }
+
+            // Function to calculate total cost of ingredients
+            function calculateDishCost() {
+                const dishIngredients = document.getElementById('dishIngredients');
+                if (!dishIngredients) return 0;
+                
+                const ingredientRows = dishIngredients.querySelectorAll('.row');
+                let totalCost = 0;
+
+                ingredientRows.forEach(row => {
+                    const select = row.querySelector('.ingredient-select');
+                    const qtyInput = row.querySelector('.ingredient-qty');
+                    const unitSelect = row.querySelector('.ingredient-unit');
+                    
+                    if (!select || !qtyInput || !unitSelect) return;
+                    
+                    const ingredientId = select.value;
+                    const quantity = parseFloat(qtyInput.value) || 0;
+                    
+                    if (!ingredientId || quantity <= 0) return;
+                    
+                    // Find the ingredient in our inventory
+                    const ingredient = ingredients.find(i => String(i.id) === String(ingredientId));
+                    if (!ingredient) return;
+                    
+                    // Calculate the cost for this ingredient
+                    const costPerUnit = parseFloat(ingredient.costPerUnit) || 0;
+                    const ingredientCost = quantity * costPerUnit;
+                    
+                    // Add to total cost
+                    totalCost += ingredientCost;
+                });
+
+                // Update the cost input field with whole number
+                const costInput = document.getElementById('dishCostPrice');
+                if (costInput) {
+                    // Round to nearest whole number
+                    const roundedCost = Math.round(totalCost);
+                    costInput.value = roundedCost;
+                    
+                    // If full portion price is not set, suggest a price with 30% margin (also rounded)
+                    const fullPriceInput = document.getElementById('fullPortionPrice');
+                    if (fullPriceInput && !fullPriceInput.value) {
+                        const suggestedPrice = Math.round(totalCost * 1.3);
+                        fullPriceInput.value = suggestedPrice;
+                        // Trigger input to update other portion prices
+                        fullPriceInput.dispatchEvent(new Event('input'));
+                    }
+                }
+                
+                return totalCost;
+            }
+
+            // Add event listeners to ingredient inputs for dynamic cost calculation
+            function setupIngredientEventListeners() {
+                const dishIngredients = document.getElementById('dishIngredients');
+                if (!dishIngredients) return;
+
+                // Add event delegation for dynamically added elements
+                dishIngredients.addEventListener('change', (e) => {
+                    if (e.target.matches('select, input[type="number"]')) {
+                        calculateDishCost();
+                    }
+                });
+
+                // Also handle input event for real-time updates
+                dishIngredients.addEventListener('input', (e) => {
+                    if (e.target.matches('input[type="number"]')) {
+                        calculateDishCost();
+                    }
+                });
+            }
+
+            // Function to update unit selection based on selected ingredient
+            function updateUnitSelect(row, ingredientId) {
+                const unitSelect = row.querySelector('.ingredient-unit');
+                if (!unitSelect) return;
+                
+                // Find the selected ingredient
+                const ingredient = ingredients.find(i => String(i.id) === String(ingredientId));
+                if (!ingredient) return;
+                
+                // Set the unit to match the ingredient's unit
+                unitSelect.value = ingredient.unit || 'g';
+            }
 
             // Add ingredient row (for dish modal)
             document.getElementById('addIngredientBtn')?.addEventListener('click', () => {
                 const dishIngredients = document.getElementById('dishIngredients');
                 const row = document.createElement('div');
-                row.className = 'row g-2 mb-2';
+                row.className = 'row g-2 mb-2 ingredient-row';
+                
+                // Create a unique ID for each row to prevent event conflicts
+                const rowId = 'ingredient-row-' + Date.now();
+                row.id = rowId;
+                
+                // Create the HTML for the row
                 row.innerHTML = `
                     <div class="col-5">
-                        <select class="form-select form-select-sm">
+                        <select class="form-select form-select-sm ingredient-select" id="${rowId}-select">
                             <option value="">Select Ingredient</option>
-                            ${ingredients.map(item => `<option value="${item.id}">${item.name}</option>`).join('')}
+                            ${ingredients.map(item => 
+                                `<option value="${item.id}" data-cost="${item.costPerUnit || 0}">
+                                    ${item.name} (${item.unit || 'g'})
+                                </option>`
+                            ).join('')}
                         </select>
                     </div>
                     <div class="col-3">
-                        <input type="number" class="form-control form-control-sm" placeholder="Qty" step="0.01">
+                        <input type="number" class="form-control form-control-sm ingredient-qty" 
+                               id="${rowId}-qty" placeholder="Qty" step="0.01" min="0">
                     </div>
                     <div class="col-3">
-                        <select class="form-select form-select-sm">
+                        <select class="form-select form-select-sm ingredient-unit" id="${rowId}-unit" disabled>
                             <option value="g">g</option>
                             <option value="kg">kg</option>
                             <option value="ml">ml</option>
@@ -953,12 +1107,53 @@
                         </select>
                     </div>
                     <div class="col-1">
-                        <button type="button" class="btn btn-sm btn-outline-danger w-100" onclick="this.closest('.row').remove()">
+                        <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-ingredient">
                             <i class="bi bi-x"></i>
                         </button>
                     </div>
                 `;
+                
                 dishIngredients.appendChild(row);
+                
+                // Get references to the new elements
+                const select = document.getElementById(`${rowId}-select`);
+                const qtyInput = document.getElementById(`${rowId}-qty`);
+                const unitSelect = document.getElementById(`${rowId}-unit`);
+                const removeBtn = row.querySelector('.remove-ingredient');
+                
+                // Handle ingredient selection
+                if (select) {
+                    select.addEventListener('change', function() {
+                        const selectedOption = this.options[this.selectedIndex];
+                        const ingredientId = this.value;
+                        if (ingredientId) {
+                            updateUnitSelect(row, ingredientId);
+                            // Focus on quantity field for better UX
+                            if (qtyInput) qtyInput.focus();
+                        }
+                        calculateDishCost();
+                    });
+                }
+                
+                // Handle quantity changes
+                if (qtyInput) {
+                    qtyInput.addEventListener('input', function() {
+                        // Ensure quantity is not negative
+                        if (parseFloat(this.value) < 0) this.value = 0;
+                        calculateDishCost();
+                    });
+                }
+                
+                // Handle remove button
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', function() {
+                        row.remove();
+                        calculateDishCost();
+                    });
+                }
+                
+                // Focus on the select for better UX
+                if (select) select.focus();
             });
 
             // Add/Update Ingredient form submit
@@ -1071,7 +1266,8 @@
                     const dishPrepTime = parseInt(document.getElementById('dishPrepTime').value) || 0;
                     const dishPhotoInput = document.getElementById('dishPhotoUrl');
                     const dishPhotoUrl = dishPhotoInput ? dishPhotoInput.value.trim() : '';
-                    const dishCostPrice = parseFloat(document.getElementById('dishCostPrice').value) || 0;
+                    // Round cost price to nearest whole number
+                    const dishCostPrice = Math.round(parseFloat(document.getElementById('dishCostPrice').value) || 0);
                     
                     // Get selected portion types with prices
                     const selectedPortions = {};
