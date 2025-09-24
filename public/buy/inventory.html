@@ -406,21 +406,39 @@
                             </button>
                         </div>
                         <div class="row">
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label" for="dishSellingPrice">Base Price (₹)</label>
-                                <input type="number" class="form-control" id="dishSellingPrice" step="0.01" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label" for="dishFullPortionPrice">Full Portion (₹)</label>
-                                <input type="number" class="form-control" id="dishFullPortionPrice" step="0.01">
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label" for="dishHalfPortionPrice">Half Portion (₹)</label>
-                                <input type="number" class="form-control" id="dishHalfPortionPrice" step="0.01">
-                            </div>
-                            <div class="col-md-3 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label" for="dishCostPrice">Cost (₹)</label>
                                 <input type="number" class="form-control" id="dishCostPrice" step="0.01" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Portion Types & Pricing</label>
+                                
+                                <!-- Full Portion -->
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0" type="checkbox" id="portionFull" value="full" checked disabled>
+                                    </div>
+                                    <span class="input-group-text">Full (1.0x)</span>
+                                    <input type="number" class="form-control" id="fullPortionPrice" placeholder="Price" step="0.01" required>
+                                </div>
+                                
+                                <!-- Half Portion -->
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0 portion-type" type="checkbox" id="portionHalfCheck" value="half">
+                                    </div>
+                                    <span class="input-group-text">Half (0.5x)</span>
+                                    <input type="number" class="form-control" id="halfPortionPrice" placeholder="Price" step="0.01" disabled>
+                                </div>
+                                
+                                <!-- Mini Portion -->
+                                <div class="input-group">
+                                    <div class="input-group-text">
+                                        <input class="form-check-input mt-0 portion-type" type="checkbox" id="portionMiniCheck" value="mini">
+                                    </div>
+                                    <span class="input-group-text">Mini (0.3x)</span>
+                                    <input type="number" class="form-control" id="miniPortionPrice" placeholder="Price" step="0.01" disabled>
+                                </div>
                             </div>
                         </div>
                         <div class="row">
@@ -869,6 +887,47 @@
                 }
             });
 
+            // Toggle portion price inputs based on checkbox state
+            document.getElementById('portionHalfCheck')?.addEventListener('change', function() {
+                const halfPriceInput = document.getElementById('halfPortionPrice');
+                halfPriceInput.disabled = !this.checked;
+                if (!this.checked) halfPriceInput.value = '';
+            });
+
+            document.getElementById('portionMiniCheck')?.addEventListener('change', function() {
+                const miniPriceInput = document.getElementById('miniPortionPrice');
+                miniPriceInput.disabled = !this.checked;
+                if (!this.checked) miniPriceInput.value = '';
+            });
+
+            // Auto-calculate other portion prices when full price changes
+            document.getElementById('fullPortionPrice')?.addEventListener('input', function() {
+                const fullPrice = parseFloat(this.value) || 0;
+                
+                // Auto-calculate half price if not manually set
+                const halfCheckbox = document.getElementById('portionHalfCheck');
+                const halfPriceInput = document.getElementById('halfPortionPrice');
+                if (halfCheckbox.checked && !halfPriceInput.dataset.manual) {
+                    halfPriceInput.value = (fullPrice * 0.55).toFixed(2); // Slight discount from 50%
+                }
+                
+                // Auto-calculate mini price if not manually set
+                const miniCheckbox = document.getElementById('portionMiniCheck');
+                const miniPriceInput = document.getElementById('miniPortionPrice');
+                if (miniCheckbox.checked && !miniPriceInput.dataset.manual) {
+                    miniPriceInput.value = (fullPrice * 0.35).toFixed(2); // Slight discount from 30%
+                }
+            });
+
+            // Track manual price changes
+            document.getElementById('halfPortionPrice')?.addEventListener('input', function() {
+                this.dataset.manual = 'true';
+            });
+
+            document.getElementById('miniPortionPrice')?.addEventListener('input', function() {
+                this.dataset.manual = 'true';
+            });
+
             // Add ingredient row (for dish modal)
             document.getElementById('addIngredientBtn')?.addEventListener('click', () => {
                 const dishIngredients = document.getElementById('dishIngredients');
@@ -1009,45 +1068,86 @@
                     const dishName = document.getElementById('dishName').value.trim();
                     const dishCategory = document.getElementById('dishCategory').value;
                     const dishDescription = document.getElementById('dishDescription').value.trim();
-                    const dishSellingPrice = parseFloat(document.getElementById('dishSellingPrice').value) || 0;
-                    const dishFullPortionPrice = parseFloat(document.getElementById('dishFullPortionPrice').value) || dishSellingPrice;
-                    const dishHalfPortionPrice = parseFloat(document.getElementById('dishHalfPortionPrice').value) || (dishSellingPrice * 0.6);
-                    const dishCostPrice = parseFloat(document.getElementById('dishCostPrice').value) || 0;
                     const dishPrepTime = parseInt(document.getElementById('dishPrepTime').value) || 0;
-                    const dishPhotoUrl = document.getElementById('dishPhotoUrl')?.value.trim() || '';
-
-                    if (!dishName || !dishCategory || dishSellingPrice <= 0 || dishCostPrice < 0) {
-                        alert('Please fill in all required fields with valid values');
-                        return;
+                    const dishPhotoInput = document.getElementById('dishPhotoUrl');
+                    const dishPhotoUrl = dishPhotoInput ? dishPhotoInput.value.trim() : '';
+                    const dishCostPrice = parseFloat(document.getElementById('dishCostPrice').value) || 0;
+                    
+                    // Get selected portion types with prices
+                    const selectedPortions = {};
+                    
+                    // Always include full portion (required) - using UPPERCASE names to match Seekh Kebab
+                    const fullPrice = parseFloat(document.getElementById('fullPortionPrice').value) || 0;
+                    selectedPortions.full = {
+                        name: 'FULL',
+                        price: fullPrice,
+                        multiplier: 1,
+                        portionPieces: 1
+                    };
+                    
+                    // Check for half portion
+                    if (document.getElementById('portionHalfCheck').checked) {
+                        const halfPrice = parseFloat(document.getElementById('halfPortionPrice').value) || 0;
+                        selectedPortions.half = {
+                            name: 'HALF',
+                            price: halfPrice,
+                            multiplier: 0.5,
+                            portionPieces: 2
+                        };
                     }
-
-                    // Calculate profit margin based on base price
-                    const profitMargin = dishSellingPrice > 0 ? (dishSellingPrice - dishCostPrice) / dishSellingPrice : 0;
-
-                    // Create new dish
+                    
+                    // Check for mini portion
+                    if (document.getElementById('portionMiniCheck').checked) {
+                        const miniPrice = parseFloat(document.getElementById('miniPortionPrice').value) || 0;
+                        selectedPortions.mini = {
+                            name: 'MINI',
+                            price: miniPrice,
+                            multiplier: 0.3,
+                            portionPieces: 4
+                        };
+                    }
+                    
+                    // Create new dish with standardized portion format
                     const newDish = {
-                        id: `dish_${Date.now()}`,
+                        id: `dish-${Date.now()}`,
                         name: dishName,
                         category: dishCategory,
                         description: dishDescription,
-                        sellingPrice: dishSellingPrice,
-                        fullPortionPrice: dishFullPortionPrice,
-                        halfPortionPrice: dishHalfPortionPrice,
                         costPrice: dishCostPrice,
-                        profitMargin: profitMargin,
+                        sellingPrice: fullPrice, // Base price is full portion price
+                        portions: {},
                         prepTime: dishPrepTime,
                         ingredients: [],
                         active: true,
                         createdAt: new Date().toISOString(),
-                        updatedAt: new Date().toISOString()
+                        updatedAt: new Date().toISOString(),
+                        fullPortionPrice: fullPrice,
+                        halfPortionPrice: selectedPortions.half ? selectedPortions.half.price : null
                     };
+
+                    // Add portions with consistent structure
+                    newDish.portions.full = {
+                        name: 'FULL',
+                        price: fullPrice,
+                        multiplier: 1,
+                        portionPieces: 8
+                    };
+                    
+                    if (selectedPortions.half) {
+                        newDish.portions.half = {
+                            name: 'HALF',
+                            price: selectedPortions.half.price,
+                            multiplier: 0.5,
+                            portionPieces: 4
+                        };
+                    }
 
                     // Add photo URL if provided
                     if (dishPhotoUrl) {
                         newDish.photoUrl = dishPhotoUrl;
                     }
 
-                    // Add ingredients if any
+                    // Add ingredients at dish level (not in portions)
                     const ingredientRows = document.querySelectorAll('#dishIngredients .row');
                     ingredientRows.forEach(row => {
                         const select = row.querySelector('select');
@@ -1061,7 +1161,10 @@
                                     ingredientId: ing.id,
                                     name: ing.name,
                                     quantity: parseFloat(qtyInput.value) || 0,
-                                    unit: unitSelect.value
+                                    unit: unitSelect.value,
+                                    costPerUnit: ing.costPerUnit || 0,
+                                    ingredientUnit: ing.ingredientUnit || unitSelect.value,
+                                    unitType: ing.unitType || inferUnitType(unitSelect.value)
                                 });
                             }
                         }
@@ -1084,8 +1187,9 @@
                     alertDiv.role = 'alert';
                     alertDiv.innerHTML = `
                         Dish "${newDish.name}" added successfully!<br>
-                        Full Portion: ₹${dishFullPortionPrice.toFixed(2)} | 
-                        Half Portion: ₹${dishHalfPortionPrice.toFixed(2)}
+                        ${Object.entries(selectedPortions).map(([key, portion]) => 
+                            `${portion.name}: ₹${portion.price.toFixed(2)}`
+                        ).join(' | ')}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     `;
                     document.querySelector('.container.mb-5').prepend(alertDiv);
@@ -1175,6 +1279,37 @@
                 `;
             }).join('');
 
+            // Generate portion info HTML
+            const portions = [];
+            if (dish.portions) {
+                for (const [key, portion] of Object.entries(dish.portions)) {
+                    portions.push(`
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>${portion.name || key.toUpperCase()}:</span>
+                            <strong>₹${Number(portion.price || 0).toFixed(2)}</strong>
+                        </div>
+                    `);
+                }
+            } else {
+                // Fallback for old format
+                if (dish.fullPortionPrice) {
+                    portions.push(`
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Full:</span>
+                            <strong>₹${Number(dish.fullPortionPrice).toFixed(2)}</strong>
+                        </div>
+                    `);
+                }
+                if (dish.halfPortionPrice) {
+                    portions.push(`
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Half:</span>
+                            <strong>₹${Number(dish.halfPortionPrice).toFixed(2)}</strong>
+                        </div>
+                    `);
+                }
+            }
+
             recipeIngredients.innerHTML = `
                 <div class="table-responsive">
                     <table class="table table-sm">
@@ -1191,34 +1326,25 @@
                 </div>
                 <div class="mt-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">Portion Prices</h6>
+                        <h6 class="mb-0">Portion Information</h6>
                         <button type="button" class="btn btn-sm btn-outline-primary" id="editPortionPricesBtn">
                             <i class="bi bi-pencil"></i> Edit
                         </button>
                     </div>
                     <div id="viewPortionPrices">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Full Portion:</span>
-                            <strong>₹${Number(dish.fullPortionPrice || dish.sellingPrice || 0).toFixed(2)}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Half Portion:</span>
-                            <strong>₹${Number(dish.halfPortionPrice || (dish.sellingPrice ? dish.sellingPrice * 0.6 : 0)).toFixed(2)}</strong>
-                        </div>
+                        ${portions.join('')}
                     </div>
                     <form id="editPortionPricesForm" style="display: none;">
-                        <div class="input-group input-group-sm mb-2">
-                            <span class="input-group-text">Full</span>
-                            <input type="number" class="form-control" id="fullPortionPrice" 
-                                   value="${Number(dish.fullPortionPrice || dish.sellingPrice || 0).toFixed(2)}" step="0.01" min="0">
-                            <span class="input-group-text">₹</span>
-                        </div>
-                        <div class="input-group input-group-sm mb-2">
-                            <span class="input-group-text">Half</span>
-                            <input type="number" class="form-control" id="halfPortionPrice" 
-                                   value="${Number(dish.halfPortionPrice || (dish.sellingPrice ? dish.sellingPrice * 0.6 : 0)).toFixed(2)}" step="0.01" min="0">
-                            <span class="input-group-text">₹</span>
-                        </div>
+                        ${Object.entries(dish.portions || {}).map(([key, portion]) => `
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text">${portion.name || key.toUpperCase()}</span>
+                                <input type="number" class="form-control" 
+                                       id="${key}PortionPrice" 
+                                       value="${Number(portion.price || 0).toFixed(2)}" 
+                                       step="0.01" min="0">
+                                <span class="input-group-text">₹</span>
+                            </div>
+                        `).join('')}
                         <div class="d-flex gap-2">
                             <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelEditPortionPrices">
                                 Cancel

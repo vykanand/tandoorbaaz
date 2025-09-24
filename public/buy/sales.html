@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Sales Tracker</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sale-entry { background-color:#f8f9fa; padding:20px; border-radius:8px; margin-bottom:20px; }
+        .vendor-section { background-color:#e9f7fe; padding:15px; border-radius:8px; margin-top:20px; }
+        .pending-item, .vendor-item { background:#fff; padding:10px; margin:5px 0; border-radius:4px; border-left:4px solid #0d6efd; }
+        .vendor-item { border-left-color: #28a745; }
+        .pending-actions, .vendor-actions { margin-left:10px; }
+        .equal-width { flex: 1; margin-right: 5px; }
+        .equal-width:last-child { margin-right: 0; }
+        .section-divider { border-top: 2px solid #dee2e6; margin: 20px 0; }
+        .cash-section { background-color:#fff3cd; padding:15px; border-radius:8px; margin:15px 0; }
+    </style>
+</head>
+<body>
+<div class="container mt-4">
+    <h1 class="mb-4">Daily Sales Tracker</h1>
+
+    <div class="row">
+        <!-- New Sale Form ---------------------------------------------------->
+        <div class="col-md-6">
+            <div class="sale-entry">
+                <h3>New Sale Entry</h3>
+                
+                <!-- Added form element -->
+                <form id="saleForm">
+                    <div class="mb-3">
+                        <label class="form-label">Sale Date</label>
+                        <input type="date" class="form-control" id="saleDate" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Online Payment (₹)</label>
+                        <input type="number" class="form-control" id="onlineAmount" placeholder="Enter amount" min="0" step="0.01" value="0">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cash Payment (₹)</label>
+                        <input type="number" class="form-control" id="cashAmount" placeholder="Enter amount" min="0" step="0.01" value="0">
+                    </div>
+
+                    <!-- Cash Received Section -->
+                    <div class="mb-4">
+                        <h5>Cash Received</h5>
+                        <div class="d-flex mb-2">
+                            <input type="number" class="form-control" id="cashReceivedAmt" placeholder="Amount Received" min="0" step="0.01" value="0">
+                            <button type="button" class="btn btn-outline-info ms-2" id="addCashReceived">Add</button>
+                        </div>
+                        <div id="cashReceivedList" class="mt-2"></div>
+                    </div>
+
+                    <!-- Pending Payments Section -->
+                    <div class="mb-4">
+                        <h5>Pending Payments</h5>
+                        <div class="d-flex mb-2">
+                            <input type="number" class="form-control equal-width" id="pendingAmount" placeholder="Amount" min="0" step="0.01">
+                            <input type="text" class="form-control equal-width" id="customerName" placeholder="Customer Name">
+                            <input type="text" class="form-control equal-width" id="customerPhone" placeholder="Phone (optional)">
+                            <button type="button" class="btn btn-outline-secondary" id="addPending">+</button>
+                        </div>
+                        <div id="pendingList" class="mt-2"></div>
+                    </div>
+
+                    <!-- Vendors Section -->
+                    <div class="vendor-section">
+                        <h5>Vendor Information</h5>
+                        <div class="d-flex mb-2">
+                            <input type="number" class="form-control equal-width" id="vendorAmount" placeholder="Amount" min="0" step="0.01">
+                            <select class="form-control equal-width" id="vendorName">
+                                <option value="">Select Vendor</option>
+                                <option value="Chicken and Meat">Chicken and Meat</option>
+                                <option value="Paneer and Butter">Paneer and Butter</option>
+                                <option value="Sabzi and Vegetables">Sabzi and Vegetables</option>
+                                <option value="Grocery and Masala">Grocery and Masala</option>
+                                <option value="Disposal">Disposal</option>
+                                <option value="Rumali Roti">Rumali Roti</option>
+                                <option value="Koyla and Coal">Koyla and Coal</option>
+                                <option value="Gas Cylinder">Gas Cylinder</option>
+                                <option value="Aata and Maida">Aata and Maida</option>
+                            </select>
+                            <button type="button" class="btn btn-outline-success" id="addVendor">+</button>
+                        </div>
+                        <div id="vendorList" class="mt-2"></div>
+                    </div>
+
+                    <div class="section-divider"></div>
+
+                    <button type="submit" class="btn btn-primary me-2" id="saveSale">Save Sale</button>
+                    <button type="button" class="btn btn-outline-secondary" id="clearForm">Clear</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sales Summary ---------------------------------------------------->
+        <div class="col-md-6">
+            <h3>Sales Summary</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Online (₹)</th>
+                        <th>Cash (₹)</th>
+                        <th>Cash Recv (₹)</th>
+                        <th>Pending (₹)</th>
+                        <th>Vendors (₹)</th>
+                        <th>Total (₹)</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody id="salesTableBody"></tbody>
+                </table>
+            </div>
+            <div id="saleDetails" class="mt-3"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<script>
+    /* ------------------------------------------------------------------ *
+     *  JSONBin configuration (your bin & keys)                           *
+     * ------------------------------------------------------------------ */
+    const API_BASE   = 'https://api.jsonbin.io/v3';
+    const BIN_ID     = '68d27f9243b1c97be94cda4c';            // ← supplied bin
+    const MASTER_KEY = '$2a$10$Fc5T8KVSWawgZnQ6dclo7O8RXtsBEt.k2v57q0eNdYeqIskqdFDt2';
+    const ACCESS_KEY = '$2a$10$nX1Het5hM.pkIx8SiLvAc.f/KDMN.zNleV7cCnC7yUZjRxyqc2Ryq';
+
+    /* ------------------------------------------------------------------ *
+     *  Global state                                                      *
+     * ------------------------------------------------------------------ */
+    let salesData = [];            // array of all sales
+    let currentEditId = null;      // id of the sale being edited (null = new)
+    let pendingPayments = [];      // pending items for the form being filled
+    let vendorPayments = [];       // vendor items for the form being filled
+    let cashReceived = [];         // cash received items for the form being filled
+
+    /* ------------------------------------------------------------------ *
+     *  DOM references                                                     *
+     * ------------------------------------------------------------------ */
+    const saleDateInput     = document.getElementById('saleDate');
+    const onlineAmountInput = document.getElementById('onlineAmount');
+    const cashAmountInput   = document.getElementById('cashAmount');
+    const cashReceivedAmtInput = document.getElementById('cashReceivedAmt');
+    const pendingAmtInput   = document.getElementById('pendingAmount');
+    const customerInput     = document.getElementById('customerName');
+    const phoneInput        = document.getElementById('customerPhone');
+    const vendorAmtInput    = document.getElementById('vendorAmount');
+    const vendorInput       = document.getElementById('vendorName');
+    const pendingListDiv    = document.getElementById('pendingList');
+    const vendorListDiv     = document.getElementById('vendorList');
+    const cashReceivedListDiv = document.getElementById('cashReceivedList');
+    const saveBtn           = document.getElementById('saveSale');
+    const clearBtn          = document.getElementById('clearForm');
+    const addPendingBtn     = document.getElementById('addPending');
+    const addVendorBtn      = document.getElementById('addVendor');
+    const addCashReceivedBtn = document.getElementById('addCashReceived');
+    const salesTbody        = document.getElementById('salesTableBody');
+    const saleDetailsDiv    = document.getElementById('saleDetails');
+    const saleForm          = document.getElementById('saleForm');
+
+    /* ------------------------------------------------------------------ *
+     *  Initialise page                                                    *
+     * ------------------------------------------------------------------ */
+    document.addEventListener('DOMContentLoaded', async () => {
+        console.log('DOM loaded - initializing...');
+        // set default date = today
+        saleDateInput.value = new Date().toISOString().split('T')[0];
+
+        await loadSalesData();      // pull data from JSONBin
+        renderSalesTable();         // show it
+        attachUiHandlers();         // wire button clicks
+        console.log('Initialization complete');
+    });
+
+    /* ------------------------------------------------------------------ *
+     *  UI event handlers                                                  *
+     * ------------------------------------------------------------------ */
+    function attachUiHandlers() {
+        console.log('Attaching UI handlers...');
+        
+        // Form submission
+        saleForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            console.log('Save button clicked - calling saveSale()');
+            saveSale();
+        });
+
+        // Add pending payment button
+        addPendingBtn.addEventListener('click', addPendingPayment);
+
+        // Add vendor payment button
+        addVendorBtn.addEventListener('click', addVendorPayment);
+
+        // Add cash received button
+        addCashReceivedBtn.addEventListener('click', addCashReceived);
+
+        // Clear form button
+        clearBtn.addEventListener('click', clearForm);
+
+        // Enter key in amount fields
+        [pendingAmtInput, vendorAmtInput, cashReceivedAmtInput].forEach(input => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (e.target === pendingAmtInput) {
+                        addPendingPayment();
+                    } else if (e.target === vendorAmtInput) {
+                        addVendorPayment();
+                    } else if (e.target === cashReceivedAmtInput) {
+                        addCashReceived();
+                    }
+                }
+            });
+        });
+
+        console.log('UI handlers attached successfully');
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Cash received handling                                            *
+     * ------------------------------------------------------------------ */
+    function addCashReceived() {
+        const amount = parseFloat(cashReceivedAmtInput.value);
+        
+        if (isNaN(amount) || amount <= 0) {
+            alert('Enter a valid cash received amount.');
+            return;
+        }
+
+        cashReceived.push({
+            id: Date.now(),
+            amount,
+            from: 'Cash Payment',
+            date: new Date().toISOString()
+        });
+
+        cashReceivedAmtInput.value = '';
+        renderCashReceivedList();
+    }
+
+    function renderCashReceivedList() {
+        cashReceivedListDiv.innerHTML = '';
+        
+        cashReceived.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'cash-received-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+            div.innerHTML = `
+                <div>${item.from}: ₹${(item.amount || 0).toFixed(2)}</div>
+                <button class="btn btn-sm btn-outline-danger delete-cash-received" data-idx="${idx}">×</button>
+            `;
+            cashReceivedListDiv.appendChild(div);
+        });
+
+        // delete handler
+        cashReceivedListDiv.querySelectorAll('.delete-cash-received').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const i = parseInt(btn.dataset.idx, 10);
+                cashReceived.splice(i, 1);
+                renderCashReceivedList();
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Pending payments handling                                          *
+     * ------------------------------------------------------------------ */
+    function addPendingPayment() {
+        const amount   = parseFloat(pendingAmtInput.value);
+        const customer = customerInput.value.trim();
+        const phone    = phoneInput.value.trim();
+
+        if (isNaN(amount) || amount <= 0 || !customer) {
+            alert('Enter a valid amount and customer name.');
+            return;
+        }
+
+        pendingPayments.push({
+            id: Date.now(),
+            amount,
+            customer,
+            phone: phone || '',
+            date: new Date().toISOString()
+        });
+
+        pendingAmtInput.value = '';
+        customerInput.value = '';
+        phoneInput.value = '';
+        renderPendingList();
+    }
+
+    function renderPendingList() {
+        pendingListDiv.innerHTML = '';
+        
+        pendingPayments.forEach((p, idx) => {
+            const phoneDisplay = p.phone ? ` (${p.phone})` : '';
+            const div = document.createElement('div');
+            div.className = 'pending-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+            div.innerHTML = `
+                <div class="me-3"><strong>${p.customer}</strong>${phoneDisplay}</div>
+                <div class="me-3">₹${(p.amount || 0).toFixed(2)}</div>
+                <button class="btn btn-sm btn-outline-danger delete-pending" data-idx="${idx}" title="Remove">
+                    <i class="bi bi-trash"></i>
+                </button>
+            `;
+            pendingListDiv.appendChild(div);
+        });
+
+        // delete handler
+        pendingListDiv.querySelectorAll('.delete-pending').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                const i = parseInt(btn.dataset.idx, 10);
+                pendingPayments.splice(i, 1);
+                renderPendingList();
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Vendor payments handling                                           *
+     * ------------------------------------------------------------------ */
+    function addVendorPayment() {
+        const amount = parseFloat(vendorAmtInput.value);
+        const vendor = vendorInput.value.trim();
+
+        if (isNaN(amount) || amount <= 0 || !vendor) {
+            alert('Enter a valid amount and select a vendor.');
+            return;
+        }
+
+        vendorPayments.push({
+            id: Date.now(),
+            amount,
+            vendor,
+            date: new Date().toISOString()
+        });
+
+        vendorAmtInput.value = '';
+        vendorInput.selectedIndex = 0; // Reset to "Select Vendor"
+        renderVendorList();
+    }
+
+    function renderVendorList() {
+        vendorListDiv.innerHTML = '';
+        vendorPayments.forEach((v, idx) => {
+            const div = document.createElement('div');
+            div.className = 'vendor-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded';
+            div.innerHTML = `
+                <div><strong>${v.vendor}</strong>: ₹${v.amount.toFixed(2)}</div>
+                <button class="btn btn-sm btn-outline-danger delete-vendor" data-idx="${idx}">×</button>
+            `;
+            vendorListDiv.appendChild(div);
+        });
+
+        // delete handler
+        vendorListDiv.querySelectorAll('.delete-vendor').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const i = parseInt(btn.dataset.idx, 10);
+                vendorPayments.splice(i, 1);
+                renderVendorList();
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Save (create / update) a sale                                      *
+     * ------------------------------------------------------------------ */
+    async function saveSale() {
+        console.log('saveSale function called');
+        
+        const date    = saleDateInput.value;
+        const online  = parseFloat(onlineAmountInput.value) || 0;
+        const cash    = parseFloat(cashAmountInput.value)   || 0;
+        
+        const cashRecvTot = cashReceived.reduce((sum, item) => sum + (item.amount || 0), 0);
+        const pendTot = pendingPayments.reduce((s, p) => s + p.amount, 0);
+        const vendTot = vendorPayments.reduce((s, v) => s + v.amount, 0);
+
+        console.log('Form data:', { date, online, cash, cashRecvTot, pendTot, vendTot });
+
+        if (!date) {
+            alert('Select a date.');
+            return;
+        }
+        if (online < 0 || cash < 0) {
+            alert('Amounts cannot be negative.');
+            return;
+        }
+
+        const sale = {
+            id: currentEditId || Date.now().toString(),
+            date,
+            online,
+            cash,
+            cashReceived: [...cashReceived], // Copy the array
+            pending: [...pendingPayments],   // Copy the array
+            vendors: [...vendorPayments],    // Copy the array
+            total: online + cash + cashRecvTot + pendTot + vendTot,
+            timestamp: new Date().toISOString()
+        };
+
+        console.log('Sale object to save:', sale);
+
+        // add or replace in the local array
+        if (currentEditId) {
+            const idx = salesData.findIndex(s => s.id === currentEditId);
+            if (idx !== -1) {
+                salesData[idx] = sale;
+                console.log('Updated existing sale at index:', idx);
+            }
+        } else {
+            salesData.push(sale);
+            console.log('Added new sale, total sales:', salesData.length);
+        }
+
+        // sort newest first
+        salesData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        try {
+            console.log('Attempting to save to JSONBin...');
+            await writeSalesToBin(salesData);
+            console.log('Save successful');
+            renderSalesTable();
+            clearForm();
+            alert('Sale saved successfully!');
+        } catch (err) {
+            console.error('Save error:', err);
+            alert('Error saving sale – check console for details.');
+        }
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Delete a sale                                                      *
+     * ------------------------------------------------------------------ */
+    async function deleteSale(id) {
+        if (!confirm('Delete this sale?')) return;
+        
+        console.log('Deleting sale with id:', id);
+        salesData = salesData.filter(s => s.id !== id);
+        
+        try {
+            await writeSalesToBin(salesData);
+            renderSalesTable();
+            saleDetailsDiv.innerHTML = '';
+            alert('Sale deleted successfully.');
+        } catch (err) {
+            console.error('Delete error:', err);
+            alert('Error deleting sale – see console.');
+        }
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Edit a sale (populate the form)                                   *
+     * ------------------------------------------------------------------ */
+    function editSale(id) {
+        console.log('Editing sale with id:', id);
+        const sale = salesData.find(s => s.id === id);
+        if (!sale) {
+            console.error('Sale not found with id:', id);
+            return;
+        }
+
+        currentEditId        = sale.id;
+        saleDateInput.value  = sale.date;
+        onlineAmountInput.value = sale.online || 0;
+        cashAmountInput.value   = sale.cash || 0;
+        
+        // Load cash received
+        cashReceived = Array.isArray(sale.cashReceived) 
+            ? sale.cashReceived.map(item => ({ ...item })) 
+            : [];
+        
+        // Load pending payments
+        pendingPayments = Array.isArray(sale.pending) 
+            ? sale.pending.map(item => ({ ...item })) 
+            : [];
+        
+        // Load vendor payments
+        vendorPayments = Array.isArray(sale.vendors) 
+            ? sale.vendors.map(item => ({ ...item })) 
+            : [];
+        
+        // Render all lists
+        renderCashReceivedList();
+        renderPendingList();
+        renderVendorList();
+
+        // Scroll to the form for better UX
+        const formElement = document.querySelector('.sale-entry');
+        if (formElement) {
+            formElement.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        console.log('Edit form populated');
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Show detailed view for a row                                       *
+     * ------------------------------------------------------------------ */
+    function showSaleDetails(id) {
+        const sale = salesData.find(s => s.id === id);
+        if (!sale) return;
+
+        // Cash received
+        const cashReceivedRows = (Array.isArray(sale.cashReceived) && sale.cashReceived.length)
+            ? sale.cashReceived.map(c => `
+                <tr>
+                    <td>${c.from || '—'}</td>
+                    <td class="text-end">₹${(c.amount || 0).toFixed(2)}</td>
+                </tr>`).join('')
+            : '<tr><td colspan="2" class="text-center">No cash received</td></tr>';
+
+        // Pending payments
+        const pendingRows = (Array.isArray(sale.pending) && sale.pending.length)
+            ? sale.pending.map(p => {
+                const phoneDisplay = p.phone ? ` (${p.phone})` : '';
+                return `
+                <tr>
+                    <td>${p.customer || '—'}${phoneDisplay}</td>
+                    <td class="text-end">₹${(p.amount || 0).toFixed(2)}</td>
+                </tr>`;
+            }).join('')
+            : '<tr><td colspan="2" class="text-center">No pending payments</td></tr>';
+
+        // Vendor payments
+        const vendorRows = (Array.isArray(sale.vendors) && sale.vendors.length)
+            ? sale.vendors.map(v => `
+                <tr>
+                    <td>${v.vendor || '—'}</td>
+                    <td class="text-end">₹${(v.amount || 0).toFixed(2)}</td>
+                </tr>`).join('')
+            : '<tr><td colspan="2" class="text-center">No vendor payments</td></tr>';
+
+        saleDetailsDiv.innerHTML = `
+            <div class="card">
+                <div class="card-header"><h4>Sale Details – ${formatDate(sale.date)}</h4></div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Online:</strong> ₹${(sale.online || 0).toFixed(2)}</p>
+                            <p><strong>Cash:</strong> ₹${(sale.cash || 0).toFixed(2)}</p>
+                            <p class="fw-bold">Subtotal: ₹${((sale.online||0)+(sale.cash||0)).toFixed(2)}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Cash Received</h5>
+                            <table class="table table-sm">
+                                <thead><tr><th>From</th><th class="text-end">Amount</th></tr></thead>
+                                <tbody>${cashReceivedRows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <h5>Pending Payments</h5>
+                            <table class="table table-sm">
+                                <thead><tr><th>Customer</th><th class="text-end">Amount</th></tr></thead>
+                                <tbody>${pendingRows}</tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Vendor Payments</h5>
+                            <table class="table table-sm">
+                                <thead><tr><th>Vendor</th><th class="text-end">Amount</th></tr></thead>
+                                <tbody>${vendorRows}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Render the summary table                                           *
+     * ------------------------------------------------------------------ */
+    function renderSalesTable() {
+        salesTbody.innerHTML = '';
+
+        if (salesData.length === 0) {
+            salesTbody.innerHTML = `<tr><td colspan="8" class="text-center">No sales data</td></tr>`;
+            return;
+        }
+
+        let sumOnline = 0, sumCash = 0, sumCashReceived = 0, sumPending = 0, sumVendors = 0, sumTotal = 0;
+
+        salesData.forEach(s => {
+            const cashRecvSum = Array.isArray(s.cashReceived)
+                ? s.cashReceived.reduce((a, c) => a + (c.amount || 0), 0)
+                : 0;
+            const pendingSum = Array.isArray(s.pending)
+                ? s.pending.reduce((a, p) => a + (p.amount || 0), 0)
+                : 0;
+            const vendorSum = Array.isArray(s.vendors)
+                ? s.vendors.reduce((a, v) => a + (v.amount || 0), 0)
+                : 0;
+            const total = (s.online || 0) + (s.cash || 0) + cashRecvSum + pendingSum + vendorSum;
+
+            sumOnline  += s.online || 0;
+            sumCash    += s.cash   || 0;
+            sumCashReceived += cashRecvSum;
+            sumPending += pendingSum;
+            sumVendors += vendorSum;
+            sumTotal   += total;
+
+            const tr = document.createElement('tr');
+            tr.dataset.id = s.id;
+            tr.style.cursor = 'pointer';
+            tr.innerHTML = `
+                <td>${formatDate(s.date)}</td>
+                <td class="text-end">₹${(s.online||0).toFixed(2)}</td>
+                <td class="text-end">₹${(s.cash||0).toFixed(2)}</td>
+                <td class="text-end">₹${cashRecvSum.toFixed(2)}</td>
+                <td class="text-end">₹${pendingSum.toFixed(2)}</td>
+                <td class="text-end">₹${vendorSum.toFixed(2)}</td>
+                <td class="text-end fw-bold">₹${total.toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary edit-sale" data-id="${s.id}">✏️</button>
+                    <button class="btn btn-sm btn-outline-danger delete-sale" data-id="${s.id}">🗑️</button>
+                </td>
+            `;
+            salesTbody.appendChild(tr);
+        });
+
+        // totals row
+        const totTr = document.createElement('tr');
+        totTr.className = 'table-active fw-bold';
+        totTr.innerHTML = `
+            <td>Total</td>
+            <td class="text-end">₹${sumOnline.toFixed(2)}</td>
+            <td class="text-end">₹${sumCash.toFixed(2)}</td>
+            <td class="text-end">₹${sumCashReceived.toFixed(2)}</td>
+            <td class="text-end">₹${sumPending.toFixed(2)}</td>
+            <td class="text-end">₹${sumVendors.toFixed(2)}</td>
+            <td class="text-end">₹${sumTotal.toFixed(2)}</td>
+            <td></td>
+        `;
+        salesTbody.appendChild(totTr);
+
+        // row click → details
+        salesTbody.querySelectorAll('tr[data-id]').forEach(row => {
+            row.addEventListener('click', e => {
+                if (e.target.closest('button')) return;
+                showSaleDetails(row.dataset.id);
+            });
+        });
+
+        // edit / delete buttons
+        salesTbody.querySelectorAll('.edit-sale').forEach(btn => {
+            btn.addEventListener('click', e => {
+                e.stopPropagation();
+                editSale(e.target.closest('button').dataset.id);
+            });
+        });
+        salesTbody.querySelectorAll('.delete-sale').forEach(btn => {
+            btn.addEventListener('click', async e => {
+                e.stopPropagation();
+                await deleteSale(e.target.closest('button').dataset.id);
+            });
+        });
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Clear the form                                                     *
+     * ------------------------------------------------------------------ */
+    function clearForm() {
+        console.log('Clearing form...');
+        currentEditId = null;
+        saleDateInput.value = new Date().toISOString().split('T')[0];
+        onlineAmountInput.value = '0';
+        cashAmountInput.value = '0';
+        cashReceivedAmtInput.value = '';
+        pendingAmtInput.value = '';
+        customerInput.value = '';
+        phoneInput.value = '';
+        vendorAmtInput.value = '';
+        vendorInput.selectedIndex = 0;
+        cashReceived = [];
+        pendingPayments = [];
+        vendorPayments = [];
+        renderCashReceivedList();
+        renderPendingList();
+        renderVendorList();
+        saleDetailsDiv.innerHTML = '';
+        console.log('Form cleared');
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  Helper: format date                                                *
+     * ------------------------------------------------------------------ */
+    function formatDate(dateStr) {
+        const opts = { year: 'numeric', month: 'short', day: 'numeric', weekday: 'short' };
+        return new Date(dateStr).toLocaleDateString('en-US', opts);
+    }
+
+    /* ------------------------------------------------------------------ *
+     *  JSONBin CRUD                                                       *
+     * ------------------------------------------------------------------ */
+    async function loadSalesData() {
+        try {
+            console.log('Loading sales data from JSONBin...');
+            const url = `${API_BASE}/b/${BIN_ID}/latest`;
+            const resp = await fetch(url, {
+                headers: {
+                    'X-Master-Key': MASTER_KEY,
+                    'X-Access-Key': ACCESS_KEY
+                }
+            });
+
+            if (!resp.ok) {
+                if (resp.status === 404) {
+                    console.log('Bin not found - starting with empty data');
+                    salesData = [];
+                    return;
+                }
+                throw new Error(`HTTP ${resp.status}`);
+            }
+
+            const body = await resp.json();
+            console.log('Received data from JSONBin:', body);
+
+            if (Array.isArray(body.record)) {
+                salesData = body.record;
+                console.log('Loaded', salesData.length, 'sales records');
+            } else {
+                console.warn('JSONBin record is not an array – resetting to []', body.record);
+                salesData = [];
+            }
+
+            salesData.sort((a, b) => new Date(b.date) - new Date(a.date));
+        } catch (err) {
+            console.error('Load error:', err);
+            salesData = [];
+        }
+    }
+
+    async function writeSalesToBin(data) {
+        console.log('Writing data to JSONBin:', data);
+        
+        if (!Array.isArray(data)) {
+            console.error('Data is not an array!', data);
+            throw new Error('Cannot save non-array data to bin');
+        }
+
+        const url = `${API_BASE}/b/${BIN_ID}`;
+        const resp = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': MASTER_KEY,
+                'X-Access-Key': ACCESS_KEY,
+                'X-Bin-Name': 'Daily Sales Tracker',
+                'X-Bin-Private': 'true'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (!resp.ok) {
+            const errText = await resp.text().catch(() => 'Unknown error');
+            console.error('Save failed:', resp.status, errText);
+            throw new Error(`Save failed: ${resp.status} ${errText}`);
+        }
+
+        const result = await resp.json();
+        console.log('Save successful:', result);
+        return result;
+    }
+</script>
+</body>
+</html>

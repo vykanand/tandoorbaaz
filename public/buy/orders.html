@@ -3307,14 +3307,12 @@
                                     </select>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    ${order.status === 'delivered' ? `
                                     <button class="btn btn-success rounded-circle d-flex align-items-center justify-content-center" 
                                             style="width: 38px; height: 38px; padding: 0;" 
                                             onclick="sendWhatsAppMessage('${order.docId}')" 
                                             title="Send Payment Link">
                                         <i class="bi bi-whatsapp"></i>
                                     </button>
-                                    ` : ''}
                                     <button class="btn btn-primary" onclick="showEditModal('${order.docId}')">
                                         <i class="bi bi-pencil"></i> Edit
                                     </button>

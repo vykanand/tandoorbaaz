@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-09-22T10:09:12.641Z",
+  "lastUpdated": "2025-09-24T16:14:49.212Z",
   "categories": [
     {
       "id": "starters",
@@ -867,7 +867,57 @@
           ]
         }
       },
-      "lastUpdated": "2025-09-22T09:56:35.525Z"
+      "lastUpdated": "2025-09-22T18:37:34.992Z",
+      "fullPortionPrice": 230,
+      "halfPortionPrice": 140
+    },
+    {
+      "id": "dish-1758730489211",
+      "name": "Chaap Biryani",
+      "category": "starters",
+      "description": "melts in mouth",
+      "costPrice": 240,
+      "sellingPrice": 240,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 240,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 120,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_006",
+          "name": "Soya Chaap Sticks",
+          "quantity": 1.99,
+          "unit": "pc",
+          "costPerUnit": 18,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        },
+        {
+          "ingredientId": "ing_101",
+          "name": "Chicken Meat",
+          "quantity": 2,
+          "unit": "pc",
+          "costPerUnit": 200,
+          "ingredientUnit": "pc",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-09-24T16:14:49.211Z",
+      "updatedAt": "2025-09-24T16:14:49.211Z",
+      "fullPortionPrice": 240,
+      "halfPortionPrice": 120
     }
   ],
   "inventory": []
