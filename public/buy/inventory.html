@@ -1027,25 +1027,37 @@ t<!DOCTYPE html>
                     const inputs = e.target.querySelectorAll('input[type="number"]');
                     let hasValidInput = false;
                     
-                    // Update each portion price
+                    // First, update all portions from the form
+                    const updatedPortions = {};
+                    
                     inputs.forEach(input => {
                         const portionKey = input.id.replace('PortionPrice', '');
                         const price = parseFloat(input.value);
                         
                         if (!isNaN(price) && price > 0) {
-                            // Update or create the portion
-                            dish.portions[portionKey] = dish.portions[portionKey] || {};
-                            dish.portions[portionKey].price = price;
+                            // Get the existing portion or create a new one with default values
+                            const existingPortion = dish.portions[portionKey] || {};
+                            updatedPortions[portionKey] = {
+                                name: existingPortion.name || portionKey.toUpperCase(),
+                                price: price,
+                                multiplier: existingPortion.multiplier || (portionKey === 'half' ? 0.5 : portionKey === 'mini' ? 0.3 : 1),
+                                portionPieces: existingPortion.portionPieces || (portionKey === 'half' ? 4 : portionKey === 'mini' ? 2 : 8)
+                            };
                             hasValidInput = true;
-                            
-                            // For backward compatibility
-                            if (portionKey === 'full') {
-                                dish.fullPortionPrice = price;
-                            } else if (portionKey === 'half') {
-                                dish.halfPortionPrice = price;
-                            }
                         }
                     });
+                    
+                    // Update the dish portions
+                    dish.portions = updatedPortions;
+                    
+                    // Update legacy properties for backward compatibility
+                    if (updatedPortions.full) {
+                        dish.fullPortionPrice = updatedPortions.full.price;
+                        dish.sellingPrice = updatedPortions.full.price; // Keep base price as full price
+                    }
+                    if (updatedPortions.half) {
+                        dish.halfPortionPrice = updatedPortions.half.price;
+                    }
                     
                     if (!hasValidInput) {
                         alert('Please enter at least one valid price');
@@ -1184,6 +1196,79 @@ t<!DOCTYPE html>
                     initPortionPriceControls();
                 });
             }
+
+            // Handle description editing
+            document.addEventListener('click', (e) => {
+                // Handle edit description button click
+                if (e.target.closest('#editDescriptionBtn')) {
+                    e.preventDefault();
+                    document.getElementById('viewDescriptionMode').style.display = 'none';
+                    document.getElementById('editDescriptionMode').style.display = 'block';
+                }
+
+                // Handle cancel edit description
+                if (e.target.closest('#cancelEditDescription')) {
+                    e.preventDefault();
+                    document.getElementById('viewDescriptionMode').style.display = 'block';
+                    document.getElementById('editDescriptionMode').style.display = 'none';
+                    // Reset to original description
+                    const dishId = dishSelect.value;
+                    if (dishId) {
+                        const dish = dishes.find(d => String(d.id) === String(dishId));
+                        if (dish) {
+                            document.getElementById('dishDescriptionEdit').value = dish.description || '';
+                        }
+                    }
+                }
+
+                // Handle save description
+                if (e.target.closest('#saveDescriptionBtn')) {
+                    e.preventDefault();
+                    const dishId = dishSelect.value;
+                    if (!dishId) return;
+                    
+                    const dish = dishes.find(d => String(d.id) === String(dishId));
+                    if (!dish) return;
+                    
+                    const newDescription = document.getElementById('dishDescriptionEdit').value.trim();
+                    
+                    // Update the dish object
+                    dish.description = newDescription;
+                    dish.updatedAt = new Date().toISOString();
+                    
+                    // Update the UI
+                    const descriptionDisplay = document.querySelector('#viewDescriptionMode p');
+                    if (descriptionDisplay) {
+                        descriptionDisplay.textContent = newDescription || 'No description available';
+                    }
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    alertDiv.innerHTML = `
+                        <i class="bi bi-check-circle me-2"></i> Description updated successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    
+                    const cardBody = document.querySelector('.card-body');
+                    if (cardBody) {
+                        cardBody.insertBefore(alertDiv, cardBody.firstChild);
+                        
+                        // Auto-hide after 3 seconds
+                        setTimeout(() => {
+                            const bsAlert = new bootstrap.Alert(alertDiv);
+                            bsAlert.close();
+                        }, 3000);
+                    }
+                    
+                    // Switch back to view mode
+                    document.getElementById('viewDescriptionMode').style.display = 'block';
+                    document.getElementById('editDescriptionMode').style.display = 'none';
+                    
+                    // Save changes to the server
+                    persistMenu();
+                }
+            });
 
             // Function to calculate total cost of ingredients
             function calculateDishCost() {
@@ -1573,11 +1658,15 @@ t<!DOCTYPE html>
                         active: true,
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
+                        // Legacy properties for backward compatibility
                         fullPortionPrice: fullPrice,
                         halfPortionPrice: selectedPortions.half ? selectedPortions.half.price : null
                     };
 
                     // Add portions with consistent structure
+                    newDish.portions = {};
+                    
+                    // Add full portion (required)
                     newDish.portions.full = {
                         name: 'FULL',
                         price: fullPrice,
@@ -1585,12 +1674,23 @@ t<!DOCTYPE html>
                         portionPieces: 8
                     };
                     
+                    // Add half portion if enabled
                     if (selectedPortions.half) {
                         newDish.portions.half = {
                             name: 'HALF',
                             price: selectedPortions.half.price,
                             multiplier: 0.5,
                             portionPieces: 4
+                        };
+                    }
+                    
+                    // Add mini portion if enabled
+                    if (selectedPortions.mini) {
+                        newDish.portions.mini = {
+                            name: 'MINI',
+                            price: selectedPortions.mini.price,
+                            multiplier: 0.3,
+                            portionPieces: 2
                         };
                     }
 
@@ -1764,8 +1864,11 @@ t<!DOCTYPE html>
 
             recipeIngredients.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="mb-0">Ingredients</h6>
+                    <h6 class="mb-0">Recipe Details</h6>
                     <div>
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="editDescriptionBtn">
+                            <i class="bi bi-pencil"></i> Edit Description
+                        </button>
                         <button type="button" class="btn btn-sm btn-outline-primary me-2" id="editIngredientsBtn">
                             <i class="bi bi-pencil"></i> Edit Ingredients
                         </button>
@@ -1774,6 +1877,31 @@ t<!DOCTYPE html>
                         </button>
                     </div>
                 </div>
+                
+                <!-- Dish Description Section -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Description</h6>
+                        <div id="viewDescriptionMode">
+                            <p class="card-text">${dish.description || 'No description available'}</p>
+                        </div>
+                        <div id="editDescriptionMode" style="display: none;">
+                            <div class="mb-3">
+                                <textarea class="form-control" id="dishDescriptionEdit" rows="3">${dish.description || ''}</textarea>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-2" id="cancelEditDescription">
+                                    Cancel
+                                </button>
+                                <button type="button" class="btn btn-sm btn-primary" id="saveDescriptionBtn">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h6 class="mb-3">Ingredients</h6>
 
                 <div id="viewIngredientsMode">
                     <div class="table-responsive">

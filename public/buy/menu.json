@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-10-04T21:40:31.796Z",
+  "lastUpdated": "2025-10-04T22:29:21.337Z",
   "categories": [
     {
       "id": "starters",
@@ -719,7 +719,7 @@
       "lastUpdated": "2025-10-04T15:57:56.313Z",
       "fullPortionPrice": 230,
       "halfPortionPrice": 120,
-      "updatedAt": "2025-10-04T19:04:14.421Z"
+      "updatedAt": "2025-10-04T22:29:21.337Z"
     },
     {
       "id": "13",
@@ -777,7 +777,7 @@
       "id": "dish-1758808355296",
       "name": "Fried rice",
       "category": "starters",
-      "description": "Yummy rice",
+      "description": "Bowl full of healthy nutrients sauted with rice and fresh herbs",
       "costPrice": 103,
       "sellingPrice": 240,
       "portions": {
@@ -789,7 +789,7 @@
         },
         "half": {
           "name": "HALF",
-          "price": 132,
+          "price": 129.98,
           "multiplier": 0.5,
           "portionPieces": 4
         }
@@ -817,15 +817,17 @@
       ],
       "active": true,
       "createdAt": "2025-09-25T13:52:35.296Z",
-      "updatedAt": "2025-09-25T13:52:35.297Z",
+      "updatedAt": "2025-10-04T22:19:59.750Z",
       "fullPortionPrice": 240,
-      "halfPortionPrice": 132
+      "halfPortionPrice": 129.98,
+      "photoUrl": "https://atmykitchen.net/wp-content/uploads/2022/08/20220828_092424.jpg",
+      "lastUpdated": "2025-10-04T22:20:53.732Z"
     },
     {
       "id": "dish-1759605478732",
       "name": "Mutton Seekh Kebab",
       "category": "starters",
-      "description": "Yummy Mutton kebab on your plate!",
+      "description": "Yummy Mutton kebab with herbs and soft mutton keema",
       "costPrice": 120,
       "sellingPrice": 290,
       "portions": {
@@ -856,15 +858,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T19:17:58.732Z",
-      "updatedAt": "2025-10-04T19:17:58.732Z",
+      "updatedAt": "2025-10-04T22:22:40.613Z",
       "fullPortionPrice": 290,
-      "halfPortionPrice": 150
+      "halfPortionPrice": 150,
+      "photoUrl": "https://www.licious.in/blog/wp-content/uploads/2022/12/Shutterstock_137577764-750x750.jpg",
+      "lastUpdated": "2025-10-04T22:22:46.872Z"
     },
     {
       "id": "dish-1759605584757",
       "name": "Chicken Tangdi",
       "category": "starters",
-      "description": "Yummy Chicken Tangdi Leg Piece",
+      "description": "Easy Charcoal Grilled Tandoori Chicken Legs | A recipe for vibrant Indian Tandoori chicken Tangdi, made on charcoal grill",
       "costPrice": 210,
       "sellingPrice": 190,
       "portions": {
@@ -904,15 +908,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T19:19:44.757Z",
-      "updatedAt": "2025-10-04T19:19:44.757Z",
+      "updatedAt": "2025-10-04T22:25:44.609Z",
       "fullPortionPrice": 190,
-      "halfPortionPrice": 100
+      "halfPortionPrice": 100,
+      "photoUrl": "https://spicecravings.com/wp-content/uploads/2020/08/Tandoori-Chicken-Square.jpg",
+      "lastUpdated": "2025-10-04T22:25:51.836Z"
     },
     {
       "id": "dish-1759605736227",
       "name": "Afghani Tangdi",
       "category": "starters",
-      "description": "Afghani buttery Tangdi very rich in taste",
+      "description": "This Afgani Chicken Tangri is cut and cleaned is roasted to perfection. Chicken tangri kabab and Tangri chicken drumstick recipe made using chicken legs.",
       "costPrice": 210,
       "sellingPrice": 250,
       "portions": {
@@ -952,7 +958,7 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T19:22:16.227Z",
-      "updatedAt": "2025-10-04T19:22:16.227Z",
+      "updatedAt": "2025-10-04T22:28:05.956Z",
       "fullPortionPrice": 250,
       "halfPortionPrice": 130
     },
