@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-10-04T19:22:16.227Z",
+  "lastUpdated": "2025-10-04T21:40:31.796Z",
   "categories": [
     {
       "id": "starters",
@@ -428,35 +428,35 @@
     },
     {
       "id": "ing_003",
-      "name": "Chicken Baccha (Drumsticks)",
+      "name": "Chicken Baccha Full",
       "category": "others",
       "unitType": "piece",
       "unit": "pc",
-      "costPerUnit": 35,
+      "costPerUnit": 170,
       "avgWeightPerPiece": 100,
       "active": true,
       "currentStock": 4,
       "minStock": 0,
       "status": "out-of-stock",
       "vendor": "Afzal chicken",
-      "minStockLevel": 4,
-      "updatedAt": "2025-09-21T23:26:47.588Z"
+      "minStockLevel": 1,
+      "updatedAt": "2025-10-04T21:36:36.697Z"
     },
     {
       "id": "ing_004",
-      "name": "Chicken Wings",
-      "category": "others",
-      "unitType": "piece",
-      "unit": "pc",
-      "costPerUnit": 22,
+      "name": "Mutton keema",
+      "category": "meat",
+      "unitType": "weight",
+      "unit": "g",
+      "costPerUnit": 200,
       "avgWeightPerPiece": 100,
       "active": true,
-      "currentStock": 0,
+      "currentStock": 500,
       "minStock": 0,
       "status": "out-of-stock",
       "vendor": "Afzal chicken",
-      "minStockLevel": 2,
-      "updatedAt": "2025-09-21T23:42:30.792Z"
+      "minStockLevel": 99.98,
+      "updatedAt": "2025-10-04T21:37:25.625Z"
     },
     {
       "id": "ing_005",
@@ -599,6 +599,58 @@
       "unit": "pc",
       "minStockLevel": 4,
       "costPerUnit": 19.95,
+      "unitType": "piece",
+      "active": true,
+      "vendor": "Afzal chicken"
+    },
+    {
+      "id": "ing_1002",
+      "createdAt": "2025-10-04T21:31:26.868Z",
+      "name": "Eggs",
+      "category": "dairy",
+      "currentStock": 2,
+      "unit": "kg",
+      "minStockLevel": 1,
+      "costPerUnit": 6.98,
+      "unitType": "weight",
+      "active": true,
+      "vendor": "Grocery and Masalas"
+    },
+    {
+      "id": "ing_1003",
+      "createdAt": "2025-10-04T21:33:25.033Z",
+      "name": "Butter",
+      "category": "others",
+      "currentStock": 1200,
+      "unit": "g",
+      "minStockLevel": 199.98,
+      "costPerUnit": 190,
+      "unitType": "weight",
+      "active": true,
+      "vendor": "Butter Paneer vendor"
+    },
+    {
+      "id": "ing_1004",
+      "createdAt": "2025-10-04T21:34:23.639Z",
+      "name": "Lehsun",
+      "category": "vegetables",
+      "currentStock": 500,
+      "unit": "g",
+      "minStockLevel": 30,
+      "costPerUnit": 120,
+      "unitType": "weight",
+      "active": true,
+      "vendor": "Sabzi Vegetables"
+    },
+    {
+      "id": "ing_1005",
+      "createdAt": "2025-10-04T21:34:41.032Z",
+      "name": "Chicken Wings",
+      "category": "others",
+      "currentStock": 19.96,
+      "unit": "pc",
+      "minStockLevel": 2,
+      "costPerUnit": 22,
       "unitType": "piece",
       "active": true,
       "vendor": "Afzal chicken"
@@ -903,6 +955,1408 @@
       "updatedAt": "2025-10-04T19:22:16.227Z",
       "fullPortionPrice": 250,
       "halfPortionPrice": 130
+    },
+    {
+      "id": "dish-1759609569263",
+      "name": "Chicken Tikka",
+      "category": "starters",
+      "description": "Tasty tikka",
+      "costPrice": 20,
+      "sellingPrice": 310,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 310,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 160,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_002",
+          "name": "Chicken Tikka Pieces",
+          "quantity": 5,
+          "unit": "g",
+          "costPerUnit": 0.28,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:26:09.263Z",
+      "updatedAt": "2025-10-04T20:26:09.263Z",
+      "fullPortionPrice": 310,
+      "halfPortionPrice": 160
+    },
+    {
+      "id": "dish-1759609633415",
+      "name": "Afghani Tikka",
+      "category": "starters",
+      "description": "Tasty afghani tikka",
+      "costPrice": 120,
+      "sellingPrice": 350,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 350,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 180,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_002",
+          "name": "Chicken Tikka Pieces",
+          "quantity": 5,
+          "unit": "g",
+          "costPerUnit": 0.28,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:27:13.415Z",
+      "updatedAt": "2025-10-04T20:27:13.415Z",
+      "fullPortionPrice": 350,
+      "halfPortionPrice": 180
+    },
+    {
+      "id": "dish-1759609798155",
+      "name": "Tandoori Chicken",
+      "category": "starters",
+      "description": "Tasties tandoor chicken marinates",
+      "costPrice": 280,
+      "sellingPrice": 370,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 370,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 190,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 8,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:29:58.155Z",
+      "updatedAt": "2025-10-04T20:29:58.155Z",
+      "fullPortionPrice": 370,
+      "halfPortionPrice": 190
+    },
+    {
+      "id": "dish-1759609911407",
+      "name": "Afghani Chicken",
+      "category": "starters",
+      "description": "Chickenn in afghani marinade",
+      "costPrice": 316,
+      "sellingPrice": 350,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 350,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 179.99,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_010",
+          "name": "Afghani Marinade Base",
+          "quantity": 50,
+          "unit": "ml",
+          "costPerUnit": 0.72,
+          "ingredientUnit": "ml",
+          "unitType": "volume"
+        },
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 8,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:31:51.407Z",
+      "updatedAt": "2025-10-04T20:31:51.407Z",
+      "fullPortionPrice": 350,
+      "halfPortionPrice": 179.99
+    },
+    {
+      "id": "dish-1759610005823",
+      "name": "Afghani Wings",
+      "category": "starters",
+      "description": "Desi wings afghani flavour",
+      "costPrice": 176,
+      "sellingPrice": 310,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 310,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 160,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_004",
+          "name": "Chicken Wings",
+          "quantity": 8,
+          "unit": "pc",
+          "costPerUnit": 22,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:33:25.823Z",
+      "updatedAt": "2025-10-04T20:33:25.824Z",
+      "fullPortionPrice": 310,
+      "halfPortionPrice": 160
+    },
+    {
+      "id": "dish-1759610110730",
+      "name": "Chicken Wings",
+      "category": "starters",
+      "description": "Desi wings tandoori",
+      "costPrice": 176,
+      "sellingPrice": 270,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 270,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 140,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_004",
+          "name": "Chicken Wings",
+          "quantity": 8,
+          "unit": "pc",
+          "costPerUnit": 22,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:35:10.730Z",
+      "updatedAt": "2025-10-04T20:35:10.730Z",
+      "fullPortionPrice": 270,
+      "halfPortionPrice": 140
+    },
+    {
+      "id": "dish-1759610206817",
+      "name": "Chicken Biryani",
+      "category": "main-course",
+      "description": "Moradabadi chicken biryani",
+      "costPrice": 140,
+      "sellingPrice": 240,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 240,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 120,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 4,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:36:46.817Z",
+      "updatedAt": "2025-10-04T20:36:46.817Z",
+      "fullPortionPrice": 240,
+      "halfPortionPrice": 120
+    },
+    {
+      "id": "dish-1759610294865",
+      "name": "Egg Biryani",
+      "category": "starters",
+      "description": "Biryani by kilo Eggs",
+      "costPrice": 60,
+      "sellingPrice": 200,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 200,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 100,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_011",
+          "name": "Cooking Oil",
+          "quantity": 0.3,
+          "unit": "l",
+          "costPerUnit": 0.15,
+          "ingredientUnit": "l",
+          "unitType": "volume"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:38:14.865Z",
+      "updatedAt": "2025-10-04T20:38:14.865Z",
+      "fullPortionPrice": 200,
+      "halfPortionPrice": 100
+    },
+    {
+      "id": "dish-1759610577628",
+      "name": "Plain Rice",
+      "category": "rice",
+      "description": "rice",
+      "costPrice": 30,
+      "sellingPrice": 110,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 110,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 60,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_107",
+          "name": "Maida (Refined Flour)",
+          "quantity": 0,
+          "unit": "kg",
+          "costPerUnit": 40,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:42:57.628Z",
+      "updatedAt": "2025-10-04T20:42:57.628Z",
+      "fullPortionPrice": 110,
+      "halfPortionPrice": 60
+    },
+    {
+      "id": "dish-1759610619143",
+      "name": "Jira Rice",
+      "category": "rice",
+      "description": "rice jira",
+      "costPrice": 100,
+      "sellingPrice": 130,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 130,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 70,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_108",
+          "name": "LPG Gas",
+          "quantity": 0.1,
+          "unit": "kg",
+          "costPerUnit": 1000,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:43:39.143Z",
+      "updatedAt": "2025-10-04T20:43:39.143Z",
+      "fullPortionPrice": 130,
+      "halfPortionPrice": 70
+    },
+    {
+      "id": "dish-1759610690067",
+      "name": "Matar Pulao",
+      "category": "rice",
+      "description": "Mattar pulao",
+      "costPrice": 100,
+      "sellingPrice": 149.98,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 149.98,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 80,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_108",
+          "name": "LPG Gas",
+          "quantity": 0.1,
+          "unit": "kg",
+          "costPerUnit": 1000,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:44:50.067Z",
+      "updatedAt": "2025-10-04T20:44:50.067Z",
+      "fullPortionPrice": 149.98,
+      "halfPortionPrice": 80
+    },
+    {
+      "id": "dish-1759610757590",
+      "name": "Kadhai Chicken",
+      "category": "main-course",
+      "description": "Chicken kadhai recipie",
+      "costPrice": 100,
+      "sellingPrice": 580,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 580,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 330,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_108",
+          "name": "LPG Gas",
+          "quantity": 0.1,
+          "unit": "kg",
+          "costPerUnit": 1000,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:45:57.590Z",
+      "updatedAt": "2025-10-04T20:45:57.590Z",
+      "fullPortionPrice": 580,
+      "halfPortionPrice": 330
+    },
+    {
+      "id": "dish-1759610825644",
+      "name": "Chicken Lababdar",
+      "category": "main-course",
+      "description": "Tasty lababdar chicken gravy",
+      "costPrice": 280,
+      "sellingPrice": 580,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 580,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 330,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 8,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:47:05.644Z",
+      "updatedAt": "2025-10-04T20:47:05.644Z",
+      "fullPortionPrice": 580,
+      "halfPortionPrice": 330
+    },
+    {
+      "id": "dish-1759610911317",
+      "name": "Butter Chicken",
+      "category": "main-course",
+      "description": "8 pc chicken kali mirch",
+      "costPrice": 280,
+      "sellingPrice": 580,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 580,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 330,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 8,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:48:31.317Z",
+      "updatedAt": "2025-10-04T20:48:31.317Z",
+      "fullPortionPrice": 580,
+      "halfPortionPrice": 330
+    },
+    {
+      "id": "dish-1759611288834",
+      "name": "Tawa Chicken",
+      "category": "main-course",
+      "description": "Tawa special chicken",
+      "costPrice": 280,
+      "sellingPrice": 580,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 580,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 330,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 8,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:54:48.834Z",
+      "updatedAt": "2025-10-04T20:54:48.834Z",
+      "fullPortionPrice": 580,
+      "halfPortionPrice": 330
+    },
+    {
+      "id": "dish-1759611345709",
+      "name": "Handi Chicken",
+      "category": "main-course",
+      "description": "",
+      "costPrice": 280,
+      "sellingPrice": 580,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 580,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 330,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 8,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:55:45.709Z",
+      "updatedAt": "2025-10-04T20:55:45.709Z",
+      "fullPortionPrice": 580,
+      "halfPortionPrice": 330
+    },
+    {
+      "id": "dish-1759611403189",
+      "name": "Egg Curry",
+      "category": "main-course",
+      "description": "egg gravy curry",
+      "costPrice": 100,
+      "sellingPrice": 170,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 170,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 90,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_002",
+          "name": "Chicken Tikka Pieces",
+          "quantity": 4,
+          "unit": "g",
+          "costPerUnit": 0.28,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:56:43.189Z",
+      "updatedAt": "2025-10-04T20:56:43.189Z",
+      "fullPortionPrice": 170,
+      "halfPortionPrice": 90
+    },
+    {
+      "id": "dish-1759611470386",
+      "name": "Chicken Roll",
+      "category": "breads",
+      "description": "chicken roll",
+      "costPrice": 70,
+      "sellingPrice": 150,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 150,
+          "multiplier": 1,
+          "portionPieces": 8
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_003",
+          "name": "Chicken Baccha (Drumsticks)",
+          "quantity": 2,
+          "unit": "pc",
+          "costPerUnit": 35,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:57:50.386Z",
+      "updatedAt": "2025-10-04T20:57:50.386Z",
+      "fullPortionPrice": 150,
+      "halfPortionPrice": null
+    },
+    {
+      "id": "dish-1759611513712",
+      "name": "Egg Roll",
+      "category": "breads",
+      "description": "Egg roll",
+      "costPrice": 100,
+      "sellingPrice": 99.98,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 99.98,
+          "multiplier": 1,
+          "portionPieces": 8
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_108",
+          "name": "LPG Gas",
+          "quantity": 0.1,
+          "unit": "kg",
+          "costPerUnit": 1000,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T20:58:33.712Z",
+      "updatedAt": "2025-10-04T20:58:33.712Z",
+      "fullPortionPrice": 99.98,
+      "halfPortionPrice": null
+    },
+    {
+      "id": "dish-1759611634311",
+      "name": "Paneer Tikka Roll",
+      "category": "breads",
+      "description": "Paneer tikka with roll",
+      "costPrice": 40,
+      "sellingPrice": 230,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 230,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 120,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_103",
+          "name": "Paneer",
+          "quantity": 4,
+          "unit": "g",
+          "costPerUnit": 300,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:00:34.311Z",
+      "updatedAt": "2025-10-04T21:00:34.311Z",
+      "fullPortionPrice": 230,
+      "halfPortionPrice": 120
+    },
+    {
+      "id": "dish-1759611747903",
+      "name": "Malai Chaap",
+      "category": "starters",
+      "description": "Desi Malai chaap",
+      "costPrice": 54,
+      "sellingPrice": 190,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 190,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 100,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_006",
+          "name": "Soya Chaap Sticks",
+          "quantity": 2.98,
+          "unit": "pc",
+          "costPerUnit": 18,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:02:27.903Z",
+      "updatedAt": "2025-10-04T21:02:27.903Z",
+      "fullPortionPrice": 190,
+      "halfPortionPrice": 100
+    },
+    {
+      "id": "dish-1759611791712",
+      "name": "Masala Chaap",
+      "category": "starters",
+      "description": "Masala chaap for veg lovers",
+      "costPrice": 54,
+      "sellingPrice": 150,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 150,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 80,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_006",
+          "name": "Soya Chaap Sticks",
+          "quantity": 3,
+          "unit": "pc",
+          "costPerUnit": 18,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:03:11.712Z",
+      "updatedAt": "2025-10-04T21:03:11.712Z",
+      "fullPortionPrice": 150,
+      "halfPortionPrice": 80
+    },
+    {
+      "id": "dish-1759611871553",
+      "name": "Afghani Chaap",
+      "category": "main-course",
+      "description": "Afghani tikka chaap",
+      "costPrice": 54,
+      "sellingPrice": 210,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 210,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 109.98,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_006",
+          "name": "Soya Chaap Sticks",
+          "quantity": 3,
+          "unit": "pc",
+          "costPerUnit": 18,
+          "ingredientUnit": "pc",
+          "unitType": "piece"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:04:31.553Z",
+      "updatedAt": "2025-10-04T21:04:31.553Z",
+      "fullPortionPrice": 210,
+      "halfPortionPrice": 109.98
+    },
+    {
+      "id": "dish-1759611931929",
+      "name": "Paneer Tikka",
+      "category": "starters",
+      "description": "Desi Tikka",
+      "costPrice": 210,
+      "sellingPrice": 170,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 230,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 120,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_103",
+          "name": "Paneer",
+          "quantity": 0.7,
+          "unit": "g",
+          "costPerUnit": 300,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:05:31.929Z",
+      "updatedAt": "2025-10-04T21:05:31.929Z",
+      "fullPortionPrice": 230,
+      "halfPortionPrice": 120,
+      "lastUpdated": "2025-10-04T21:06:23.396Z"
+    },
+    {
+      "id": "dish-1759612108231",
+      "name": "Tandoori Roti",
+      "category": "starters",
+      "description": "roti from tandoor",
+      "costPrice": 9,
+      "sellingPrice": 230,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 230,
+          "multiplier": 1,
+          "portionPieces": 8
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_106",
+          "name": "Aata (Wheat Flour)",
+          "quantity": 0.2,
+          "unit": "kg",
+          "costPerUnit": 45,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:08:28.231Z",
+      "updatedAt": "2025-10-04T21:08:28.231Z",
+      "fullPortionPrice": 230,
+      "halfPortionPrice": null
+    },
+    {
+      "id": "dish-1759612197047",
+      "name": "Butter Tandoori Roti",
+      "category": "breads",
+      "description": "Butter roti",
+      "costPrice": 15,
+      "sellingPrice": 230,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 230,
+          "multiplier": 1,
+          "portionPieces": 8
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_102",
+          "name": "Butter",
+          "quantity": 20,
+          "unit": "g",
+          "costPerUnit": 500,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        },
+        {
+          "ingredientId": "ing_106",
+          "name": "Aata (Wheat Flour)",
+          "quantity": 0.2,
+          "unit": "kg",
+          "costPerUnit": 45,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:09:57.047Z",
+      "updatedAt": "2025-10-04T21:09:57.047Z",
+      "fullPortionPrice": 230,
+      "halfPortionPrice": null
+    },
+    {
+      "id": "dish-1759612275709",
+      "name": "Dal Makhani",
+      "category": "main-course",
+      "description": "Makhani buttery dal",
+      "costPrice": 150,
+      "sellingPrice": 230,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 220,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 120,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_102",
+          "name": "Butter",
+          "quantity": 0.1,
+          "unit": "g",
+          "costPerUnit": 500,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        },
+        {
+          "ingredientId": "ing_108",
+          "name": "LPG Gas",
+          "quantity": 0.1,
+          "unit": "kg",
+          "costPerUnit": 1000,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:11:15.709Z",
+      "updatedAt": "2025-10-04T21:11:15.709Z",
+      "fullPortionPrice": 220,
+      "halfPortionPrice": 120
+    },
+    {
+      "id": "dish-1759612489338",
+      "name": "Chole Masala",
+      "category": "main-course",
+      "description": "Masala pindi chole",
+      "costPrice": 30,
+      "sellingPrice": 240,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 240,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 130,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_108",
+          "name": "LPG Gas",
+          "quantity": 0.03,
+          "unit": "kg",
+          "costPerUnit": 1000,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:14:49.338Z",
+      "updatedAt": "2025-10-04T21:14:49.338Z",
+      "fullPortionPrice": 240,
+      "halfPortionPrice": 130
+    },
+    {
+      "id": "dish-1759612550763",
+      "name": "Rajma Masala",
+      "category": "main-course",
+      "description": "Rajma dish",
+      "costPrice": 10,
+      "sellingPrice": 230,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 230,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 130,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_108",
+          "name": "LPG Gas",
+          "quantity": 0.01,
+          "unit": "kg",
+          "costPerUnit": 1000,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:15:50.763Z",
+      "updatedAt": "2025-10-04T21:15:50.763Z",
+      "fullPortionPrice": 230,
+      "halfPortionPrice": 130
+    },
+    {
+      "id": "dish-1759612653235",
+      "name": "Paneer Butter Masala",
+      "category": "main-course",
+      "description": "Yummy delicious paneer dish butter masala",
+      "costPrice": 30,
+      "sellingPrice": 250,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 250,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 140,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_103",
+          "name": "Paneer",
+          "quantity": 0.1,
+          "unit": "g",
+          "costPerUnit": 300,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:17:33.235Z",
+      "updatedAt": "2025-10-04T21:17:33.235Z",
+      "fullPortionPrice": 250,
+      "halfPortionPrice": 140
+    },
+    {
+      "id": "dish-1759612707678",
+      "name": "Kadhai Paneer",
+      "category": "main-course",
+      "description": "Kadhai Paneer",
+      "costPrice": 30,
+      "sellingPrice": 250,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 250,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 140,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_103",
+          "name": "Paneer",
+          "quantity": 0.1,
+          "unit": "g",
+          "costPerUnit": 300,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:18:27.678Z",
+      "updatedAt": "2025-10-04T21:18:27.678Z",
+      "fullPortionPrice": 250,
+      "halfPortionPrice": 140
+    },
+    {
+      "id": "dish-1759612903298",
+      "name": "Matar Paneer",
+      "category": "main-course",
+      "description": "Desi Matar paneer",
+      "costPrice": 30,
+      "sellingPrice": 240,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 240,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 130,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_103",
+          "name": "Paneer",
+          "quantity": 0.1,
+          "unit": "g",
+          "costPerUnit": 300,
+          "ingredientUnit": "g",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:21:43.298Z",
+      "updatedAt": "2025-10-04T21:21:43.298Z",
+      "fullPortionPrice": 240,
+      "halfPortionPrice": 130
+    },
+    {
+      "id": "dish-1759612970137",
+      "name": "Dum Aloo",
+      "category": "main-course",
+      "description": "Kashmere Dum aloo",
+      "costPrice": 5,
+      "sellingPrice": 190,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 190,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 100,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_104",
+          "name": "Onion Pyaaz",
+          "quantity": 0.1,
+          "unit": "kg",
+          "costPerUnit": 50,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:22:50.137Z",
+      "updatedAt": "2025-10-04T21:22:50.137Z",
+      "fullPortionPrice": 190,
+      "halfPortionPrice": 100
+    },
+    {
+      "id": "dish-1759613040282",
+      "name": "Veg Chowmein",
+      "category": "starters",
+      "description": "Evening snacks with full plate veg chowmein",
+      "costPrice": 80,
+      "sellingPrice": 120,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 120,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 60,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_105",
+          "name": "Grocery Masala",
+          "quantity": 0.2,
+          "unit": "kg",
+          "costPerUnit": 400,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:24:00.282Z",
+      "updatedAt": "2025-10-04T21:24:00.282Z",
+      "fullPortionPrice": 120,
+      "halfPortionPrice": 60
+    },
+    {
+      "id": "dish-1759613127402",
+      "name": "Chicken Chowmein",
+      "category": "starters",
+      "description": "Tandoori chicken chowmein",
+      "costPrice": 25,
+      "sellingPrice": 180,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 180,
+          "multiplier": 1,
+          "portionPieces": 8
+        },
+        "half": {
+          "name": "HALF",
+          "price": 90,
+          "multiplier": 0.5,
+          "portionPieces": 4
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_104",
+          "name": "Onion Pyaaz",
+          "quantity": 0.5,
+          "unit": "kg",
+          "costPerUnit": 50,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:25:27.402Z",
+      "updatedAt": "2025-10-04T21:25:27.402Z",
+      "fullPortionPrice": 180,
+      "halfPortionPrice": 90
+    },
+    {
+      "id": "dish-1759614031796",
+      "name": "Butter Naan",
+      "category": "breads",
+      "description": "Naan bread",
+      "costPrice": 5,
+      "sellingPrice": 54.98,
+      "portions": {
+        "full": {
+          "name": "FULL",
+          "price": 54.98,
+          "multiplier": 1,
+          "portionPieces": 8
+        }
+      },
+      "prepTime": 15,
+      "ingredients": [
+        {
+          "ingredientId": "ing_106",
+          "name": "Aata (Wheat Flour)",
+          "quantity": 0.1,
+          "unit": "kg",
+          "costPerUnit": 45,
+          "ingredientUnit": "kg",
+          "unitType": "weight"
+        }
+      ],
+      "active": true,
+      "createdAt": "2025-10-04T21:40:31.796Z",
+      "updatedAt": "2025-10-04T21:40:31.796Z",
+      "fullPortionPrice": 54.98,
+      "halfPortionPrice": null
     }
   ],
   "inventory": []

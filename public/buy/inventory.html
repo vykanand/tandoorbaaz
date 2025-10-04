@@ -247,6 +247,7 @@ t<!DOCTYPE html>
                                         <th>Category</th>
                                         <th>Stock</th>
                                         <th>Unit</th>
+                                        <th>Price</th>
                                         <th>Status</th>
                                         <th>Actions</th>
                                     </tr>
@@ -711,6 +712,7 @@ t<!DOCTYPE html>
                 stock: Number(ing.currentStock || 0),
                 unit: ing.unit || 'g',
                 minRequired: Number(ing.minStockLevel || 0),
+                costPerUnit: Number(ing.costPerUnit || 0),
                 status: computeStatus(ing),
                 vendorName: ing.vendor || 'No Vendor',
                 vendorId: ing.vendor ? ing.vendor.toLowerCase().replace(/\s+/g, '-') : 'no-vendor'
@@ -758,7 +760,7 @@ t<!DOCTYPE html>
                     const vendorRow = document.createElement('tr');
                     vendorRow.className = 'vendor-header';
                     vendorRow.innerHTML = `
-                        <td colspan="6" class="fw-bold">
+                        <td colspan="7" class="fw-bold">
                             <i class="bi bi-shop me-2"></i>${currentVendor || 'No Vendor Specified'}
                         </td>`;
                     inventoryTableBody.appendChild(vendorRow);
@@ -786,6 +788,7 @@ t<!DOCTYPE html>
                     <td>${formatCategory(item.category)}</td>
                     <td>${item.stock} ${item.unit}</td>
                     <td>${formatUnit(item.unit)}</td>
+                    <td>₹${item.costPerUnit.toFixed(2)}</td>
                     <td>${statusBadge}</td>
                     <td>
                         <button class="btn btn-sm btn-outline-primary me-1" onclick="editIngredient('${item.id}')">
@@ -1897,7 +1900,11 @@ t<!DOCTYPE html>
         function editIngredient(id) {
             const ing = ingredients.find(i => i.id === id);
             if (!ing) return;
-            
+
+            // Set modal title and hidden id
+            addIngModalTitle.textContent = 'Edit Ingredient';
+            addIngIdEl.value = ing.id;
+
             // Set form values
             addIngNameEl.value = ing.name || '';
             addIngCategoryEl.value = (ing.category || ing.categoryId || 'others');
@@ -1905,7 +1912,7 @@ t<!DOCTYPE html>
             addIngUnitEl.value = (ing.unit || 'g');
             addIngMinRequiredEl.value = Number(ing.minStockLevel || 0);
             addIngCostPerUnitEl.value = Number(ing.costPerUnit || 0);
-            
+
             // Set vendor if vendor dropdown exists
             if (addIngVendorEl) {
                 // If we have a vendor string, use it directly
@@ -1929,7 +1936,7 @@ t<!DOCTYPE html>
                     addIngVendorEl.value = '';
                 }
             }
-            
+
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('addIngredientModal'));
             modal.show();
