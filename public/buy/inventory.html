@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+t<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -111,6 +111,39 @@
 
         .ingredient-row:hover {
             background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        /* Vendor grouping styles */
+        .vendor-header {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .vendor-header td {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .vendor-header i {
+            margin-right: 8px;
+            color: #6c757d;
+        }
+        
+        .first-in-vendor-group {
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .no-vendor {
+            font-style: italic;
+            color: #6c757d;
         }
 
         .chart-container {
@@ -355,6 +388,24 @@
                             <input type="number" class="form-control" id="addIngMinRequired" step="0.01" required>
                             <div class="form-text">Alert when stock goes below this level</div>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="addIngCostPerUnit">Cost per Unit (₹)</label>
+                            <input type="number" class="form-control" id="addIngCostPerUnit" step="0.01" min="0" required>
+                            <div class="form-text">Cost per unit for calculating dish prices</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="addIngVendor">Vendor</label>
+                            <div class="input-group">
+                                <select class="form-select" id="addIngVendor">
+                                    <option value="">Select Vendor (Optional)</option>
+                                    <!-- Vendors will be populated by JavaScript -->
+                                </select>
+                                <button class="btn btn-outline-secondary" type="button" id="addNewVendorBtn" title="Add New Vendor">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary" id="addIngSubmitBtn">Save</button>
                         </div>
@@ -514,6 +565,7 @@
         let menuData = null; // Full menu.json
         let ingredients = []; // menuData.ingredients
         let dishes = []; // menuData.dishes
+        let vendors = []; // menuData.vendors
         let inventory = []; // mapped for UI table
         let ingredientCategories = []; // menuData.ingredientCategories
         let unitDisplayMap = {}; 
@@ -542,6 +594,8 @@
         const addIngStockEl = document.getElementById('addIngStock');
         const addIngUnitEl = document.getElementById('addIngUnit');
         const addIngMinRequiredEl = document.getElementById('addIngMinRequired');
+        const addIngCostPerUnitEl = document.getElementById('addIngCostPerUnit');
+        const addIngVendorEl = document.getElementById('addIngVendor');
 
         // Update inventory form elements
         const updateInventoryForm = document.getElementById('updateInventoryForm');
@@ -573,6 +627,35 @@
                 
                 dishes = Array.isArray(menuData.dishes) ? menuData.dishes : [];
                 ingredientCategories = Array.isArray(menuData.ingredientCategories) ? menuData.ingredientCategories : [];
+                vendors = Array.isArray(menuData.vendors) ? menuData.vendors : [];
+                
+                // Extract unique vendors from ingredients
+                const vendorSet = new Set();
+                ingredients.forEach(ing => {
+                    if (ing.vendor) {
+                        vendorSet.add(ing.vendor);
+                    }
+                });
+                
+                // Convert Set to array and sort
+                const uniqueVendors = Array.from(vendorSet).sort();
+                
+                // Populate vendor select if it exists
+                if (addIngVendorEl) {
+                    // Clear existing options except the first one
+                    while (addIngVendorEl.options.length > 1) {
+                        addIngVendorEl.remove(1);
+                    }
+
+                    uniqueVendors.forEach(vendor => {
+                        if (vendor) {
+                            const option = document.createElement('option');
+                            option.value = vendor;
+                            option.textContent = vendor;
+                            addIngVendorEl.appendChild(option);
+                        }
+                    });
+                }
 
                 // Build unit display map
                 unitDisplayMap = {};
@@ -620,15 +703,28 @@
         }
 
         function rebuildInventoryFromIngredients() {
-            inventory = ingredients.map(ing => ({
+            // First, get all ingredients with their vendor info
+            const ingredientsWithVendors = ingredients.map(ing => ({
                 id: ing.id,
                 name: ing.name,
                 category: ing.category || ing.categoryId || 'others',
                 stock: Number(ing.currentStock || 0),
                 unit: ing.unit || 'g',
                 minRequired: Number(ing.minStockLevel || 0),
-                status: computeStatus(ing)
+                status: computeStatus(ing),
+                vendorName: ing.vendor || 'No Vendor',
+                vendorId: ing.vendor ? ing.vendor.toLowerCase().replace(/\s+/g, '-') : 'no-vendor'
             }));
+
+            // Sort by vendor name, then by ingredient name
+            ingredientsWithVendors.sort((a, b) => {
+                if (a.vendorName === b.vendorName) {
+                    return a.name.localeCompare(b.name);
+                }
+                return a.vendorName.localeCompare(b.vendorName);
+            });
+
+            inventory = ingredientsWithVendors;
         }
 
         function computeStatus(ing) {
@@ -652,7 +748,22 @@
 
         function renderInventory() {
             inventoryTableBody.innerHTML = '';
-            inventory.forEach(item => {
+            
+            let currentVendor = null;
+            
+            inventory.forEach((item, index) => {
+                // Add vendor header if this is a new vendor
+                if (currentVendor !== item.vendorName) {
+                    currentVendor = item.vendorName;
+                    const vendorRow = document.createElement('tr');
+                    vendorRow.className = 'vendor-header';
+                    vendorRow.innerHTML = `
+                        <td colspan="6" class="fw-bold">
+                            <i class="bi bi-shop me-2"></i>${currentVendor || 'No Vendor Specified'}
+                        </td>`;
+                    inventoryTableBody.appendChild(vendorRow);
+                }
+                
                 const row = document.createElement('tr');
                 row.className = 'ingredient-row';
                 let statusBadge = '';
@@ -663,6 +774,13 @@
                 } else {
                     statusBadge = '<span class="badge bg-danger">Out of Stock</span>';
                 }
+                
+                // Add a class for the first item in each vendor group
+                const isFirstInGroup = index === 0 || inventory[index - 1].vendorName !== item.vendorName;
+                if (isFirstInGroup) {
+                    row.classList.add('first-in-vendor-group');
+                }
+                
                 row.innerHTML = `
                     <td>${item.name}</td>
                     <td>${formatCategory(item.category)}</td>
@@ -789,22 +907,100 @@
         }
 
         function setupEventListeners() {
-            // Edit/Cancel/Save portion prices
+            // Edit/Cancel/Save portion prices and ingredients
             document.addEventListener('click', (e) => {
-                // Handle edit button click
+                // Handle edit portion prices button click
                 if (e.target.closest('#editPortionPricesBtn')) {
                     e.preventDefault();
                     document.getElementById('viewPortionPrices').style.display = 'none';
                     document.getElementById('editPortionPricesForm').style.display = 'block';
                     document.getElementById('editPortionPricesBtn').style.display = 'none';
                 }
-                
-                // Handle cancel button click
+
+                // Handle cancel portion prices button click
                 if (e.target.closest('#cancelEditPortionPrices')) {
                     e.preventDefault();
                     document.getElementById('viewPortionPrices').style.display = 'block';
                     document.getElementById('editPortionPricesForm').style.display = 'none';
                     document.getElementById('editPortionPricesBtn').style.display = 'block';
+                }
+
+                // Handle edit ingredients button click
+                if (e.target.closest('#editIngredientsBtn')) {
+                    e.preventDefault();
+                    document.getElementById('viewIngredientsMode').style.display = 'none';
+                    document.getElementById('editIngredientsMode').style.display = 'block';
+                    document.getElementById('editIngredientsBtn').style.display = 'none';
+                }
+
+                // Handle cancel edit ingredients button click
+                if (e.target.closest('#cancelEditIngredients')) {
+                    e.preventDefault();
+                    document.getElementById('viewIngredientsMode').style.display = 'block';
+                    document.getElementById('editIngredientsMode').style.display = 'none';
+                    document.getElementById('editIngredientsBtn').style.display = 'block';
+                    // Re-render to discard changes
+                    const dishId = dishSelect.value;
+                    if (dishId) {
+                        const dish = dishes.find(d => String(d.id) === String(dishId));
+                        if (dish) {
+                            renderRecipeIngredients(dish);
+                        }
+                    }
+                }
+
+                // Handle add recipe ingredient button click
+                if (e.target.closest('#addRecipeIngredientBtn')) {
+                    e.preventDefault();
+                    const editIngredientsList = document.getElementById('editIngredientsList');
+                    if (!editIngredientsList) return;
+
+                    const row = document.createElement('div');
+                    row.className = 'row g-2 mb-2 ingredient-edit-row';
+                    row.innerHTML = `
+                        <div class="col-5">
+                            <select class="form-select form-select-sm recipe-ingredient-select">
+                                <option value="">Select Ingredient</option>
+                                ${ingredients.map(item =>
+                                    `<option value="${item.id}">${item.name} (${item.unit || 'g'})</option>`
+                                ).join('')}
+                            </select>
+                        </div>
+                        <div class="col-3">
+                            <input type="number" class="form-control form-control-sm recipe-ingredient-qty"
+                                   placeholder="Qty" step="0.01" min="0">
+                        </div>
+                        <div class="col-3">
+                            <select class="form-select form-select-sm recipe-ingredient-unit">
+                                <option value="g">g</option>
+                                <option value="kg">kg</option>
+                                <option value="ml">ml</option>
+                                <option value="l">L</option>
+                                <option value="pc">pc</option>
+                            </select>
+                        </div>
+                        <div class="col-1">
+                            <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-recipe-ingredient">
+                                <i class="bi bi-x"></i>
+                            </button>
+                        </div>
+                    `;
+                    editIngredientsList.appendChild(row);
+                }
+
+                // Handle remove recipe ingredient button click
+                if (e.target.closest('.remove-recipe-ingredient')) {
+                    e.preventDefault();
+                    const row = e.target.closest('.ingredient-edit-row');
+                    if (row) {
+                        row.remove();
+                    }
+                }
+
+                // Handle save ingredients button click
+                if (e.target.closest('#saveIngredientsBtn')) {
+                    e.preventDefault();
+                    saveRecipeIngredients();
                 }
             });
 
@@ -1160,15 +1356,27 @@
             addIngredientForm?.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const idVal = addIngIdEl.value?.trim();
+                // Get the selected vendor text (name) from the dropdown
+                const selectedVendorName = addIngVendorEl.options[addIngVendorEl.selectedIndex]?.text || '';
                 const payload = {
                     name: addIngNameEl.value.trim(),
                     category: addIngCategoryEl.value,
                     currentStock: Number(addIngStockEl.value || 0),
                     unit: addIngUnitEl.value,
                     minStockLevel: Number(addIngMinRequiredEl.value || 0),
+                    costPerUnit: Number(addIngCostPerUnitEl.value || 0),
                     unitType: inferUnitType(addIngUnitEl.value),
-                    active: true
+                    active: true,
+                    vendor: selectedVendorName || undefined  // Store the vendor name directly
                 };
+                
+                // If this is a new vendor, add it to the dropdown for future use
+                if (selectedVendorName && !Array.from(addIngVendorEl.options).some(opt => opt.text === selectedVendorName)) {
+                    const option = document.createElement('option');
+                    option.value = selectedVendorName;
+                    option.textContent = selectedVendorName;
+                    addIngVendorEl.appendChild(option);
+                }
 
                 if (!payload.name || !payload.category || !payload.unit) return;
 
@@ -1194,6 +1402,7 @@
                 const modal = bootstrap.Modal.getInstance(addIngModal) || new bootstrap.Modal(addIngModal);
                 modal.hide();
                 addIngredientForm.reset();
+                addIngCostPerUnitEl.value = '';
                 addIngIdEl.value = '';
                 addIngModalTitle.textContent = 'Add New Ingredient';
             });
@@ -1252,6 +1461,50 @@
                 addIngModalTitle.textContent = 'Add New Ingredient';
                 addIngredientForm.reset();
                 addIngIdEl.value = '';
+            });
+
+            // Add New Vendor button functionality
+            document.getElementById('addNewVendorBtn')?.addEventListener('click', () => {
+                const newVendorName = prompt('Enter new vendor name:');
+                if (newVendorName && newVendorName.trim()) {
+                    const vendorName = newVendorName.trim();
+
+                    // Check if vendor already exists
+                    const existingOption = Array.from(addIngVendorEl.options).find(opt => opt.text === vendorName);
+                    if (existingOption) {
+                        alert('Vendor already exists!');
+                        addIngVendorEl.value = existingOption.value;
+                        return;
+                    }
+
+                    // Add new vendor to select dropdown
+                    const option = document.createElement('option');
+                    option.value = vendorName;
+                    option.textContent = vendorName;
+                    addIngVendorEl.appendChild(option);
+
+                    // Select the newly added vendor
+                    addIngVendorEl.value = vendorName;
+
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+                    alertDiv.role = 'alert';
+                    alertDiv.innerHTML = `
+                        Vendor "${vendorName}" added successfully!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+
+                    const modalBody = document.querySelector('#addIngredientModal .modal-body');
+                    if (modalBody) {
+                        modalBody.insertBefore(alertDiv, modalBody.firstChild);
+                    }
+
+                    setTimeout(() => {
+                        const bsAlert = new bootstrap.Alert(alertDiv);
+                        bsAlert.close();
+                    }, 3000);
+                }
             });
 
             // Add Dish form submit
@@ -1454,7 +1707,7 @@
         }
 
         function renderRecipeIngredients(dish) {
-            const rows = (dish.ingredients || []).map(di => {
+            const rows = (dish.ingredients || []).map((di, index) => {
                 const ing = ingredients.find(i => String(i.id) === String(di.ingredientId));
                 let status = '';
                 if (!ing) {
@@ -1507,26 +1760,86 @@
             }
 
             recipeIngredients.innerHTML = `
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Ingredient</th>
-                                <th>Quantity</th>
-                                <th>Unit</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-                <div class="mt-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="mb-0">Portion Information</h6>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">Ingredients</h6>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" id="editIngredientsBtn">
+                            <i class="bi bi-pencil"></i> Edit Ingredients
+                        </button>
                         <button type="button" class="btn btn-sm btn-outline-primary" id="editPortionPricesBtn">
-                            <i class="bi bi-pencil"></i> Edit
+                            <i class="bi bi-pencil"></i> Edit Prices
                         </button>
                     </div>
+                </div>
+
+                <div id="viewIngredientsMode">
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Ingredient</th>
+                                    <th>Quantity</th>
+                                    <th>Unit</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="editIngredientsMode" style="display: none;">
+                    <div id="editIngredientsList">
+                        ${(dish.ingredients || []).map((di, index) => {
+                            const ing = ingredients.find(i => String(i.id) === String(di.ingredientId));
+                            return `
+                                <div class="row g-2 mb-2 ingredient-edit-row" data-index="${index}">
+                                    <div class="col-5">
+                                        <select class="form-select form-select-sm recipe-ingredient-select">
+                                            <option value="">Select Ingredient</option>
+                                            ${ingredients.map(item =>
+                                                `<option value="${item.id}" ${String(item.id) === String(di.ingredientId) ? 'selected' : ''}>
+                                                    ${item.name} (${item.unit || 'g'})
+                                                </option>`
+                                            ).join('')}
+                                        </select>
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="number" class="form-control form-control-sm recipe-ingredient-qty"
+                                               value="${di.quantity}" step="0.01" min="0" placeholder="Qty">
+                                    </div>
+                                    <div class="col-3">
+                                        <select class="form-select form-select-sm recipe-ingredient-unit">
+                                            <option value="g" ${di.unit === 'g' ? 'selected' : ''}>g</option>
+                                            <option value="kg" ${di.unit === 'kg' ? 'selected' : ''}>kg</option>
+                                            <option value="ml" ${di.unit === 'ml' ? 'selected' : ''}>ml</option>
+                                            <option value="l" ${di.unit === 'l' ? 'selected' : ''}>L</option>
+                                            <option value="pc" ${di.unit === 'pc' ? 'selected' : ''}>pc</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-1">
+                                        <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-recipe-ingredient">
+                                            <i class="bi bi-x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="addRecipeIngredientBtn">
+                        <i class="bi bi-plus-lg"></i> Add Ingredient
+                    </button>
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="cancelEditIngredients">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-sm btn-primary" id="saveIngredientsBtn">
+                            Save Ingredients
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-3">
                     <div id="viewPortionPrices">
                         ${portions.join('')}
                     </div>
@@ -1534,9 +1847,9 @@
                         ${Object.entries(dish.portions || {}).map(([key, portion]) => `
                             <div class="input-group input-group-sm mb-2">
                                 <span class="input-group-text">${portion.name || key.toUpperCase()}</span>
-                                <input type="number" class="form-control" 
-                                       id="${key}PortionPrice" 
-                                       value="${Number(portion.price || 0).toFixed(2)}" 
+                                <input type="number" class="form-control"
+                                       id="${key}PortionPrice"
+                                       value="${Number(portion.price || 0).toFixed(2)}"
                                        step="0.01" min="0">
                                 <span class="input-group-text">₹</span>
                             </div>
@@ -1581,22 +1894,50 @@
         }
 
         // Actions used by buttons in table
-        window.editIngredient = function(id) {
-            const ing = ingredients.find(i => String(i.id) === String(id));
+        function editIngredient(id) {
+            const ing = ingredients.find(i => i.id === id);
             if (!ing) return;
-            addIngModalTitle.textContent = 'Edit Ingredient';
-            addIngIdEl.value = ing.id;
+            
+            // Set form values
             addIngNameEl.value = ing.name || '';
             addIngCategoryEl.value = (ing.category || ing.categoryId || 'others');
             addIngStockEl.value = Number(ing.currentStock || 0);
             addIngUnitEl.value = (ing.unit || 'g');
             addIngMinRequiredEl.value = Number(ing.minStockLevel || 0);
-            const modal = new bootstrap.Modal(addIngModal);
+            addIngCostPerUnitEl.value = Number(ing.costPerUnit || 0);
+            
+            // Set vendor if vendor dropdown exists
+            if (addIngVendorEl) {
+                // If we have a vendor string, use it directly
+                if (ing.vendor) {
+                    // Check if the vendor exists in the dropdown
+                    const vendorOption = Array.from(addIngVendorEl.options).find(
+                        option => option.text === ing.vendor
+                    );
+
+                    if (vendorOption) {
+                        addIngVendorEl.value = vendorOption.value;
+                    } else {
+                        // If vendor doesn't exist in dropdown, add it
+                        const option = document.createElement('option');
+                        option.value = ing.vendor;
+                        option.textContent = ing.vendor;
+                        addIngVendorEl.appendChild(option);
+                        addIngVendorEl.value = option.value;
+                    }
+                } else {
+                    addIngVendorEl.value = '';
+                }
+            }
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('addIngredientModal'));
             modal.show();
         };
 
         window.deleteIngredient = async function(id) {
             if (!confirm('Are you sure you want to delete this ingredient?')) return;
+            
             const idx = ingredients.findIndex(i => String(i.id) === String(id));
             if (idx >= 0) {
                 ingredients.splice(idx, 1);
@@ -1613,6 +1954,125 @@
             const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
         });
+
+        // Helper function to get unit information
+        function getUnitInfo(unitName) {
+            if (!menuData.units) return null;
+
+            for (const [unitType, units] of Object.entries(menuData.units)) {
+                const unit = units.find(u => u.name === unitName);
+                if (unit) {
+                    return { ...unit, unitType };
+                }
+            }
+            return null;
+        }
+
+        // Save recipe ingredients changes
+        async function saveRecipeIngredients() {
+            const dishId = dishSelect.value;
+            if (!dishId) return;
+
+            const dish = dishes.find(d => String(d.id) === String(dishId));
+            if (!dish) return;
+
+            const ingredientRows = document.querySelectorAll('#editIngredientsList .ingredient-edit-row');
+            const updatedIngredients = [];
+
+            ingredientRows.forEach(row => {
+                const select = row.querySelector('.recipe-ingredient-select');
+                const qtyInput = row.querySelector('.recipe-ingredient-qty');
+                const unitSelect = row.querySelector('.recipe-ingredient-unit');
+
+                if (!select || !qtyInput || !unitSelect) return;
+
+                const ingredientId = select.value;
+                const quantity = parseFloat(qtyInput.value) || 0;
+
+                if (!ingredientId || quantity <= 0) return;
+
+                // Find the ingredient to get its details
+                const ingredient = ingredients.find(i => String(i.id) === String(ingredientId));
+                if (!ingredient) return;
+
+                updatedIngredients.push({
+                    ingredientId: ingredient.id,
+                    name: ingredient.name,
+                    quantity: quantity,
+                    unit: unitSelect.value,
+                    costPerUnit: ingredient.costPerUnit || 0,
+                    ingredientUnit: ingredient.unit || unitSelect.value,
+                    unitType: ingredient.unitType || inferUnitType(unitSelect.value)
+                });
+            });
+
+            // Update dish ingredients
+            dish.ingredients = updatedIngredients;
+
+            // Recalculate cost price with proper unit conversion
+            let totalCost = 0;
+            updatedIngredients.forEach(di => {
+                const ingredient = ingredients.find(i => String(i.id) === String(di.ingredientId));
+                if (!ingredient) return;
+
+                // Convert quantity to the same unit as costPerUnit for calculation
+                let convertedQuantity = di.quantity;
+                const recipeUnit = di.unit;
+                const ingredientUnit = ingredient.unit || recipeUnit;
+
+                // If units are different, convert to base unit first
+                if (recipeUnit !== ingredientUnit) {
+                    // Convert recipe quantity to ingredient's unit
+                    const recipeUnitInfo = getUnitInfo(recipeUnit);
+                    const ingredientUnitInfo = getUnitInfo(ingredientUnit);
+
+                    if (recipeUnitInfo && ingredientUnitInfo && recipeUnitInfo.unitType === ingredientUnitInfo.unitType) {
+                        // Convert to base unit, then to target unit
+                        const baseQuantity = di.quantity * recipeUnitInfo.toBase;
+                        convertedQuantity = baseQuantity / ingredientUnitInfo.toBase;
+                    }
+                }
+
+                // Calculate cost
+                const cost = convertedQuantity * (ingredient.costPerUnit || 0);
+                totalCost += cost;
+            });
+
+            dish.costPrice = Math.round(totalCost); // Round to nearest whole number
+
+            // Update timestamp
+            dish.updatedAt = new Date().toISOString();
+
+            // Save to menu
+            await persistMenu();
+
+            // Switch back to view mode
+            document.getElementById('viewIngredientsMode').style.display = 'block';
+            document.getElementById('editIngredientsMode').style.display = 'none';
+            document.getElementById('editIngredientsBtn').style.display = 'block';
+
+            // Re-render ingredients
+            renderRecipeIngredients(dish);
+
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show mt-2';
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                Recipe ingredients updated successfully!
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            const container = document.querySelector('#recipeIngredients .card-body') ||
+                            document.querySelector('#recipeIngredients') ||
+                            document.body;
+            container.prepend(alertDiv);
+
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }, 3000);
+        }
 
         // Utility: generate a new ingredient id like ing_XXX
         function generateIngredientId() {

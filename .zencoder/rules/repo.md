@@ -42,7 +42,7 @@ TandoorBaaz is a Node.js application that hosts multiple websites under the /pub
   - **partner/**: Partner management interface
   - **upi/**: UPI payment integration
 - **Dockerfile & docker-compose.yml**: Container configuration
-- **index.js**: Main application entry point
+- **server.js**: Main application entry point
 - **server.js**: Service orchestration
 - **relay.js**: Browser integration for error handling
 
@@ -108,6 +108,6 @@ npm start
 
 ## Usage
 
-The application serves multiple websites from the public directory, with each subdirectory representing a different application. The main entry point is index.js, which dynamically routes requests to the appropriate files based on the URL path.
+The application serves multiple websites from the public directory, with each subdirectory representing a different application. The main entry point is server.js, which dynamically routes requests to the appropriate files based on the URL path.
 
-The server can be started with `npm start`, which runs the index.js file. Docker Compose can be used to start both the web server and the WhatsApp bot services.
+The server can be started with `npm start`, which runs the server.js file. Docker Compose can be used to start both the web server and the WhatsApp bot services.

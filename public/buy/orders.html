@@ -2902,12 +2902,11 @@
             loadOrders();
         }
 
-        // Initialize date pickers with today's date
+        // Initialize date pickers with today's date in IST
         function initDatePickers() {
-            const today = new Date();
-            const formattedDate = today.toISOString().split('T')[0];
-            document.getElementById('orderDatePicker').value = formattedDate;
-            document.getElementById('orderDatePicker-mobile').value = formattedDate;
+            const istDate = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+            document.getElementById('orderDatePicker').value = istDate;
+            document.getElementById('orderDatePicker-mobile').value = istDate;
         }
 
         async function loadOrders(date = null) {
@@ -4090,7 +4089,7 @@
         }
 
         function formatTime(date) {
-            return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' });
         }
 
         function formatElapsedTime(date) {
