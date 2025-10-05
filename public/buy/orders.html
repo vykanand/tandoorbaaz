@@ -5369,20 +5369,19 @@ async function updateOrderStatus(docId, newStatus) {
         <a href="#" class="nav-item" id="nav-completed" onclick="switchTab('completed'); return false;">
             <i class="bi bi-check-circle"></i>
             <span>Completed</span>
-        </a>
         <a href="#" class="nav-item" data-bs-toggle="modal" data-bs-target="#qrCodeModal">
             <i class="bi bi-qr-code-scan"></i>
             <span>QR</span>
         </a>
-        <a href="#" class="nav-item" onclick="document.getElementById('newOrderBtn').click(); return false;">
-            <i class="bi bi-plus-circle"></i>
-            <span>New</span>
+        <a href="#" class="nav-item" onclick="navigateToAnalytics()">
+            <i class="bi bi-bar-chart-line"></i>
+            <span>Analytics</span>
         </a>
     </div>
 
     <!-- Mobile Floating Action Button -->
-    <button class="mobile-fab d-md-none" onclick="document.getElementById('newOrderBtn').click();">
-        <i class="bi bi-plus-lg"></i>
+    <button class="mobile-fab d-md-none" style="display: none;">
+{{ ... }}
     </button>
 
     <script>
@@ -5434,6 +5433,11 @@ async function updateOrderStatus(docId, newStatus) {
 
             // Scroll to top for better UX
             window.scrollTo(0, 0);
+        }
+
+        // Function to navigate to analytics page with current cart name
+        function navigateToAnalytics() {
+            window.location.href = `analytics.html?cart=${encodeURIComponent(cartName)}`;
         }
 
         // Initialize the tabs on page load

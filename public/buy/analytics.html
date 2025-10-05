@@ -538,19 +538,17 @@
             padding: 1.5rem;
         }
 
-        /* Status indicators */
         .status-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
             display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
             margin-right: 5px;
         }
-
+        
         .status-cash {
             background-color: var(--success-color);
         }
-
         .status-online {
             background-color: var(--purple-color);
         }
@@ -561,6 +559,14 @@
 
         .status-delivered {
             background-color: var(--info-color);
+        }
+        
+        /* Ensure comments column is visible and wraps text */
+        #pendingOrdersTableBody td:nth-child(7) {
+            min-width: 150px;
+            max-width: 250px;
+            white-space: normal;
+            word-wrap: break-word;
         }
 
         .status-preparing {
@@ -980,7 +986,7 @@
                             <!-- Pending Orders Tab -->
                             <div class="tab-pane fade" id="pending-orders" role="tabpanel" aria-labelledby="pending-orders-tab">
                                 <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
-                                    <h6 class="mb-0"><span class="status-indicator status-pending"></span> Pending Orders</h6>
+                                    <h6 class="mb-0"><span class="status-indicator status-pending"></span> Pending & Delivered Orders</h6>
                                     <div>
                                         <span class="badge" style="background-color: #fd7e14;">Total: ₹<span id="pendingTabTotal">0</span></span>
                                     </div>
@@ -991,11 +997,12 @@
                                             <tr>
                                                 <th>Order ID</th>
                                                 <th>Date</th>
-                                                <th>Customer</th>
+                                                <th>Phone</th>
                                                 <th>Total</th>
                                                 <th>Cart Name</th>
+                                                <th>Status</th>
+                                                <th>Comments</th>
                                                 <th>Actions</th>
-                                            </tr>
                                         </thead>
                                         <tbody id="pendingOrdersTableBody">
                                             <!-- Pending orders will be populated here -->
@@ -1930,35 +1937,64 @@
             });
         }
 
-        // Render Pending Orders Table with pagination
+        // Render Pending and Delivered Orders Table with pagination
         function renderPendingOrdersTable() {
             const tableBody = document.getElementById('pendingOrdersTableBody');
             tableBody.innerHTML = '';
             
-            const pendingOrders = state.filteredOrders.filter(order => order.status === 'pending' || order.status === 'preparing');
-            const paginatedData = Paginator.paginate(pendingOrders, 'pendingOrders');
+            // Include both pending and delivered orders
+            const pendingAndDeliveredOrders = state.filteredOrders.filter(order => 
+                order.status === 'pending' || 
+                order.status === 'preparing' || 
+                order.status === 'delivered'
+            );
+            
+            // Sort by status (pending first) and then by date (newest first)
+            const sortedOrders = [...pendingAndDeliveredOrders].sort((a, b) => {
+                if (a.status === b.status) {
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                }
+                return a.status === 'pending' || a.status === 'preparing' ? -1 : 1;
+            });
+
+            const paginatedData = Paginator.paginate(sortedOrders, 'pendingOrders');
             
             if (paginatedData.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="6" class="text-center">No pending orders found</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No orders found</td></tr>`;
                 return;
             }
             
             paginatedData.forEach(order => {
                 const orderDate = order.createdAt ? formatDate(order.createdAt) : 'N/A';
+                const customerPhone = order.customerDetails?.phone || 'N/A';
+                
+                // Get comments in the same way as in the order details modal
+                const customerComments = order.customerDetails?.comments || 'N/A';
+                
+                // Format comments to match the order details display
+                const formattedComments = customerComments === 'N/A' ? 
+                    '<span class="text-muted">No comments</span>' : 
+                    customerComments;
+                const statusBadge = order.status === 'delivered' ? 
+                    '<span class="badge bg-success">Delivered</span>' : 
+                    '<span class="badge bg-warning text-dark">Pending</span>';
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
+                    <td>${order.id ? order.id.toString() : order.docId?.slice(-4) || 'N/A'}</td>
                     <td>${orderDate}</td>
-                    <td>${order.customerDetails ? order.customerDetails.phone || 'N/A' : 'N/A'}</td>
+                    <td>${customerPhone}</td>
                     <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
                     <td>${order.cartName || 'N/A'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${customerComments}</td>
                     <td>${getSimpleActionButtons(order.docId)}</td>
                 `;
                 tableBody.appendChild(row);
             });
         }
 
-        // Render Delivered Orders Table with pagination
+        // Render Delivered Orders Table with pagination and WhatsApp button
         function renderDeliveredOrdersTable() {
             const tableBody = document.getElementById('deliveredOrdersTableBody');
             tableBody.innerHTML = '';
@@ -1967,7 +2003,7 @@
             const paginatedData = Paginator.paginate(deliveredOrders, 'deliveredOrders');
             
             if (paginatedData.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No delivered orders found</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="8" class="text-center">No delivered orders found</td></tr>`;
                 return;
             }
             
@@ -1975,6 +2011,60 @@
                 const orderDate = order.createdAt ? formatDate(order.createdAt) : 'N/A';
                 const paymentType = order.status === 'paid (cash)' ? 'Cash' : 
                                    (order.status === 'paid(online)' ? 'Online' : 'N/A');
+                
+                // Format phone number (remove any non-digit characters and leading 0 if present)
+                let phone = order.customerDetails?.phone?.replace(/\D/g, '') || '';
+                phone = phone.startsWith('0') ? phone.substring(1) : phone;
+                const hasPhone = phone.length >= 10; // Basic phone number validation
+                
+                // Create WhatsApp button if phone exists
+                let whatsappButton = '';
+                if (hasPhone) {
+                    const orderId = order.id ? order.id.toString() : order.docId.slice(-4);
+                    const orderTotal = parseFloat(order.total || 0).toFixed(2);
+                    const cartName = order.cartName || 'your order';
+                    const customerName = order.customerDetails?.name || 'Valued Customer';
+                    
+                    // Get order items text if available
+                    let itemsText = '';
+                    if (Array.isArray(order.items) && order.items.length > 0) {
+                        itemsText = '\n*Items:*\n' + 
+                            order.items.map(item => 
+                                `- ${item.name} (${item.quantity} x ₹${item.price?.toFixed(2) || '0.00'})`
+                            ).join('\n');
+                    }
+                    
+                    // Get the current hostname and port
+                    const host = window.location.host;
+                    const protocol = window.location.protocol;
+                    const payLink = `${protocol}//${host}/pay?orderId=${orderId}`;
+                    
+                    const message = encodeURIComponent(
+                        `*Payment Reminder*\n\n` +
+                        `*Order #*: ${orderId}\n` +
+                        `*Date*: ${orderDate}\n` +
+                        `*Customer*: ${customerName}\n` +
+                        `*Total Amount*: ₹${orderTotal}` +
+                        `${itemsText}\n\n` +
+                        `Dear ${customerName},\n` +
+                        `This is a reminder regarding your recent order #${orderId} which was delivered.\n\n` +
+                        `*Payment Details:*\n` +
+                        `- Order Total: ₹${orderTotal}\n` +
+                        `- Payment Status: Pending\n\n` +
+                        `You can make the payment securely using this link:\n${payLink}\n\n` +
+                        `Please complete the payment at your earliest convenience.\n` +
+                        `Thank you for your business!`
+                    );
+                    
+                    whatsappButton = `
+                        <a href="https://wa.me/91${phone}?text=${message}" 
+                           class="btn btn-sm btn-success ms-1" 
+                           target="_blank" 
+                           title="Send Payment Reminder">
+                            <i class="bi bi-whatsapp"></i>
+                        </a>`;
+                }
+                
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${(order.id ? order.id.toString() : order.docId.slice(-4))}</td>
@@ -1983,7 +2073,10 @@
                     <td>₹${parseFloat(order.total || 0).toFixed(2)}</td>
                     <td>${paymentType}</td>
                     <td>${order.cartName || 'N/A'}</td>
-                    <td>${getSimpleActionButtons(order.docId)}</td>
+                    <td class="text-nowrap">
+                        ${getSimpleActionButtons(order.docId)}
+                        ${whatsappButton}
+                    </td>
                 `;
                 tableBody.appendChild(row);
             });
@@ -2090,7 +2183,7 @@
                 // Calculate percentages
                 const cashPercent = stats.total > 0 ? (stats.cashTotal / stats.total * 100).toFixed(1) : 0;
                 const onlinePercent = stats.total > 0 ? (stats.onlineTotal / stats.total * 100).toFixed(1) : 0;
-                const pendingPercent = stats.total > 0 ? (stats.pendingTotal / stats.total * 100).toFixed(1) : 0;
+                const deliveredPercent = stats.total > 0 ? (stats.deliveredTotal / stats.total * 100).toFixed(1) : 0;
                 
                 cardBody.innerHTML = `
                     <h5 class="card-title">${cartName}</h5>
@@ -2112,8 +2205,8 @@
                         <strong>${stats.onlineCount} (₹${stats.onlineTotal.toFixed(2)}) - ${onlinePercent}%</strong>
                     </div>
                     <div class="d-flex justify-content-between mb-2">
-                        <span><span class="status-indicator status-pending"></span> Pending:</span>
-                        <strong>${stats.pendingCount} (₹${stats.pendingTotal.toFixed(2)}) - ${pendingPercent}%</strong>
+                        <span><span class="status-indicator status-delivered"></span> Delivered (Pending payments):</span>
+                        <strong>${stats.deliveredCount || 0} (₹${(stats.deliveredTotal || 0).toFixed(2)}) - ${deliveredPercent}%</strong>
                     </div>
                 `;
                 
