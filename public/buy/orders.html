@@ -126,6 +126,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- QR Code Modal -->
     <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -4815,161 +4817,158 @@ async function updateOrderStatus(docId, newStatus) {
         }
 
         async function handleNewOrder(e) {
-            e.preventDefault();
+    e.preventDefault();
 
-            // Get form data
-            const phone = document.getElementById('customerPhone').value.trim();
-            const comments = document.getElementById('customerComments').value.trim();
+    // Get form data
+    const phone = document.getElementById('customerPhone').value.trim();
+    const comments = document.getElementById('customerComments').value.trim();
 
-            // Phone validation removed - now optional
+    // Get order items
+    const items = [];
+    const orderItemsContainer = document.getElementById('orderItemsContainer');
+    const orderTotalElem = document.getElementById('orderTotal');
+    const rows = orderItemsContainer.querySelectorAll('div.d-flex');
 
-            // Get order items
-            const items = [];
-            const orderItemsContainer = document.getElementById('orderItemsContainer');
-            const orderTotalElem = document.getElementById('orderTotal');
-            const rows = orderItemsContainer.querySelectorAll('div.d-flex');
+    // Process each item
+    for (const row of rows) {
+        // Check if this is a custom item
+        const isCustomItem = row.dataset.customItem === 'true';
 
-            // Validate at least one item
-            if (rows.length === 0) {
-                alert('Please add at least one order item.');
-                return;
+        if (isCustomItem) {
+            // Process custom item
+            const nameInput = row.querySelector('input[type="text"]');
+            const priceInput = row.querySelector('input[type="number"]:not([min="1"])');
+            const quantityInput = row.querySelector('input[type="number"][min="1"]');
+
+            // Skip if no name or price is entered
+            if (!nameInput || !priceInput || !nameInput.value.trim() || !priceInput.value) {
+                continue;
             }
 
-            // Process each item
-            for (const row of rows) {
-                // Check if this is a custom item
-                const isCustomItem = row.dataset.customItem === 'true';
+            const name = nameInput.value.trim();
+            const pricePerUnit = parseFloat(priceInput.value) || 0;
+            const quantity = parseInt(quantityInput.value) || 1;
 
-                if (isCustomItem) {
-                    // Process custom item
-                    const nameInput = row.querySelector('input[type="text"]');
-                    const priceInput = row.querySelector('input[type="number"]:not([min="1"])'); // Price input has min="0"
-                    const quantityInput = row.querySelector('input[type="number"][min="1"]'); // Quantity input has min="1"
+            // Only add if we have valid custom item details
+            if (name && pricePerUnit > 0) {
+                items.push({
+                    isCustom: true,
+                    name: name,
+                    quantity: quantity,
+                    price: pricePerUnit,
+                    portion: 'Custom'
+                });
+            }
+        } else {
+            // Process regular menu item
+            const itemSelect = row.querySelector('select.form-select');
+            const portionSelect = row.querySelectorAll('select.form-select')[1];
+            const quantityInput = row.querySelector('input[type="number"]');
+            
+            // Skip if no item is selected
+            if (!itemSelect || !itemSelect.value) {
+                continue;
+            }
+            
+            const itemId = itemSelect.value;
+            const portionKey = portionSelect ? portionSelect.value : null;
+            const quantity = parseInt(quantityInput.value) || 1;
 
-                    const name = nameInput.value.trim();
-                    const pricePerUnit = parseInt(priceInput.value) || 0;
-                    const quantity = parseInt(quantityInput.value) || 1;
-
-                    // Validate custom item details
-                    if (!name || pricePerUnit <= 0) {
-                        alert('Please fill all custom item details correctly.');
-                        return;
-                    }
-
-                    // Create the item object with explicit property names
-                    const customItem = {
-                        isCustom: true,
-                        name: name,
-                        quantity: quantity,
-                        price: pricePerUnit,
-                        portion: 'Custom'
-                    };
-
-                    items.push(customItem);
-                } else {
-                    // Process regular menu item
-                    const itemSelect = row.querySelector('select.form-select');
-                    const portionSelect = row.querySelectorAll('select.form-select')[1];
-                    const quantityInput = row.querySelector('input[type="number"]');
-                    const itemId = itemSelect.value;
-                    const portionKey = portionSelect.value;
-                    const quantity = parseInt(quantityInput.value);
-
-                    // Validate item details
-                    if (!itemId || !portionKey || !quantity || quantity <= 0) {
-                        alert('Please fill all item details correctly.');
-                        return;
-                    }
-
-                    const itemData = state.menuItems[itemId];
+            // Only add if we have valid menu item details
+            if (itemId && portionKey && quantity > 0) {
+                const itemData = state.menuItems[itemId];
+                if (itemData && itemData.portions && itemData.portions[portionKey]) {
                     const portionData = itemData.portions[portionKey];
                     items.push({
                         id: itemId,
                         name: itemData.name,
                         portion: portionData.name,
-                        quantity,
+                        quantity: quantity,
                         price: portionData.price,
                         pieces: portionData.pieces || null
                     });
                 }
             }
-
-            // Calculate total
-            const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-
-            try {
-                // First close the modal before the async operation
-                // This ensures UI is not blocked during the database operation
-                const modal = bootstrap.Modal.getInstance(document.getElementById('addOrderModal'));
-                if (modal) {
-                    modal.hide();
-                }
-
-                // Clean up any modal artifacts
-                const modalBackdrops = document.querySelectorAll('.modal-backdrop');
-                modalBackdrops.forEach(backdrop => {
-                    backdrop.parentNode.removeChild(backdrop);
-                });
-                document.body.classList.remove('modal-open');
-                document.body.style.removeProperty('padding-right');
-                document.body.style.removeProperty('overflow');
-
-                // Add order to database with selected date if viewing historical data
-                const orderData = {
-                    customerDetails: { phone, comments },
-                    items,
-                    total,
-                    cartName: state.cartName, // Add cartName field
-                    status: 'pending',
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                // Create a local timestamp to ensure immediate display
-                const now = new Date();
-
-                // If we're viewing a historical date, use that date for createdAt
-                if (selectedDate) {
-                    // Use the selected date but keep current time
-                    const historicalDate = new Date(selectedDate);
-                    historicalDate.setHours(now.getHours());
-                    historicalDate.setMinutes(now.getMinutes());
-                    historicalDate.setSeconds(now.getSeconds());
-
-                    orderData.createdAt = historicalDate;
-                } else {
-                    // Use local timestamp to ensure immediate display
-                    orderData.createdAt = now;
-                }
-
-                // Add the order to the database
-                const newOrderRef = await db.collection('bot_orders').add(orderData);
-
-                // Update with server timestamp in the background
-                // This ensures data consistency on the server
-                if (!selectedDate) {
-                    db.collection('bot_orders').doc(newOrderRef.id).update({
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }).catch(error => {
-                        console.warn('Error updating timestamps:', error);
-                    });
-                }
-
-                // Reset form
-                e.target.reset();
-                orderItemsContainer.innerHTML = '';
-                orderTotalElem.textContent = '0';
-
-                // Show success message
-                alert('Order added successfully.');
-
-                // Refresh the entire page to ensure all data loads properly
-                window.location.reload();
-
-            } catch (error) {
-                alert('Error adding order: ' + error.message);
-            }
         }
+    }
+
+    // Check if we have any valid items
+    if (items.length === 0) {
+        alert('Please add at least one valid order item.');
+        return;
+    }
+
+    // Calculate total
+    const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+
+    try {
+        // First close the modal before the async operation
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addOrderModal'));
+        if (modal) {
+            modal.hide();
+        }
+
+        // Clean up any modal artifacts
+        const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+        modalBackdrops.forEach(backdrop => {
+            backdrop.parentNode.removeChild(backdrop);
+        });
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+        document.body.style.removeProperty('overflow');
+
+        // Add order to database with selected date if viewing historical data
+        const orderData = {
+            customerDetails: { phone, comments },
+            items,
+            total,
+            cartName: state.cartName,
+            status: 'pending',
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        // Create a local timestamp to ensure immediate display
+        const now = new Date();
+
+        // If we're viewing a historical date, use that date for createdAt
+        if (selectedDate) {
+            const historicalDate = new Date(selectedDate);
+            historicalDate.setHours(now.getHours());
+            historicalDate.setMinutes(now.getMinutes());
+            historicalDate.setSeconds(now.getSeconds());
+            orderData.createdAt = historicalDate;
+        } else {
+            orderData.createdAt = now;
+        }
+
+        // Add the order to the database
+        const newOrderRef = await db.collection('bot_orders').add(orderData);
+
+        // Update with server timestamp in the background
+        if (!selectedDate) {
+            db.collection('bot_orders').doc(newOrderRef.id).update({
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }).catch(error => {
+                console.warn('Error updating timestamps:', error);
+            });
+        }
+
+        // Reset form
+        e.target.reset();
+        orderItemsContainer.innerHTML = '';
+        orderTotalElem.textContent = '0';
+
+        // Show success message
+        alert('Order added successfully.');
+
+        // Refresh the page
+        window.location.reload();
+
+    } catch (error) {
+        alert('Error adding order: ' + error.message);
+    }
+}
 
         // handleOrderEdit function is already defined above
 

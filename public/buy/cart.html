@@ -1946,14 +1946,13 @@
 
         // Checkout function
         async function checkout() {
+            // Check if cart is empty
             if (cart.length === 0) {
                 showToast('Your cart is empty!', 'error');
                 return;
             }
             
-            // Get customer info from localStorage
-            const customerInfo = getCustomerInfo();
-            
+            showLoader();
             // Validate customer info
             if (!customerInfo.phone) {
                 showToast('Please provide your phone number to continue', 'error');

@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-10-05T06:25:47.305Z",
+  "lastUpdated": "2025-10-05T16:16:02.574Z",
   "categories": [
     {
       "id": "starters",
@@ -1133,7 +1133,9 @@
       "createdAt": "2025-10-04T20:31:51.407Z",
       "updatedAt": "2025-10-05T06:13:39.159Z",
       "fullPortionPrice": 350,
-      "halfPortionPrice": 179.99
+      "halfPortionPrice": 179.99,
+      "photoUrl": "https://socialchefpriyanka.com/wp-content/uploads/2019/10/afghani-chicken-cooktube.jpg",
+      "lastUpdated": "2025-10-05T16:15:11.462Z"
     },
     {
       "id": "dish-1759610005823",
@@ -1172,7 +1174,9 @@
       "createdAt": "2025-10-04T20:33:25.823Z",
       "updatedAt": "2025-10-04T20:33:25.824Z",
       "fullPortionPrice": 310,
-      "halfPortionPrice": 160
+      "halfPortionPrice": 160,
+      "photoUrl": "https://img.taste.com.au/MSgFPZhZ/w720-h480-cfill-q80/taste/2016/11/tandoori-wings-with-cucumber-yoghurt-77565-1.jpeg",
+      "lastUpdated": "2025-10-05T16:16:02.574Z"
     },
     {
       "id": "dish-1759610110730",
