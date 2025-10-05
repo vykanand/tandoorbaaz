@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-10-05T16:16:02.574Z",
+  "lastUpdated": "2025-10-05T17:40:55.384Z",
   "categories": [
     {
       "id": "starters",
@@ -1182,7 +1182,7 @@
       "id": "dish-1759610110730",
       "name": "Chicken Wings",
       "category": "starters",
-      "description": "Desi wings tandoori",
+      "description": "Crispy Tandoor Baked Chicken Wings are so easy to prepare and you don't have to bother with all the grease from frying! A healthier yet delicious way to enjoy",
       "costPrice": 176,
       "sellingPrice": 270,
       "portions": {
@@ -1213,9 +1213,11 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:35:10.730Z",
-      "updatedAt": "2025-10-04T20:35:10.730Z",
+      "updatedAt": "2025-10-05T16:46:06.633Z",
       "fullPortionPrice": 270,
-      "halfPortionPrice": 140
+      "halfPortionPrice": 140,
+      "photoUrl": "https://www.wholesomeyum.com/wp-content/uploads/2022/12/wholesomeyum-Baked-Whole-Chicken-Wings-15.jpg",
+      "lastUpdated": "2025-10-05T16:46:08.568Z"
     },
     {
       "id": "dish-1759610206817",
@@ -1254,13 +1256,15 @@
       "createdAt": "2025-10-04T20:36:46.817Z",
       "updatedAt": "2025-10-04T20:36:46.817Z",
       "fullPortionPrice": 240,
-      "halfPortionPrice": 120
+      "halfPortionPrice": 120,
+      "photoUrl": "https://www.mydelicious-recipes.com/home/images/423_1080_1080/mydelicious-recipes-chicken-biryani",
+      "lastUpdated": "2025-10-05T16:47:22.460Z"
     },
     {
       "id": "dish-1759610294865",
       "name": "Egg Biryani",
       "category": "starters",
-      "description": "Biryani by kilo Eggs",
+      "description": "Our Egg Dum Biryani is delicious, flavorsome and easy to make. Boiled eggs are simmered in a flavorsome biryani masala gravy and layered over delicately cooked eggs",
       "costPrice": 60,
       "sellingPrice": 200,
       "portions": {
@@ -1291,15 +1295,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:38:14.865Z",
-      "updatedAt": "2025-10-04T20:38:14.865Z",
+      "updatedAt": "2025-10-05T16:49:03.807Z",
       "fullPortionPrice": 200,
-      "halfPortionPrice": 100
+      "halfPortionPrice": 100,
+      "photoUrl": "https://vaya.in/recipes/wp-content/uploads/2019/01/Hyderabadi-Egg-Dum-Biryani.jpg",
+      "lastUpdated": "2025-10-05T16:49:05.524Z"
     },
     {
       "id": "dish-1759610577628",
       "name": "Plain Rice",
       "category": "rice",
-      "description": "rice",
+      "description": "Plain Basmati Rice to complete your full meal",
       "costPrice": 30,
       "sellingPrice": 110,
       "portions": {
@@ -1330,15 +1336,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:42:57.628Z",
-      "updatedAt": "2025-10-04T20:42:57.628Z",
+      "updatedAt": "2025-10-05T16:50:41.388Z",
       "fullPortionPrice": 110,
-      "halfPortionPrice": 60
+      "halfPortionPrice": 60,
+      "photoUrl": "https://d3s8tbcesxr4jm.cloudfront.net/recipe-images/v1/simple-basmati-rice-recipe-for-the-perfect-side.jpg",
+      "lastUpdated": "2025-10-05T16:50:42.712Z"
     },
     {
       "id": "dish-1759610619143",
       "name": "Jira Rice",
       "category": "rice",
-      "description": "rice jira",
+      "description": "Flavourful Jira rice for a full meal",
       "costPrice": 100,
       "sellingPrice": 130,
       "portions": {
@@ -1369,15 +1377,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:43:39.143Z",
-      "updatedAt": "2025-10-04T20:43:39.143Z",
+      "updatedAt": "2025-10-05T16:52:35.825Z",
       "fullPortionPrice": 130,
-      "halfPortionPrice": 70
+      "halfPortionPrice": 70,
+      "photoUrl": "https://www.whiskaffair.com/wp-content/uploads/2021/06/Jeera-Rice-2-3-1-500x375.jpg",
+      "lastUpdated": "2025-10-05T16:52:37.266Z"
     },
     {
       "id": "dish-1759610690067",
       "name": "Matar Pulao",
       "category": "rice",
-      "description": "Mattar pulao",
+      "description": "Dum Mattar pulao for biryani rice cravings",
       "costPrice": 100,
       "sellingPrice": 149.98,
       "portions": {
@@ -1408,15 +1418,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:44:50.067Z",
-      "updatedAt": "2025-10-04T20:44:50.067Z",
+      "updatedAt": "2025-10-05T16:54:04.463Z",
       "fullPortionPrice": 149.98,
-      "halfPortionPrice": 80
+      "halfPortionPrice": 80,
+      "photoUrl": "https://www.harighotra.co.uk/images/recipes/hero/vegetable-pilau-hero.webp",
+      "lastUpdated": "2025-10-05T17:40:55.384Z"
     },
     {
       "id": "dish-1759610757590",
       "name": "Kadhai Chicken",
       "category": "main-course",
-      "description": "Chicken kadhai recipie",
+      "description": "This authentic punjabi kadai chicken features juicy chicken pieces in a smoky & spicy tomato onion gravy seasoned with homemade kadai!",
       "costPrice": 100,
       "sellingPrice": 580,
       "portions": {
@@ -1447,15 +1459,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:45:57.590Z",
-      "updatedAt": "2025-10-04T20:45:57.590Z",
+      "updatedAt": "2025-10-05T16:55:13.099Z",
       "fullPortionPrice": 580,
-      "halfPortionPrice": 330
+      "halfPortionPrice": 330,
+      "photoUrl": "https://5.imimg.com/data5/SELLER/Default/2024/3/405436831/HU/ZR/AE/214586431/chicken-masala-500x500.jpg",
+      "lastUpdated": "2025-10-05T16:56:06.407Z"
     },
     {
       "id": "dish-1759610825644",
       "name": "Chicken Lababdar",
       "category": "main-course",
-      "description": "Tasty lababdar chicken gravy",
+      "description": "Chicken Lababdar is a rich, creamy, and flavorful North Indian dish featuring tender pieces of chicken in a spiced tomato and onion gravy.",
       "costPrice": 280,
       "sellingPrice": 580,
       "portions": {
@@ -1486,15 +1500,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:47:05.644Z",
-      "updatedAt": "2025-10-04T20:47:05.644Z",
+      "updatedAt": "2025-10-05T16:57:28.092Z",
       "fullPortionPrice": 580,
-      "halfPortionPrice": 330
+      "halfPortionPrice": 330,
+      "photoUrl": "https://www.celebrationinmykitchen.com/uploads/4/8/6/2/48622077/chicken-lababdar1_orig.jpg",
+      "lastUpdated": "2025-10-05T16:57:29.743Z"
     },
     {
       "id": "dish-1759610911317",
       "name": "Butter Chicken",
       "category": "main-course",
-      "description": "8 pc chicken kali mirch",
+      "description": "This finger-lickin' Butter Chicken is the dreamiest creamiest Indian curry that you can make in the comfort of your own home, even down to the iconic bold flavours. A taste you will never forget!",
       "costPrice": 280,
       "sellingPrice": 580,
       "portions": {
@@ -1525,15 +1541,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:48:31.317Z",
-      "updatedAt": "2025-10-04T20:48:31.317Z",
+      "updatedAt": "2025-10-05T16:58:17.061Z",
       "fullPortionPrice": 580,
-      "halfPortionPrice": 330
+      "halfPortionPrice": 330,
+      "photoUrl": "https://www.licious.in/blog/wp-content/uploads/2020/10/butter-chicken--600x600.jpg",
+      "lastUpdated": "2025-10-05T16:59:35.960Z"
     },
     {
       "id": "dish-1759611288834",
       "name": "Tawa Chicken",
       "category": "main-course",
-      "description": "Tawa special chicken",
+      "description": "Tawa Chicken is a popular Lahori dish where chicken quarters are marinated, cooked on a large skillet, basted in that same masala, and then finished off with a brisk Tawa seasoning on the top",
       "costPrice": 280,
       "sellingPrice": 580,
       "portions": {
@@ -1564,15 +1582,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:54:48.834Z",
-      "updatedAt": "2025-10-04T20:54:48.834Z",
+      "updatedAt": "2025-10-05T17:00:20.995Z",
       "fullPortionPrice": 580,
-      "halfPortionPrice": 330
+      "halfPortionPrice": 330,
+      "photoUrl": "https://i.ytimg.com/vi/gyP2ClISl5M/maxresdefault.jpg",
+      "lastUpdated": "2025-10-05T17:00:36.837Z"
     },
     {
       "id": "dish-1759611345709",
       "name": "Handi Chicken",
       "category": "main-course",
-      "description": "",
+      "description": "This creamy, spicy, and aromatic boneless Chicken Handi or Handi Chicken is a taste worthy dish that to enjoy and wow your friends and family. Packed with desi handi masala and flavours!",
       "costPrice": 280,
       "sellingPrice": 580,
       "portions": {
@@ -1603,15 +1623,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:55:45.709Z",
-      "updatedAt": "2025-10-04T20:55:45.709Z",
+      "updatedAt": "2025-10-05T17:02:24.964Z",
       "fullPortionPrice": 580,
-      "halfPortionPrice": 330
+      "halfPortionPrice": 330,
+      "photoUrl": "https://i.ytimg.com/vi/_kkosy25Yuc/maxresdefault.jpg",
+      "lastUpdated": "2025-10-05T17:02:27.597Z"
     },
     {
       "id": "dish-1759611403189",
       "name": "Egg Curry",
       "category": "main-course",
-      "description": "egg gravy curry",
+      "description": "Egg curry is a comforting Indian dish of curried eggs. It is basically made with hard boiled eggs, onions, tomatoes, whole & ground spices.Egg curry can be a daily meal with light and mealful flavours.",
       "costPrice": 100,
       "sellingPrice": 170,
       "portions": {
@@ -1642,15 +1664,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:56:43.189Z",
-      "updatedAt": "2025-10-04T20:56:43.189Z",
+      "updatedAt": "2025-10-05T17:04:42.318Z",
       "fullPortionPrice": 170,
-      "halfPortionPrice": 90
+      "halfPortionPrice": 90,
+      "photoUrl": "https://sp-ao.shortpixel.ai/client/to_auto,q_lossless,ret_img,w_735/https://www.thetakeiteasychef.com/wp-content/uploads/2018/02/Egg-Curry-Kerala-Style-F2.jpg",
+      "lastUpdated": "2025-10-05T17:04:43.942Z"
     },
     {
       "id": "dish-1759611470386",
       "name": "Chicken Roll",
       "category": "breads",
-      "description": "chicken roll",
+      "description": "Delicious chicken roll for a fast and quick meal for evening snacks.",
       "costPrice": 70,
       "sellingPrice": 150,
       "portions": {
@@ -1675,15 +1699,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:57:50.386Z",
-      "updatedAt": "2025-10-04T20:57:50.386Z",
+      "updatedAt": "2025-10-05T17:07:53.607Z",
       "fullPortionPrice": 150,
-      "halfPortionPrice": null
+      "halfPortionPrice": null,
+      "photoUrl": "https://static.india.com/wp-content/uploads/2024/08/chicken-kathi-roll-1.jpg?impolicy=Medium_Widthonly&w=350&h=220",
+      "lastUpdated": "2025-10-05T17:07:55.666Z"
     },
     {
       "id": "dish-1759611513712",
       "name": "Egg Roll",
       "category": "breads",
-      "description": "Egg roll",
+      "description": "Delicious Egg roll packed with eggy flavours and veggies",
       "costPrice": 100,
       "sellingPrice": 99.98,
       "portions": {
@@ -1708,15 +1734,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:58:33.712Z",
-      "updatedAt": "2025-10-04T20:58:33.712Z",
+      "updatedAt": "2025-10-05T17:11:29.986Z",
       "fullPortionPrice": 99.98,
-      "halfPortionPrice": null
+      "halfPortionPrice": null,
+      "photoUrl": "https://www.chefkunalkapur.com/wp-content/uploads/2021/08/CW0_7822-scaled.jpg?v=1628745250",
+      "lastUpdated": "2025-10-05T17:11:31.144Z"
     },
     {
       "id": "dish-1759611634311",
       "name": "Paneer Tikka Roll",
       "category": "breads",
-      "description": "Paneer tikka with roll",
+      "description": "Paneer tikka with roll to water your mouth with big pieces of tikka and veggie fillings.",
       "costPrice": 40,
       "sellingPrice": 230,
       "portions": {
@@ -1747,15 +1775,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:00:34.311Z",
-      "updatedAt": "2025-10-04T21:00:34.311Z",
+      "updatedAt": "2025-10-05T17:08:40.720Z",
       "fullPortionPrice": 230,
-      "halfPortionPrice": 120
+      "halfPortionPrice": 120,
+      "photoUrl": "https://vaya.in/recipes/wp-content/uploads/2017/11/Chicken-Spring-Rolls.jpeg",
+      "lastUpdated": "2025-10-05T17:08:41.998Z"
     },
     {
       "id": "dish-1759611747903",
       "name": "Malai Chaap",
       "category": "starters",
-      "description": "Desi Malai chaap",
+      "description": "n Malai Soya Chaap, the chaap pieces are marinated in a gravy-like mix of cream, yoghurt, spices, and herbs, which gives the characteristic creamy, mild taste.",
       "costPrice": 54,
       "sellingPrice": 190,
       "portions": {
@@ -1786,15 +1816,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:02:27.903Z",
-      "updatedAt": "2025-10-04T21:02:27.903Z",
+      "updatedAt": "2025-10-05T17:14:56.516Z",
       "fullPortionPrice": 190,
-      "halfPortionPrice": 100
+      "halfPortionPrice": 100,
+      "photoUrl": "https://images.boldsky.com/hi/img/2024/02/malai-soya-chaap-1709094463.jpg",
+      "lastUpdated": "2025-10-05T17:14:57.714Z"
     },
     {
       "id": "dish-1759611791712",
       "name": "Masala Chaap",
       "category": "starters",
-      "description": "Masala chaap for veg lovers",
+      "description": "Here is a finger-licking good Punjabi-style masala soya chaap recipe —the ultimate vegetarian comfort food from North India.",
       "costPrice": 54,
       "sellingPrice": 150,
       "portions": {
@@ -1825,15 +1857,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:03:11.712Z",
-      "updatedAt": "2025-10-04T21:03:11.712Z",
+      "updatedAt": "2025-10-05T17:17:00.374Z",
       "fullPortionPrice": 150,
-      "halfPortionPrice": 80
+      "halfPortionPrice": 80,
+      "photoUrl": "https://orders.popskitchen.in/storage/2024/09/image-364.png",
+      "lastUpdated": "2025-10-05T17:17:01.642Z"
     },
     {
       "id": "dish-1759611871553",
       "name": "Afghani Chaap",
       "category": "main-course",
-      "description": "Afghani tikka chaap",
+      "description": "Afghani tikka chaap for rich and creamy taste for your kids and family.",
       "costPrice": 54,
       "sellingPrice": 210,
       "portions": {
@@ -1864,15 +1898,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:04:31.553Z",
-      "updatedAt": "2025-10-04T21:04:31.553Z",
+      "updatedAt": "2025-10-05T17:18:20.487Z",
       "fullPortionPrice": 210,
-      "halfPortionPrice": 109.98
+      "halfPortionPrice": 109.98,
+      "photoUrl": "https://images.herzindagi.info/image/2024/Jun/best-afghani-chaap-recipe.jpg",
+      "lastUpdated": "2025-10-05T17:18:21.756Z"
     },
     {
       "id": "dish-1759611931929",
       "name": "Paneer Tikka",
       "category": "starters",
-      "description": "Desi Tikka",
+      "description": "Paneer tikka featuring cubes of paneer (Indian cottage cheese) and vegetables that are marinated in a spiced yogurt sauce and then grilled. The grilling process, traditionally done in a tandoor, imparts a smoky flavor and a charred texture that makes it a favorite appetizer.",
       "costPrice": 210,
       "sellingPrice": 170,
       "portions": {
@@ -1903,16 +1939,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:05:31.929Z",
-      "updatedAt": "2025-10-04T21:05:31.929Z",
+      "updatedAt": "2025-10-05T17:19:19.559Z",
       "fullPortionPrice": 230,
       "halfPortionPrice": 120,
-      "lastUpdated": "2025-10-04T21:06:23.396Z"
+      "lastUpdated": "2025-10-05T17:19:21.761Z",
+      "photoUrl": "https://orders.popskitchen.in/storage/2024/09/image-358.png"
     },
     {
       "id": "dish-1759612108231",
       "name": "Tandoori Roti",
       "category": "starters",
-      "description": "roti from tandoor",
+      "description": "Fresh roti from tandoor",
       "costPrice": 9,
       "sellingPrice": 230,
       "portions": {
@@ -1937,15 +1974,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:08:28.231Z",
-      "updatedAt": "2025-10-04T21:08:28.231Z",
+      "updatedAt": "2025-10-05T17:20:19.851Z",
       "fullPortionPrice": 230,
-      "halfPortionPrice": null
+      "halfPortionPrice": null,
+      "photoUrl": "https://cdn.shopify.com/s/files/1/0551/8009/9722/files/4_b1ca596e-51a9-4fae-b067-071a80f26a14_480x480.png?v=1716792199",
+      "lastUpdated": "2025-10-05T17:21:23.377Z"
     },
     {
       "id": "dish-1759612197047",
       "name": "Butter Tandoori Roti",
       "category": "breads",
-      "description": "Butter roti",
+      "description": "Fresh Butter tandoori roti maid of whole wheat",
       "costPrice": 15,
       "sellingPrice": 230,
       "portions": {
@@ -1979,15 +2018,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:09:57.047Z",
-      "updatedAt": "2025-10-04T21:09:57.047Z",
+      "updatedAt": "2025-10-05T17:20:53.136Z",
       "fullPortionPrice": 230,
-      "halfPortionPrice": null
+      "halfPortionPrice": null,
+      "photoUrl": "https://mughaldarbar.in/upload/pro/product-featured-90.jpg",
+      "lastUpdated": "2025-10-05T17:20:58.130Z"
     },
     {
       "id": "dish-1759612275709",
       "name": "Dal Makhani",
       "category": "main-course",
-      "description": "Makhani buttery dal",
+      "description": "Dal makhani is a rich, creamy, and flavorful Indian lentil dish originating from the Punjab region. The name \"makhani\" means \"buttery,\" which refers to the dish's signature use of butter and cream. The authentic recipe involves slow-cooking whole black lentils (urad dal) and kidney beans (rajma) for hours until they become tender and luxurious comfort.",
       "costPrice": 150,
       "sellingPrice": 230,
       "portions": {
@@ -2027,15 +2068,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:11:15.709Z",
-      "updatedAt": "2025-10-04T21:11:15.709Z",
+      "updatedAt": "2025-10-05T17:22:14.757Z",
       "fullPortionPrice": 220,
-      "halfPortionPrice": 120
+      "halfPortionPrice": 120,
+      "photoUrl": "https://sinfullyspicy.com/wp-content/uploads/2015/03/1200-by-1200-images-1.jpg",
+      "lastUpdated": "2025-10-05T17:22:16.989Z"
     },
     {
       "id": "dish-1759612489338",
       "name": "Chole Masala",
       "category": "main-course",
-      "description": "Masala pindi chole",
+      "description": "Chole Masala is an authentic North Indian style Chickpea Curry made with white chickpeas, freshly powdered spices, onions, tomatoes, and herbs.",
       "costPrice": 30,
       "sellingPrice": 240,
       "portions": {
@@ -2066,15 +2109,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:14:49.338Z",
-      "updatedAt": "2025-10-04T21:14:49.338Z",
+      "updatedAt": "2025-10-05T17:22:59.505Z",
       "fullPortionPrice": 240,
-      "halfPortionPrice": 130
+      "halfPortionPrice": 130,
+      "photoUrl": "https://vegecravings.com/wp-content/uploads/2017/01/chole-recipe-step-by-step-instructions-13.jpg",
+      "lastUpdated": "2025-10-05T17:24:49.165Z"
     },
     {
       "id": "dish-1759612550763",
       "name": "Rajma Masala",
       "category": "main-course",
-      "description": "Rajma dish",
+      "description": "ajma Masala is a delicious gravy made by cooking red kidney beans with onion, tomatoes and basic spices. Rajma Masala goes well with roti, chapati & rice",
       "costPrice": 10,
       "sellingPrice": 230,
       "portions": {
@@ -2105,15 +2150,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:15:50.763Z",
-      "updatedAt": "2025-10-04T21:15:50.763Z",
+      "updatedAt": "2025-10-05T17:26:06.924Z",
       "fullPortionPrice": 230,
-      "halfPortionPrice": 130
+      "halfPortionPrice": 130,
+      "photoUrl": "https://www.kuchpakrahahai.in/wp-content/uploads/2015/09/Rajma-Recipe-Kidney-Beans-Curry.jpg",
+      "lastUpdated": "2025-10-05T17:26:08.419Z"
     },
     {
       "id": "dish-1759612653235",
       "name": "Paneer Butter Masala",
       "category": "main-course",
-      "description": "Yummy delicious paneer dish butter masala",
+      "description": "Yummy delicious Paneer Butter Masala made with paneer in a creamy tomato-cashew gravy with butter, cream, and spices.",
       "costPrice": 30,
       "sellingPrice": 250,
       "portions": {
@@ -2144,15 +2191,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:17:33.235Z",
-      "updatedAt": "2025-10-04T21:17:33.235Z",
+      "updatedAt": "2025-10-05T17:26:58.715Z",
       "fullPortionPrice": 250,
-      "halfPortionPrice": 140
+      "halfPortionPrice": 140,
+      "photoUrl": "https://silkroadrecipes.com/wp-content/uploads/2021/12/Paneer-Butter-Masala-square.jpg",
+      "lastUpdated": "2025-10-05T17:28:30.872Z"
     },
     {
       "id": "dish-1759612707678",
       "name": "Kadhai Paneer",
       "category": "main-course",
-      "description": "Kadhai Paneer",
+      "description": "Kadai paneer delicious spicy paneer recipe made with fresh ground kadai masala, paneer, onions, tomatoes & bell peppers.Kadai paneer masala brings together earthy spices with the smokiness from kadai cooking, creating a complex flavor that's both comforting and exciting.",
       "costPrice": 30,
       "sellingPrice": 250,
       "portions": {
@@ -2183,15 +2232,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:18:27.678Z",
-      "updatedAt": "2025-10-04T21:18:27.678Z",
+      "updatedAt": "2025-10-05T17:30:06.480Z",
       "fullPortionPrice": 250,
-      "halfPortionPrice": 140
+      "halfPortionPrice": 140,
+      "photoUrl": "https://madscookhouse.com/wp-content/uploads/2022/10/Kadhai-Paneer.jpg",
+      "lastUpdated": "2025-10-05T17:30:07.617Z"
     },
     {
       "id": "dish-1759612903298",
       "name": "Matar Paneer",
       "category": "main-course",
-      "description": "Desi Matar paneer",
+      "description": "Matar Paneer a delicious combination of soft paneer and healthy green peas in a mild spicy tomato based gravy, is a treat to taste buds",
       "costPrice": 30,
       "sellingPrice": 240,
       "portions": {
@@ -2222,15 +2273,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:21:43.298Z",
-      "updatedAt": "2025-10-04T21:21:43.298Z",
+      "updatedAt": "2025-10-05T17:31:27.146Z",
       "fullPortionPrice": 240,
-      "halfPortionPrice": 130
+      "halfPortionPrice": 130,
+      "photoUrl": "https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/matar-paneer-1.webp",
+      "lastUpdated": "2025-10-05T17:33:20.025Z"
     },
     {
       "id": "dish-1759612970137",
       "name": "Dum Aloo",
       "category": "main-course",
-      "description": "Kashmere Dum aloo",
+      "description": "um Aloo is a North Indian curried dish where baby potatoes are steam cooked in a delicious gravy. The word Dum means cooked with steam slowly while aloo soaks all the flavours",
       "costPrice": 5,
       "sellingPrice": 190,
       "portions": {
@@ -2261,15 +2314,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:22:50.137Z",
-      "updatedAt": "2025-10-04T21:22:50.137Z",
+      "updatedAt": "2025-10-05T17:34:40.251Z",
       "fullPortionPrice": 190,
-      "halfPortionPrice": 100
+      "halfPortionPrice": 100,
+      "photoUrl": "https://i0.wp.com/cookingfromheart.com/wp-content/uploads/2017/08/Dum-Aloo-5.jpg?w=1024&ssl=1",
+      "lastUpdated": "2025-10-05T17:34:41.615Z"
     },
     {
       "id": "dish-1759613040282",
       "name": "Veg Chowmein",
       "category": "starters",
-      "description": "Evening snacks with full plate veg chowmein",
+      "description": "Evening snacks with full yummy fresh plate veg chowmein!",
       "costPrice": 80,
       "sellingPrice": 120,
       "portions": {
@@ -2300,15 +2355,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:24:00.282Z",
-      "updatedAt": "2025-10-04T21:24:00.282Z",
+      "updatedAt": "2025-10-05T17:36:00.288Z",
       "fullPortionPrice": 120,
-      "halfPortionPrice": 60
+      "halfPortionPrice": 60,
+      "photoUrl": "https://www.chefkunalkapur.com/wp-content/uploads/2021/03/veg-chowmein-min-1300x867.jpg?v=1620296035",
+      "lastUpdated": "2025-10-05T17:36:04.830Z"
     },
     {
       "id": "dish-1759613127402",
       "name": "Chicken Chowmein",
       "category": "starters",
-      "description": "Tandoori chicken chowmein",
+      "description": "Chicken Chow Mein is a perfect takeout! A satisfying one-pan dinner with chicken, vegetables, noodles, and the best homemade chow mein sauce.",
       "costPrice": 25,
       "sellingPrice": 180,
       "portions": {
@@ -2339,15 +2396,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:25:27.402Z",
-      "updatedAt": "2025-10-04T21:25:27.402Z",
+      "updatedAt": "2025-10-05T17:36:56.639Z",
       "fullPortionPrice": 180,
-      "halfPortionPrice": 90
+      "halfPortionPrice": 90,
+      "photoUrl": "https://myfoodbook.com.au/sites/default/files/styles/card_c_xw_wp/public/recipe_photo/Chicken_Chow_Mein_0.jpg",
+      "lastUpdated": "2025-10-05T17:37:26.473Z"
     },
     {
       "id": "dish-1759614031796",
       "name": "Butter Naan",
       "category": "breads",
-      "description": "Naan bread",
+      "description": "Soft delicious Fresh Tandoori Naan",
       "costPrice": 5,
       "sellingPrice": 54.98,
       "portions": {
@@ -2372,9 +2431,11 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:40:31.796Z",
-      "updatedAt": "2025-10-04T21:40:31.796Z",
+      "updatedAt": "2025-10-05T17:38:21.010Z",
       "fullPortionPrice": 54.98,
-      "halfPortionPrice": null
+      "halfPortionPrice": null,
+      "photoUrl": "https://orders.popskitchen.in/storage/2024/09/image-69.png",
+      "lastUpdated": "2025-10-05T17:38:22.241Z"
     }
   ],
   "inventory": []
