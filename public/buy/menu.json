@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-10-04T22:29:21.337Z",
+  "lastUpdated": "2025-10-05T06:25:47.305Z",
   "categories": [
     {
       "id": "starters",
@@ -960,13 +960,15 @@
       "createdAt": "2025-10-04T19:22:16.227Z",
       "updatedAt": "2025-10-04T22:28:05.956Z",
       "fullPortionPrice": 250,
-      "halfPortionPrice": 130
+      "halfPortionPrice": 130,
+      "photoUrl": "https://scontent.fdel11-3.fna.fbcdn.net/v/t1.6435-9/48086990_2070039683063639_7095867052002377728_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=833d8c&_nc_ohc=aeiDMegYR7oQ7kNvwECi5pH&_nc_oc=AdnEEk8mQznuNdfnqB-XKt2M3DLa-tAYiblDXuidBPKCcTb-AwfW1mGMvnFaCQ8iQNcf_-A3FrxNd427xaLEYh8k&_nc_zt=23&_nc_ht=scontent.fdel11-3.fna&_nc_gid=4ssTeVcmDMseXP9vKcI5nQ&oh=00_Afc0oQUlPwMtLSYOzDwovmN3J-dmUkbLMdtxW5deAy9jAQ&oe=69098614",
+      "lastUpdated": "2025-10-05T06:17:08.889Z"
     },
     {
       "id": "dish-1759609569263",
       "name": "Chicken Tikka",
       "category": "starters",
-      "description": "Tasty tikka",
+      "description": "Chicken Tikka (Murgh Tikka) is a popular North Indian starter. Boneless chicken pieces are coated with a spicy marinade and then grilled to perfection.",
       "costPrice": 20,
       "sellingPrice": 310,
       "portions": {
@@ -997,15 +999,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:26:09.263Z",
-      "updatedAt": "2025-10-04T20:26:09.263Z",
+      "updatedAt": "2025-10-04T22:31:37.825Z",
       "fullPortionPrice": 310,
-      "halfPortionPrice": 160
+      "halfPortionPrice": 160,
+      "photoUrl": "https://noseychef.com/wp-content/uploads/2019/12/IMG_5237.jpg",
+      "lastUpdated": "2025-10-05T06:20:25.856Z"
     },
     {
       "id": "dish-1759609633415",
       "name": "Afghani Tikka",
       "category": "starters",
-      "description": "Tasty afghani tikka",
+      "description": "Creamy, mildly spiced chicken tikka skewers baked to juicy perfection, finished with aioli and fresh herbs for a melt-in-mouth experience.",
       "costPrice": 120,
       "sellingPrice": 350,
       "portions": {
@@ -1036,15 +1040,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:27:13.415Z",
-      "updatedAt": "2025-10-04T20:27:13.415Z",
+      "updatedAt": "2025-10-05T06:09:36.294Z",
       "fullPortionPrice": 350,
-      "halfPortionPrice": 180
+      "halfPortionPrice": 180,
+      "photoUrl": "https://www.misterveg.com/cdn/shop/articles/Afghani_Chicken_Tikka.png?v=1682761091",
+      "lastUpdated": "2025-10-05T06:10:16.248Z"
     },
     {
       "id": "dish-1759609798155",
       "name": "Tandoori Chicken",
       "category": "starters",
-      "description": "Tasties tandoor chicken marinates",
+      "description": "Full(8pc) Half (4pc) Tandoori chicken is a dish made from chicken marinated in yogurt and spices and roasted in a tandoor, a cylindrical clay oven. The dish is now popular worldwide. The modern form of the dish was popularized by the Moti Mahal restaurant in New Delhi, India in the late 1940s.",
       "costPrice": 280,
       "sellingPrice": 370,
       "portions": {
@@ -1075,15 +1081,17 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:29:58.155Z",
-      "updatedAt": "2025-10-04T20:29:58.155Z",
+      "updatedAt": "2025-10-05T06:25:22.821Z",
       "fullPortionPrice": 370,
-      "halfPortionPrice": 190
+      "halfPortionPrice": 190,
+      "photoUrl": "https://img.freepik.com/premium-photo/delicious-hot-tandoori-chicken-with-smoke-fire_5095-4006.jpg",
+      "lastUpdated": "2025-10-05T06:25:47.305Z"
     },
     {
       "id": "dish-1759609911407",
       "name": "Afghani Chicken",
       "category": "starters",
-      "description": "Chickenn in afghani marinade",
+      "description": "Afghani chicken is a creamy, mildly spiced dish of South Asian origin, popular in Afghanistan and Northern India. It is characterized by its signature velvety texture and smokiness, which comes from the combination of yogurt, cream, ground nuts, and aromatic spices",
       "costPrice": 316,
       "sellingPrice": 350,
       "portions": {
@@ -1123,7 +1131,7 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T20:31:51.407Z",
-      "updatedAt": "2025-10-04T20:31:51.407Z",
+      "updatedAt": "2025-10-05T06:13:39.159Z",
       "fullPortionPrice": 350,
       "halfPortionPrice": 179.99
     },

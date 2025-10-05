@@ -59,7 +59,7 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 1000;
+            z-index: 1000; /* Base z-index for navbar */
             padding: 0.75rem 0;
             transition: var(--transition);
         }
@@ -934,26 +934,48 @@
         
         /* Cart Badge */
         .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--primary); /* Keep the yellow background */
-            color: #000000; /* Black text for better contrast */
+            position: absolute !important;
+            top: -8px !important;
+            right: -8px !important;
+            background: #ff0000 !important;
+            color: white !important;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: flex;
+            min-width: 24px !important;
+            height: 24px !important;
+            padding: 0 !important;
+            display: flex !important;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border: 2px solid #000000;
+            font-size: 12px !important;
+            font-weight: bold !important;
+            border: 2px solid #ffffff !important;
+            box-shadow: 0 0 0 2px #000000, 0 0 0 3px #ffffff !important;
+            z-index: 1100 !important;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.5) !important;
+            line-height: 1;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: none !important;
+            transition: none !important;
         }
 
+        /* Cart Icon Container */
         .cart-icon-container {
             position: relative;
             cursor: pointer;
             margin-left: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+        }
+        
+        .cart-icon-container i {
+            position: relative;
+            z-index: 1;
         }
 
         .empty-cart {
@@ -1397,82 +1419,6 @@
             }
         }
         
-        .cart-icon-container {
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            padding: 8px;
-            border-radius: 50%;
-            background: linear-gradient(145deg, #f6d365 0%, #fda085 100%);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-        
-        .cart-icon-container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                transparent,
-                rgba(255, 255, 255, 0.4),
-                rgba(255, 255, 255, 0.6),
-                rgba(255, 255, 255, 0.4),
-                transparent
-            );
-            transform: skewX(-25deg);
-            transition: 0.3s;
-            opacity: 0;
-        }
-        
-        .cart-icon-container:hover::before {
-            animation: metalShine 1.5s ease-in-out forwards;
-        }
-        
-        .cart-icon-container.pulse {
-            animation: borderGlow 2s ease-in-out infinite;
-        }
-        
-        .cart-icon-container.pulse::before {
-            animation: metalShine 1.5s ease-in-out forwards;
-        }
-        
-        .cart-icon-container i {
-            position: relative;
-            z-index: 1;
-            color: #fff;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s ease-in-out;
-            display: inline-block;
-        }
-        
-        .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: linear-gradient(145deg, #ff4d4d, #d93636);
-            color: white;
-            border-radius: 50%;
-            padding: 0.25em 0.5em;
-            font-size: 0.75rem;
-            min-width: 1.5em;
-            height: 1.5em;
-            line-height: 1em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 2;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .cart-badge.pulse {
-            animation: borderGlow 1.5s ease-in-out infinite;
-        }
-        
         /* Customer Info in Header */
         .customer-info {
             background: rgba(255, 255, 255, 0.1);
@@ -1626,24 +1572,22 @@
             });
         });
         
-        // Firebase Configuration
+        // Firebase Configuration and Initialization
         const firebaseConfig = {
             apiKey: "AIzaSyAEKHWdRyzI8WyBeGeesjDrM-nEzOXCuNk",
             authDomain: "billion1-a9324.firebaseapp.com",
             projectId: "billion1-a9324",
             storageBucket: "billion1-a9324.appspot.com",
-            messagingSenderId: "1085677766778",
-            appId: "1:1085677766778:web:3c9d7f9d7c1d8f8a5e8c9b"
+            messagingSenderId: "443716692865",
+            appId: "1:443716692865:web:96813fe32a44f8342cd680",
+            measurementId: "G-FE7NFHY5PG"
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        console.log('Firebase initialized successfully');
 
-        // Initialize cart
-        let cart = [];
-        let menuData = [];
-        let orderId = '';
 
         // DOM Elements
         const menuItemsContainer = document.getElementById('menuItems');
@@ -1810,46 +1754,8 @@
                 .replace(/'/g, "&#039;");
         }
 
-        // Add item to cart
-        function addToCart(id) {
-            const menuItem = menuData.find(item => item.id === id);
-            if (!menuItem) return;
-
-            // Get selected portion from active badge or default to first available
-            let portion = 'full';
-            const activeBadge = document.querySelector(`#menuItems [data-item-id="${id}"] .portion-badge.active`);
-            if (activeBadge) {
-                portion = activeBadge.getAttribute('data-portion');
-            }
-            
-            // Get price and display name based on portion
-            let price = menuItem.sellingPrice || 0;
-            let displayName = menuItem.name;
-            
-            if (menuItem.portions && menuItem.portions[portion]) {
-                price = menuItem.portions[portion].price;
-                displayName = `${menuItem.name} (${portion.charAt(0).toUpperCase() + portion.slice(1)})`;
-            }
-            
-            // Check if same item with same portion already in cart
-            const existingItem = cart.find(item => 
-                item.id === id && item.portion === portion
-            );
-            
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({
-                    id,
-                    name: displayName,
-                    baseName: menuItem.name,
-                    price: price,
-                    quantity: 1,
-                    portion: portion,
-                    imageUrl: menuItem.photoUrl || ''
-                });
-            }
-            
+        // Update cart display
+        function updateCart() {
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             cartBadge.textContent = totalItems;
             cartBadge.style.display = totalItems > 0 ? 'flex' : 'none';
@@ -1893,9 +1799,9 @@
                             </div>
                         </div>
                         <div class="item-quantity d-flex align-items-center">
-                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity - 1}, '${item.portion || ''}')">-</button>
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', -1, '${item.portion || ''}')">-</button>
                             <span class="quantity mx-2">${item.quantity}</span>
-                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', ${item.quantity + 1}, '${item.portion || ''}')">+</button>
+                            <button class="quantity-btn" onclick="updateQuantity('${item.id}', 1, '${item.portion || ''}')">+</button>
                         </div>
                     `;
                     cartItemsContainer.appendChild(cartItem);
@@ -1910,14 +1816,59 @@
             saveCart();
         }
 
+        // Add item to cart
+        function addToCart(id) {
+            const menuItem = menuData.find(item => item.id === id);
+            if (!menuItem) return;
+
+            // Get selected portion from active badge or default to first available
+            let portion = 'full';
+            const activeBadge = document.querySelector(`#menuItems [data-item-id="${id}"] .portion-badge.active`);
+            if (activeBadge) {
+                portion = activeBadge.getAttribute('data-portion');
+            }
+            
+            // Get price and display name based on portion
+            let price = menuItem.sellingPrice || 0;
+            let displayName = menuItem.name;
+            
+            if (menuItem.portions && menuItem.portions[portion]) {
+                price = menuItem.portions[portion].price;
+                displayName = `${menuItem.name} (${portion.charAt(0).toUpperCase() + portion.slice(1)})`;
+            }
+            
+            // Check if same item with same portion already in cart
+            const existingItem = cart.find(item => 
+                item.id === id && item.portion === portion
+            );
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id,
+                    name: displayName,
+                    baseName: menuItem.name,
+                    price: price,
+                    quantity: 1,
+                    portion: portion,
+                    imageUrl: menuItem.photoUrl || ''
+                });
+            }
+            
+            updateCart();
+        }
+
         // Update item quantity
-        function updateQuantity(id, newQuantity, portion = '') {
+        function updateQuantity(id, change, portion = '') {
             // Find the item with matching ID and portion
             const itemIndex = cart.findIndex(item => 
                 item.id === id && (item.portion || '') === portion
             );
             
             if (itemIndex === -1) return;
+            
+            const newQuantity = cart[itemIndex].quantity + change;
             
             if (newQuantity <= 0) {
                 cart.splice(itemIndex, 1);
@@ -2032,7 +1983,7 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const cartName = urlParams.get('cart') || 'default';
                 
-                // Create order data matching orders.html structure
+                // Create order data matching orders.html structure exactly
                 const orderData = {
                     customerDetails: {
                         phone: customerInfo.phone,
@@ -2046,17 +1997,20 @@
                     status: 'pending',
                     paymentStatus: 'pending',
                     source: 'web',
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                     date: formatDate(now),
                     time: now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
                 };
                 
-                console.log('Submitting order:', orderData);
-                
                 // Add the order to the database
-                const orderRef = await db.collection('bot_orders').add(orderData);
-                console.log('Order submitted with ID: ', orderRef.id);
+                console.log('Submitting order to Firestore...', orderData);
+                const newOrderRef = await db.collection('bot_orders').add(orderData);
+                console.log('Order submitted with ID: ', newOrderRef.id);
+                
+                // Update with server timestamp in the background
+                await db.collection('bot_orders').doc(newOrderRef.id).update({
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
                 
                 // Record sales for each item in the cart
                 for (const item of cart) {
@@ -2080,7 +2034,7 @@
                 showToast('Order placed successfully!', 'success');
                 
                 // Redirect to payment page
-                const paymentWebUrl = `https://www.tandoorbaaz.shop/buy/pay.html?orderId=${orderRef.id}&amount=${total}`;
+                const paymentWebUrl = `https://www.tandoorbaaz.shop/buy/pay.html?orderId=${newOrderRef.id}&amount=${total}`;
                 console.log('Redirecting to:', paymentWebUrl);
                 window.location.href = paymentWebUrl;
                 
