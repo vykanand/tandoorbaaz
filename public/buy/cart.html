@@ -1276,21 +1276,20 @@
     <div class="toast-container">
         <div class="toast" id="toast">
             <div class="toast-message" id="toastMessage"></div>
-        </div>
-    </div>
-
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Initialize customer info modal
-        let customerInfoModal = null;
+        // Global variables - customerInfo and customerInfoModal are now declared later in the file
         
         // Function to load customer info from localStorage
         function loadCustomerInfo() {
-            const customerInfo = JSON.parse(localStorage.getItem('customerInfo')) || {};
-            if (customerInfo.phone) {
-                document.getElementById('customerPhone').value = customerInfo.phone;
-                document.getElementById('customerComments').value = customerInfo.comments || '';
+            if (customerInfo && customerInfo.phone) {
+                const phoneInput = document.getElementById('customerPhone');
+                const commentsInput = document.getElementById('customerComments');
+                
+                if (phoneInput) phoneInput.value = customerInfo.phone;
+                if (commentsInput) commentsInput.value = customerInfo.comments || '';
+                
                 updateHeaderCustomerInfo(customerInfo);
                 return true;
             }
@@ -1299,7 +1298,7 @@
         
         // Function to save customer info to localStorage
         function saveCustomerInfo(phone, comments = '') {
-            const customerInfo = { phone, comments };
+            customerInfo = { phone, comments };
             localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
             updateHeaderCustomerInfo(customerInfo);
         }
@@ -1365,7 +1364,7 @@
         
         // Function to get customer info for order
         function getCustomerInfo() {
-            return JSON.parse(localStorage.getItem('customerInfo')) || { phone: '', comments: '' };
+            return customerInfo || { phone: '', comments: '' };
         }
     </script>
     
@@ -1537,8 +1536,9 @@
     
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        // Initialize cart variable
+        // Initialize global variables
         let cart = [];
+        let customerInfo = JSON.parse(localStorage.getItem('customerInfo')) || {};
         
         // Initialize AOS and cart
         document.addEventListener('DOMContentLoaded', function() {
@@ -1915,15 +1915,17 @@
 
         // Load cart from localStorage
         function loadCart() {
-            const savedCart = localStorage.getItem('cart');
-            if (savedCart) {
+            try {
+                const savedCart = localStorage.getItem('cart');
+                cart = savedCart ? JSON.parse(savedCart) : [];
+                updateCart();
+            } catch (e) {
+                console.error('Error loading cart:', e);
+                cart = [];
                 try {
-                    cart = JSON.parse(savedCart);
-                    updateCart();
-                } catch (e) {
-                    console.error('Error parsing cart:', e);
                     localStorage.removeItem('cart');
-                    cart = [];
+                } catch (e) {
+                    console.error('Error clearing invalid cart data:', e);
                 }
             }
         }
@@ -1950,18 +1952,35 @@
         // Checkout function
         async function checkout() {
             // Check if cart is empty
-            if (cart.length === 0) {
+            if (!cart || cart.length === 0) {
                 showToast('Your cart is empty!', 'error');
                 return;
             }
             
-            showLoader();
+            // Ensure customer info is loaded
+            try {
+                if (!customerInfo || !customerInfo.phone) {
+                    customerInfo = getCustomerInfo();
+                }
+            } catch (e) {
+                console.error('Error loading customer info:', e);
+                showToast('Error loading customer information', 'error');
+                return;
+            }
+            
             // Validate customer info
             if (!customerInfo.phone) {
                 showToast('Please provide your phone number to continue', 'error');
-                customerInfoModal.show();
+                try {
+                    customerInfoModal = customerInfoModal || new bootstrap.Modal(document.getElementById('customerInfoModal'));
+                    customerInfoModal.show();
+                } catch (e) {
+                    console.error('Error showing customer info modal:', e);
+                }
                 return;
             }
+            
+            showLoader();
             
             try {
                 showLoader();
