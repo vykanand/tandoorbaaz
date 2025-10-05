@@ -2034,10 +2034,8 @@
                             ).join('\n');
                     }
                     
-                    // Get the current hostname and port
-                    const host = window.location.host;
-                    const protocol = window.location.protocol;
-                    const payLink = `${protocol}//${host}/pay?orderId=${orderId}`;
+                    // Construct payment link with order ID and amount using existing orderTotal
+                    const payLink = `https://www.tandoorbaaz.shop/buy/pay.html?orderId=${orderId}&amount=${orderTotal}`;
                     
                     const message = encodeURIComponent(
                         `*Payment Reminder*\n\n` +
