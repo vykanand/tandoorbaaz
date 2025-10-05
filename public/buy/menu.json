@@ -27,7 +27,7 @@
       "itemsPerPage": 10
     }
   },
-  "lastUpdated": "2025-10-05T17:40:55.384Z",
+  "lastUpdated": "2025-10-05T17:50:15.254Z",
   "categories": [
     {
       "id": "starters",
@@ -2119,7 +2119,7 @@
       "id": "dish-1759612550763",
       "name": "Rajma Masala",
       "category": "main-course",
-      "description": "ajma Masala is a delicious gravy made by cooking red kidney beans with onion, tomatoes and basic spices. Rajma Masala goes well with roti, chapati & rice",
+      "description": "Rajma Masala is a delicious gravy made by cooking red kidney beans with onion, tomatoes and basic spices. Rajma Masala goes well with roti, chapati & rice",
       "costPrice": 10,
       "sellingPrice": 230,
       "portions": {
@@ -2150,11 +2150,11 @@
       ],
       "active": true,
       "createdAt": "2025-10-04T21:15:50.763Z",
-      "updatedAt": "2025-10-05T17:26:06.924Z",
+      "updatedAt": "2025-10-05T17:50:12.357Z",
       "fullPortionPrice": 230,
       "halfPortionPrice": 130,
       "photoUrl": "https://www.kuchpakrahahai.in/wp-content/uploads/2015/09/Rajma-Recipe-Kidney-Beans-Curry.jpg",
-      "lastUpdated": "2025-10-05T17:26:08.419Z"
+      "lastUpdated": "2025-10-05T17:50:15.254Z"
     },
     {
       "id": "dish-1759612653235",
