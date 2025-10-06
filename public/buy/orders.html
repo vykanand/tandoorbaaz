@@ -5380,8 +5380,8 @@ async function updateOrderStatus(docId, newStatus) {
     </div>
 
     <!-- Mobile Floating Action Button -->
-    <button class="mobile-fab d-md-none" style="display: none;">
-{{ ... }}
+    <button class="mobile-fab d-md-none" data-bs-toggle="modal" data-bs-target="#addOrderModal" title="Add New Order">
+        <i class="bi bi-plus-lg"></i>
     </button>
 
     <script>
